@@ -1,0 +1,37 @@
+{
+  "name": "spryker-sdk/composer-constrainer",
+  "type": "library",
+  "description": "ComposerConstrainer module",
+  "license": "proprietary",
+  "require": {
+    "php": ">=7.1",
+    "spryker/kernel": "^3.33.0",
+    "spryker/symfony": "^3.2.2"
+  },
+  "require-dev": {
+    "sllh/composer-versions-check": "^2.0.2",
+    "spryker-sdk/phpstan-spryker": "dev-master",
+    "spryker/code-sniffer": "dev-master",
+    "spryker/testify": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "SprykerSdk\\": "src/SprykerSdk/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SprykerSdkTest\\": "tests/SprykerSdkTest/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0.x-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

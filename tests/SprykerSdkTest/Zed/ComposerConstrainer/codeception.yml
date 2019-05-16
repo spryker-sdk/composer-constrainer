@@ -1,0 +1,46 @@
+namespace: SprykerSdkTest\Zed\ComposerConstrainer
+paths:
+    tests: .
+    data: ../../../_data
+    support: _support
+    log: ../../../_output
+coverage:
+    enabled: true
+    remote: false
+    whitelist:
+        include:
+            - '../../../../src/*'
+suites:
+    Communication:
+        path: Communication
+        class_name: ComposerConstrainerCommunicationTester
+        modules:
+            enabled:
+                - Asserts
+                - \SprykerTest\Shared\Testify\Helper\Environment
+                - \SprykerTest\Shared\Testify\Helper\ConfigHelper
+                - \SprykerTest\Shared\Testify\Helper\LocatorHelper:
+                      coreNamespaces:
+                          - SprykerShop
+                          - Spryker
+                          - SprykerSdk
+                - \SprykerTest\Shared\Testify\Helper\DependencyHelper
+                - \SprykerTest\Zed\Console\Helper\ConsoleHelper
+                - \SprykerTest\Zed\Testify\Helper\BusinessHelper
+                - \SprykerSdkTest\Zed\ComposerConstrainer\Helper\ComposerJsonHelper
+                - \SprykerSdkTest\Zed\ComposerConstrainer\Helper\ProjectModuleHelper
+    Business:
+        path: Business
+        class_name: ComposerConstrainerBusinessTester
+        modules:
+            enabled:
+                - Asserts
+                - \SprykerTest\Shared\Testify\Helper\Environment
+                - \SprykerTest\Shared\Testify\Helper\ConfigHelper
+                - \SprykerTest\Shared\Testify\Helper\LocatorHelper:
+                      coreNamespaces:
+                          - SprykerShop
+                          - Spryker
+                          - SprykerSdk
+                - \SprykerTest\Shared\Testify\Helper\DependencyHelper
+                - \SprykerTest\Zed\Testify\Helper\BusinessHelper
