@@ -7,10 +7,12 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder\DirectoryFinder;
 
+use Generated\Shared\Transfer\ModuleTransfer;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
+use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -22,11 +24,22 @@ class DirectoryFinder implements UsedModuleFinderInterface
     protected $config;
 
     /**
+     * @var \SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeInterface
+     */
+    protected $moduleFinderFacade;
+
+    /**
+     * @var \Generated\Shared\Transfer\ModuleTransfer[]|null
+     */
+    protected $modules;
+
+    /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
      */
-    public function __construct(ComposerConstrainerConfig $config)
+    public function __construct(ComposerConstrainerConfig $config, ComposerConstrainerToModuleFinderFacadeInterface $moduleFinderFacade)
     {
         $this->config = $config;
+        $this->moduleFinderFacade = $moduleFinderFacade;
     }
 
     /**
@@ -78,8 +91,14 @@ class DirectoryFinder implements UsedModuleFinderInterface
         $pathFragments = explode(DIRECTORY_SEPARATOR, $splFileInfo->getPathname());
         $positionOfSrcDirectory = array_search('src', $pathFragments);
 
-        $organizationName = $pathFragments[$positionOfSrcDirectory + 1];
         $moduleName = $pathFragments[$positionOfSrcDirectory + 3];
+        $moduleTransfer = $this->findModuleTransfer($moduleName);
+
+        if ($moduleTransfer === null) {
+            return $usedModuleCollectionTransfer;
+        }
+
+        $organizationName = $moduleTransfer->getOrganization()->getName();
 
         $usedModuleTransfer = new UsedModuleTransfer();
         $usedModuleTransfer
@@ -89,5 +108,38 @@ class DirectoryFinder implements UsedModuleFinderInterface
         $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
 
         return $usedModuleCollectionTransfer;
+    }
+
+    /**
+     * @param string $moduleName
+     *
+     * @return \Generated\Shared\Transfer\ModuleTransfer|null
+     */
+    protected function findModuleTransfer(string $moduleName): ?ModuleTransfer
+    {
+        $foundModules = [];
+        foreach ($this->getModules() as $moduleTransfer) {
+            if ($moduleTransfer->getName() === $moduleName) {
+                $foundModules[] = $moduleTransfer;
+            }
+        }
+
+        if (count($foundModules) === 1) {
+            return current($foundModules);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return \Generated\Shared\Transfer\ModuleTransfer[]
+     */
+    protected function getModules(): array
+    {
+        if ($this->modules === null) {
+            $this->modules = $this->moduleFinderFacade->getModules();
+        }
+
+        return $this->modules;
     }
 }

@@ -8,6 +8,11 @@
 namespace SprykerSdkTest\Zed\ComposerConstrainer;
 
 use Codeception\Actor;
+use Generated\Shared\Transfer\ModuleTransfer;
+use Generated\Shared\Transfer\OrganizationTransfer;
+use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeBridge;
+use SprykerSdk\Zed\ModuleFinder\Business\ModuleFinderFacade;
+use Codeception\Stub;
 
 /**
  * Inherited Methods
@@ -27,4 +32,60 @@ use Codeception\Actor;
 class ComposerConstrainerCommunicationTester extends Actor
 {
     use _generated\ComposerConstrainerCommunicationTesterActions;
+
+    /**
+     * @return void
+     */
+    public function mockModuleFinder(): void
+    {
+        $moduleFinderFacadeMock = Stub::make(ModuleFinderFacade::class, [
+            'getModules' => function () {
+                return $this->getModuleCollection();
+            },
+        ]);
+
+        $composerConstrainerToModuleFinderFacadeBridge = new ComposerConstrainerToModuleFinderFacadeBridge($moduleFinderFacadeMock);
+
+        $this->mockFactoryMethod('getModuleFinderFacade', $composerConstrainerToModuleFinderFacadeBridge);
+    }
+
+    /**
+     * @return array
+     */
+    protected function getModuleCollection(): array
+    {
+        $sprykerOrganizationTransfer = new OrganizationTransfer();
+        $sprykerOrganizationTransfer->setName('Spryker');
+
+        $sprykerShopOrganizationTransfer = new OrganizationTransfer();
+        $sprykerShopOrganizationTransfer->setName('SprykerShop');
+
+        $moduleTransferSprykerModuleA = new ModuleTransfer();
+        $moduleTransferSprykerModuleA
+            ->setName('ModuleA')
+            ->setOrganization($sprykerOrganizationTransfer);
+
+        $moduleTransferSprykerModuleB = new ModuleTransfer();
+        $moduleTransferSprykerModuleB
+            ->setName('ModuleB')
+            ->setOrganization($sprykerOrganizationTransfer);
+
+        $moduleTransferSprykerModuleC = new ModuleTransfer();
+        $moduleTransferSprykerModuleC
+            ->setName('ModuleC')
+            ->setOrganization($sprykerOrganizationTransfer);
+
+        $moduleTransferSprykerShopModuleC = new ModuleTransfer();
+        $moduleTransferSprykerShopModuleC
+            ->setName('ModuleC')
+            ->setOrganization($sprykerShopOrganizationTransfer);
+
+        $moduleCollection = [
+            $moduleTransferSprykerModuleA,
+            $moduleTransferSprykerModuleB,
+            $moduleTransferSprykerModuleC,
+            $moduleTransferSprykerShopModuleC,
+        ];
+        return $moduleCollection;
+    }
 }

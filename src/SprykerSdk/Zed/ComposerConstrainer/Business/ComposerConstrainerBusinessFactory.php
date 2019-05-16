@@ -23,6 +23,8 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerDependencyProvider;
+use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeInterface;
 
 /**
  * @method \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig getConfig()
@@ -110,7 +112,8 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createDirectoryFinder(): UsedModuleFinderInterface
     {
         return new DirectoryFinder(
-            $this->getConfig()
+            $this->getConfig(),
+            $this->getModuleFinderFacade()
         );
     }
 
@@ -132,5 +135,13 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ComposerJsonWriter(
             $this->getConfig()
         );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeInterface
+     */
+    public function getModuleFinderFacade(): ComposerConstrainerToModuleFinderFacadeInterface
+    {
+        return $this->getProvidedDependency(ComposerConstrainerDependencyProvider::FACADE_MODULE_FINDER);
     }
 }

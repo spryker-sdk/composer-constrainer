@@ -8,7 +8,11 @@
 namespace SprykerSdkTest\Zed\ComposerConstrainer\Communication\Console;
 
 use Codeception\Test\Unit;
+use Generated\Shared\Transfer\ModuleTransfer;
+use Generated\Shared\Transfer\OrganizationTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Communication\Console\ComposerConstraintConsole;
+use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeBridge;
+use SprykerSdk\Zed\ModuleFinder\Business\ModuleFinderFacade;
 use Symfony\Component\Console\Output\Output;
 
 /**
@@ -36,6 +40,7 @@ class ComposerConstraintConsoleTest extends Unit
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
         $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
 
+        $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
         $command = new ComposerConstraintConsole();
@@ -61,6 +66,7 @@ class ComposerConstraintConsoleTest extends Unit
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
         $this->tester->haveComposerRequire('spryker/module-b', '^2.0.0');
 
+        $this->tester->mockModuleFinder();
         $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
         $this->tester->haveConfigFileWithUsedModule('Spryker', 'ModuleB');
 
@@ -91,6 +97,7 @@ class ComposerConstraintConsoleTest extends Unit
         $this->tester->haveComposerRequire('spryker/module-b', '^1.0.0');
         $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
 
+        $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
         $command = new ComposerConstraintConsole();
@@ -116,6 +123,7 @@ class ComposerConstraintConsoleTest extends Unit
     {
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
 
+        $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
         $command = new ComposerConstraintConsole();
@@ -141,6 +149,7 @@ class ComposerConstraintConsoleTest extends Unit
         $this->tester->haveComposerRequire('spryker/module-a', '~1.0.0');
         $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
 
+        $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
         $command = new ComposerConstraintConsole();
@@ -165,6 +174,7 @@ class ComposerConstraintConsoleTest extends Unit
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
         $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
 
+        $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
         $command = new ComposerConstraintConsole();
@@ -188,6 +198,7 @@ class ComposerConstraintConsoleTest extends Unit
         $this->tester->haveComposerRequireDev('spryker/module-a', '^1.0.0');
         $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
 
+        $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
         $command = new ComposerConstraintConsole();
@@ -209,6 +220,31 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteWillNotUpdateComposerJsonWhenNoViolationFound(): void
     {
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
+        $this->tester->mockModuleFinder();
+        $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
+
+        $command = new ComposerConstraintConsole();
+        $command->setFacade($this->tester->getFacade());
+        $commandTester = $this->tester->getConsoleTester($command);
+
+        $arguments = [
+            'command' => $command->getName(),
+        ];
+
+        $commandTester->execute($arguments);
+
+        $this->assertSame(ComposerConstraintConsole::CODE_SUCCESS, $commandTester->getStatusCode());
+    }
+
+    /**
+     * @return void
+     */
+    public function testExecuteWillNotUpdateComposerJsonWhenMoreThanOneMatchingModuleFound(): void
+    {
+        $this->tester->haveComposerRequire('spryker/module-c', '^1.0.0');
+        $this->tester->haveDependencyProvider('Spryker', 'ModuleC', 'Zed');
+
+        $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
         $command = new ComposerConstraintConsole();
