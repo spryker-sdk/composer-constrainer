@@ -5,14 +5,16 @@
   "license": "proprietary",
   "require": {
     "php": ">=7.1",
+    "spryker-sdk/module-finder": "^1.0.0",
     "spryker/kernel": "^3.33.0",
-    "spryker/symfony": "^3.2.2"
+    "spryker/symfony": "^3.2.2",
+    "spryker/zend": "^2.2.2"
   },
   "require-dev": {
     "sllh/composer-versions-check": "^2.0.2",
-    "spryker-sdk/phpstan-spryker": "dev-master",
-    "spryker/code-sniffer": "dev-master",
-    "spryker/testify": "dev-master"
+    "spryker/code-sniffer": "*",
+    "spryker/console": "*",
+    "spryker/testify": "*"
   },
   "autoload": {
     "psr-4": {

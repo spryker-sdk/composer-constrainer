@@ -48,12 +48,6 @@ class ProjectModuleHelper extends Module
         if (!is_dir($pathToExtendedModule)) {
             mkdir($pathToExtendedModule, 0777, true);
         }
-
-        $this->addCleanup(function () use ($pathToExtendedModule) {
-            if (is_dir($pathToExtendedModule)) {
-                rmdir($pathToExtendedModule);
-            }
-        });
     }
 
     /**
@@ -103,12 +97,6 @@ CODE;
 
         $filePath = $pathToExtendedModule . sprintf('%sDependencyProvider.php', $module);
         file_put_contents($filePath, $factoryContent);
-
-        $this->addCleanup(function () use ($filePath) {
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-        });
     }
 
     /**
@@ -130,12 +118,6 @@ CODE;
             mkdir(dirname($configFilePath), 0777, true);
         }
         file_put_contents($configFilePath, $configContent);
-
-        $this->addCleanup(function () use ($configFilePath) {
-            if (file_exists($configFilePath)) {
-                unlink($configFilePath);
-            }
-        });
     }
 
     /**
@@ -153,21 +135,23 @@ CODE;
      *
      * @return void
      */
-    public function _before(TestInterface $test)
+    public function _before(TestInterface $test): void
     {
         $this->cleanup();
-//        $callables = array_reverse($this->cleanupCallables);
-//        if ($callables) {
-//            foreach ($callables as $callable) {
-//                $callable();
-//            }
-//        }
     }
 
     /**
      * @return void
      */
-    protected function cleanup()
+    public function _afterSuite(): void
+    {
+        $this->cleanup();
+    }
+
+    /**
+     * @return void
+     */
+    protected function cleanup(): void
     {
         $filesystem = new Filesystem();
         $filesystem->remove($this->getFixturesDirectory());

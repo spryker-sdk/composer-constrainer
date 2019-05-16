@@ -10,6 +10,7 @@ namespace SprykerSdkTest\Zed\ComposerConstrainer\Helper;
 use Codeception\Module;
 use Codeception\TestInterface;
 use Exception;
+use Symfony\Component\Filesystem\Filesystem;
 
 class ComposerJsonHelper extends Module
 {
@@ -116,18 +117,6 @@ class ComposerJsonHelper extends Module
     }
 
     /**
-     * @param \Codeception\TestInterface $test
-     *
-     * @return void
-     */
-    public function _after(TestInterface $test): void
-    {
-        if (file_exists($this->getComposerJsonPath())) {
-            unlink($this->getComposerJsonPath());
-        }
-    }
-
-    /**
      * @param string $name
      * @param string $version
      *
@@ -155,5 +144,32 @@ class ComposerJsonHelper extends Module
         $this->assertArrayHasKey('require-dev', $composerJsonArray);
         $this->assertArrayHasKey($name, $composerJsonArray['require-dev']);
         $this->assertSame($version, $composerJsonArray['require-dev'][$name]);
+    }
+
+    /**
+     * @param \Codeception\TestInterface $test
+     *
+     * @return void
+     */
+    public function _before(TestInterface $test): void
+    {
+        $this->cleanup();
+    }
+
+    /**
+     * @return void
+     */
+    public function _afterSuite(): void
+    {
+        $this->cleanup();
+    }
+
+    /**
+     * @return void
+     */
+    protected function cleanup(): void
+    {
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->getComposerJsonPath());
     }
 }
