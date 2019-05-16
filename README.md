@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/spryker-sdk/composer-constrainer.svg)](https://travis-ci.org/spryker-sdk/composer-constrainer)
 [![Coverage Status](https://coveralls.io/repos/github/spryker-sdk/composer-constrainer/badge.svg)](https://coveralls.io/github/spryker-sdk/composer-constrainer)
 
-{{ADD DESCRIPTION HERE}}
+Tool to detect extended core modules and to update composer.json constraints fom using ^ (caret) to use ~ (tilde) for those extended modules. 
 
 ## Installation
 
