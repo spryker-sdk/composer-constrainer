@@ -29,7 +29,7 @@ class ComposerConstraintConsole extends Console
     {
         $this
             ->setName(static::COMMAND_NAME)
-            ->setDescription('Updates composer constraint in projects.');
+            ->setDescription('Updates composer constraint in projects. When a module is extended on project level, this command will change ^ to ~ in the projects composer.json. This will make sure that a composer update will only pull the exact version or patch versions of it.');
 
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_OPTIONAL, 'Use this option to validate your projects constraints.');
     }
