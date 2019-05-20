@@ -8,11 +8,11 @@
 namespace SprykerSdkTest\Zed\ComposerConstrainer;
 
 use Codeception\Actor;
+use Codeception\Stub;
 use Generated\Shared\Transfer\ModuleTransfer;
 use Generated\Shared\Transfer\OrganizationTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeBridge;
 use SprykerSdk\Zed\ModuleFinder\Business\ModuleFinderFacade;
-use Codeception\Stub;
 
 /**
  * Inherited Methods

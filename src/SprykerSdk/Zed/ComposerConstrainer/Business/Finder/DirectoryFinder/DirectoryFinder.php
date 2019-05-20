@@ -35,6 +35,7 @@ class DirectoryFinder implements UsedModuleFinderInterface
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeInterface $moduleFinderFacade
      */
     public function __construct(ComposerConstrainerConfig $config, ComposerConstrainerToModuleFinderFacadeInterface $moduleFinderFacade)
     {

@@ -8,11 +8,7 @@
 namespace SprykerSdkTest\Zed\ComposerConstrainer\Communication\Console;
 
 use Codeception\Test\Unit;
-use Generated\Shared\Transfer\ModuleTransfer;
-use Generated\Shared\Transfer\OrganizationTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Communication\Console\ComposerConstraintConsole;
-use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeBridge;
-use SprykerSdk\Zed\ModuleFinder\Business\ModuleFinderFacade;
 use Symfony\Component\Console\Output\Output;
 
 /**

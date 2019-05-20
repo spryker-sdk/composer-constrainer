@@ -31,6 +31,8 @@ class ComposerConstrainerDependencyProvider extends AbstractBundleDependencyProv
     }
 
     /**
+     * @param \Spryker\Zed\Kernel\Container $container
+     *
      * @return \Spryker\Zed\Kernel\Container
      */
     protected function addModuleFinderFacade(Container $container): Container

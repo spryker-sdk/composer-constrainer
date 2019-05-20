@@ -19,7 +19,6 @@ install:
 script:
     - vendor/bin/phpcs src --standard=vendor/spryker/code-sniffer/Spryker/ruleset.xml
     - vendor/bin/phpcs tests --standard=vendor/spryker/code-sniffer/Spryker/ruleset.xml
-    - vendor/bin/codecept run --env isolated --coverage-xml
 
 after_success:
     - vendor/bin/coveralls -vvv
