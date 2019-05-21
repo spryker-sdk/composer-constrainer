@@ -18,7 +18,8 @@
   },
   "autoload": {
     "psr-4": {
-      "SprykerSdk\\": "src/SprykerSdk/"
+      "SprykerSdk\\": "src/SprykerSdk/",
+      "SprykerSdkTest\\Zed\\ComposerConstrainer\\Helper\\": "tests/SprykerSdkTest/Zed/ComposerConstrainer/_support/Helper/"
     }
   },
   "autoload-dev": {
