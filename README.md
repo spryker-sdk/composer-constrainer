@@ -7,8 +7,10 @@ Tool to detect extended core modules and to update composer.json constraints fom
 ## Installation
 
 ```
-composer require spryker-sdk/composer-constrainer
+composer require --dev spryker-sdk/composer-constrainer
 ```
+
+This is a development only "require-dev" module. Please make sure you include it as such.
 
 ## Documentation
 
