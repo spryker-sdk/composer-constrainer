@@ -60,7 +60,7 @@ class ComposerConstraintConsole extends Console
             return static::CODE_SUCCESS;
         }
 
-        if ($this->output->isVeryVerbose()) {
+        if ($this->output->isVerbose()) {
             $this->outputValidationFindings($constraintValidationResultTransfer);
         }
 

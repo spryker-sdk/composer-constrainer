@@ -22,7 +22,7 @@ Spryker OS is modular and following SemVer. Every BC-breaking change of module A
 
 What does it mean for my customized modules?
 
-When you customized Spryker modules (changed modules behaviour on project level) even minor changes could potentially cause migration efforts. To avoid such cases and keep project updates safe and predictable a project should use ~ (tilde) composer constraint instead of ^ for modules with changed behaviour. And to simplify the process Spryker provides a development tool "code:constraint:modules", which will suggest required changed in composer.json. 
+When you customized Spryker modules (changed modules behavior on project level) even minor changes could potentially cause migration efforts. To avoid such cases and keep project updates safe and predictable a project should use ~ (tilde) composer constraint instead of ^ for modules with changed behavior. And to simplify the process Spryker provides a development tool "code:constraint:modules", which will suggest required changes in composer.json. 
 
 ## Usage
 
@@ -34,7 +34,7 @@ With this command no changes will be made in the composer.json. The return code 
 
 To see exactly what will be updated run the command in very verbose mode.
 
-`vendor/bin/console code:constraint:modules -d -vvv` 
+`vendor/bin/console code:constraint:modules -d -v` 
 
 
 ### Run the command
