@@ -6,9 +6,9 @@
   "require": {
     "php": ">=7.1",
     "spryker/kernel": "^3.33.0",
+    "spryker/module-finder": "^1.0.0",
     "spryker/symfony": "^3.2.2",
-    "spryker/zend": "^2.2.2",
-    "spryker-sdk/module-finder": "^1.0.0"
+    "spryker/zend": "^2.2.2"
   },
   "require-dev": {
     "sllh/composer-versions-check": "^2.0.2",
