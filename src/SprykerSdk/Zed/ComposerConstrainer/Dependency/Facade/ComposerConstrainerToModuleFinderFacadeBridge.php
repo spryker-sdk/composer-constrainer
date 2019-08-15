@@ -10,12 +10,12 @@ namespace SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade;
 class ComposerConstrainerToModuleFinderFacadeBridge implements ComposerConstrainerToModuleFinderFacadeInterface
 {
     /**
-     * @var \SprykerSdk\Zed\ModuleFinder\Business\ModuleFinderFacadeInterface
+     * @var \Spryker\Zed\ModuleFinder\Business\ModuleFinderFacadeInterface
      */
     protected $moduleFinderFacade;
 
     /**
-     * @param \SprykerSdk\Zed\ModuleFinder\Business\ModuleFinderFacadeInterface $moduleFinderFacade
+     * @param \Spryker\Zed\ModuleFinder\Business\ModuleFinderFacadeInterface $moduleFinderFacade
      */
     public function __construct($moduleFinderFacade)
     {

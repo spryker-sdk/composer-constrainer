@@ -1,6 +1,7 @@
 language: php
 
 php:
+    - 7.1
     - 7.3
 
 cache:
@@ -13,8 +14,12 @@ env:
         - APPLICATION_ENV=development
         - APPLICATION_STORE=DE
 
+before_install:
+    - echo "memory_limit = -1" >> travis.ini
+    - phpenv config-add travis.ini
+
 install:
-    - composer install --no-interaction --prefer-dist
+    - composer update --no-interaction --prefer-dist
 
 script:
     - vendor/bin/phpcs src --standard=vendor/spryker/code-sniffer/Spryker/ruleset.xml
