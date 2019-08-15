@@ -18,6 +18,7 @@ interface ComposerConstrainerFacadeInterface
      * @return \Generated\Shared\Transfer\ConstraintUpdateResultTransfer
      */
     public function updateConstraints(): ConstraintUpdateResultTransfer;
+
     /**
      * @api
      *

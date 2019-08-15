@@ -11,8 +11,8 @@ use Codeception\Actor;
 use Codeception\Stub;
 use Generated\Shared\Transfer\ModuleTransfer;
 use Generated\Shared\Transfer\OrganizationTransfer;
+use Spryker\Zed\ModuleFinder\Business\ModuleFinderFacade;
 use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeBridge;
-use SprykerSdk\Zed\ModuleFinder\Business\ModuleFinderFacade;
 
 /**
  * Inherited Methods
@@ -86,6 +86,7 @@ class ComposerConstrainerCommunicationTester extends Actor
             $moduleTransferSprykerModuleC,
             $moduleTransferSprykerShopModuleC,
         ];
+
         return $moduleCollection;
     }
 }
