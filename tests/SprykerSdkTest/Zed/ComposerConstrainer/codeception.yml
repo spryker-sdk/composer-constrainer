@@ -44,3 +44,4 @@ suites:
                           - SprykerSdk
                 - \SprykerTest\Shared\Testify\Helper\DependencyHelper
                 - \SprykerTest\Zed\Testify\Helper\BusinessHelper
+                - \SprykerTest\Shared\Testify\Helper\VirtualFilesystemHelper

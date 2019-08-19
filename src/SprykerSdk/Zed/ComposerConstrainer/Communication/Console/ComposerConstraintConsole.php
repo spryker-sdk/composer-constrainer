@@ -75,7 +75,7 @@ class ComposerConstraintConsole extends Console
     protected function outputValidationFindings(ConstraintValidationResultTransfer $constraintValidationResultTransfer): void
     {
         foreach ($constraintValidationResultTransfer->getInvalidConstraints() as $invalidConstraintTransfer) {
-            $this->output->writeln(sprintf('<fg=green>%s</> seems to have an invalid constraint.', $invalidConstraintTransfer->getName()));
+            $this->output->writeln(sprintf('<fg=green>%s</> appears to be extended on project level.', $invalidConstraintTransfer->getName()));
             foreach ($invalidConstraintTransfer->getMessages() as $messageTransfer) {
                 $this->output->writeln($messageTransfer->getMessage());
             }

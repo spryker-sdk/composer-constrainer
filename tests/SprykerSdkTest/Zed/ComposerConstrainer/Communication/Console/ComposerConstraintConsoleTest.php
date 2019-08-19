@@ -34,7 +34,7 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteInDryRunWillOutputErrorCodeWhenModuleExtendedAndConstrainedWithCaret(): void
     {
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
-        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
+        $this->tester->haveOverriddenClass('Spryker', 'ModuleA', 'Zed');
 
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
@@ -63,7 +63,7 @@ class ComposerConstraintConsoleTest extends Unit
         $this->tester->haveComposerRequire('spryker/module-b', '^2.0.0');
 
         $this->tester->mockModuleFinder();
-        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
+        $this->tester->haveOverriddenClass('Spryker', 'ModuleA', 'Zed');
         $this->tester->haveConfigFileWithUsedModule('Spryker', 'ModuleB');
 
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
@@ -91,7 +91,7 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteInDryRunWillOutputErrorCodeAndMessageWhenModuleExtendedButNotConstrainedInComposerJson(): void
     {
         $this->tester->haveComposerRequire('spryker/module-b', '^1.0.0');
-        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
+        $this->tester->haveOverriddenClass('Spryker', 'ModuleA', 'Zed');
 
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
@@ -118,6 +118,7 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteInDryRunWillOutputSuccessCodeWhenNoExtendedModuleFound(): void
     {
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
+        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
 
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
@@ -143,7 +144,7 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteInDryRunWillOutputSuccessCodeWhenModuleExtendedAndConstrainedWithTilde(): void
     {
         $this->tester->haveComposerRequire('spryker/module-a', '~1.0.0');
-        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
+        $this->tester->haveOverriddenClass('Spryker', 'ModuleA', 'Zed');
 
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
@@ -168,7 +169,7 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteWillUpdateComposerJsonRequireWhenModuleExtendedAndConstrainedWithCaret(): void
     {
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
-        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
+        $this->tester->haveOverriddenClass('Spryker', 'ModuleA', 'Zed');
 
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
@@ -192,7 +193,7 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteWillUpdateComposerJsonRequireDevWhenModuleExtendedAndConstrainedWithCaret(): void
     {
         $this->tester->haveComposerRequireDev('spryker/module-a', '^1.0.0');
-        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
+        $this->tester->haveOverriddenClass('Spryker', 'ModuleA', 'Zed');
 
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
@@ -216,6 +217,8 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteWillNotUpdateComposerJsonWhenNoViolationFound(): void
     {
         $this->tester->haveComposerRequire('spryker/module-a', '^1.0.0');
+        $this->tester->haveDependencyProvider('Spryker', 'ModuleA', 'Zed');
+
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));
 
@@ -238,7 +241,7 @@ class ComposerConstraintConsoleTest extends Unit
     public function testExecuteWillNotUpdateComposerJsonWhenMoreThanOneMatchingModuleFound(): void
     {
         $this->tester->haveComposerRequire('spryker/module-c', '^1.0.0');
-        $this->tester->haveDependencyProvider('Spryker', 'ModuleC', 'Zed');
+        $this->tester->haveOverriddenClass('Spryker', 'ModuleC', 'Zed');
 
         $this->tester->mockModuleFinder();
         $this->tester->mockConfigMethod('getProjectRootPath', codecept_data_dir('Fixtures/project/'));

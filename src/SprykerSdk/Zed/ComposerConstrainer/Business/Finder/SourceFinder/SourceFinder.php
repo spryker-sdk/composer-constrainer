@@ -52,7 +52,25 @@ class SourceFinder implements UsedModuleFinderInterface
      */
     protected function createFinder(): Finder
     {
-        return (new Finder())->files()->in($this->config->getSourceDirectory());
+        $finder = new Finder();
+        $finder
+            ->files()
+            ->in($this->config->getSourceDirectory())
+            ->filter($this->getFileFilter());
+
+        return $finder;
+    }
+
+    protected function getFileFilter()
+    {
+        return function (SplFileInfo $fileInfo) {
+            $filePath = $fileInfo->getPathname();
+            if (preg_match('/src\/(.*?)\/(.*?)\/(.*?)Config.php|src\/(.*?)\/(.*?)\/(.*?)DependencyProvider.php/', $filePath)) {
+                return false;
+            }
+
+            return true;
+        };
     }
 
     /**

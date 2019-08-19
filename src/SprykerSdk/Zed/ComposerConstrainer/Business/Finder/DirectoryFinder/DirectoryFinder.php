@@ -16,6 +16,9 @@ use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToMo
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
+/**
+ * @deprecated Will be removed without replacement. This finder will finds all directories which are overridden on project side. We need to allow to override specific files and this finder makes it impossible to do so.
+ */
 class DirectoryFinder implements UsedModuleFinderInterface
 {
     /**

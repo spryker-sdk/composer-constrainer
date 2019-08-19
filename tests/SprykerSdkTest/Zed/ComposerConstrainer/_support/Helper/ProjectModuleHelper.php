@@ -102,6 +102,35 @@ CODE;
     /**
      * @param string $organization
      * @param string $module
+     * @param string $application
+     *
+     * @return void
+     */
+    public function haveOverriddenClass(string $organization, string $module, string $application): void
+    {
+        $this->haveExtendedModule($module, $application);
+
+        $fileContent = <<<CODE
+<?php
+
+use $organization\\$application\\$module\\SubDirectory\{$module}Class;
+use Generated\\Shared\\Transfer\\{$module}Transfer;
+use Orm\\Zed\\{$module}\\Persistence\\Spy{$module}Query;
+
+class {$module}Class
+{
+}
+CODE;
+
+        $pathToExtendedModule = $this->getPathToExtendedModule($module, $application);
+
+        $filePath = $pathToExtendedModule . sprintf('%Class.php', $module);
+        file_put_contents($filePath, $fileContent);
+    }
+
+    /**
+     * @param string $organization
+     * @param string $module
      *
      * @return void
      */

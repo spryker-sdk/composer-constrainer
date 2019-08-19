@@ -82,7 +82,6 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return [
             $this->createConfigFinder(),
             $this->createSourceFinder(),
-            $this->createDirectoryFinder(),
         ];
     }
 
@@ -107,6 +106,8 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
+     * @deprecated Will be removed without replacement. This finder will finds all directories which are overridden on project side. We need to allow to override specific files and this finder makes it impossible to do so.
+     *
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface
      */
     public function createDirectoryFinder(): UsedModuleFinderInterface

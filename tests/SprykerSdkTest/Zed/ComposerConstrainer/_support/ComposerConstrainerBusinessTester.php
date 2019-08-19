@@ -28,7 +28,85 @@ class ComposerConstrainerBusinessTester extends Actor
 {
     use _generated\ComposerConstrainerBusinessTesterActions;
 
-   /**
-    * Define custom actions here
-    */
+    /**
+     * @return string
+     */
+    public function getVirtualDirectoryWhereModuleClassIsOverridden(): string
+    {
+        return $this->getVirtualDirectory([
+            'src' => [
+                'Pyz' => [
+                    'Zed' => [
+                        'Module' => [
+                            'Business' => [
+                                'SubDirectory' => [
+                                    'FooClass.php' => 'use Spryker\Zed\Module\Business\SubDirectory\FooClass;',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+    /**
+     * @return string
+     */
+    public function getVirtualDirectoryWithOrmAndGeneratedDependencies(): string
+    {
+        return $this->getVirtualDirectory([
+            'src' => [
+                'Pyz' => [
+                    'Zed' => [
+                        'Module' => [
+                            'Business' => [
+                                'SubDirectory' => [
+                                    'FooClass.php' => 'use Orm\Zed\Module\Business\SubDirectory\FooClass;',
+                                    'BarClass.php' => 'use Generated\Shared\Transfer\FooBarTransfer;',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getVirtualDirectoryWhereModuleConfigIsOverridden(): string
+    {
+        return $this->getVirtualDirectory([
+            'src' => [
+                'Pyz' => [
+                    'Zed' => [
+                        'Module' => [
+                            'ModuleConfig.php' => 'use Spryker\Zed\Module\ModuleConfig;',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getVirtualDirectoryWhereModuleDependencyProviderIsOverridden(): string
+    {
+        return $this->getVirtualDirectory([
+            'src' => [
+                'Pyz' => [
+                    'Zed' => [
+                        'Module' => [
+                            'Business' => [
+                                'ModuleDependencyProvider.php' => 'use Spryker\Zed\Module\Business\ModuleDependencyProvider;',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
 }
