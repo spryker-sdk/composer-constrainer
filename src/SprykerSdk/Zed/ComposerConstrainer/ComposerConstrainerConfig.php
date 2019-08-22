@@ -8,6 +8,7 @@
 namespace SprykerSdk\Zed\ComposerConstrainer;
 
 use Spryker\Zed\Kernel\AbstractBundleConfig;
+use SprykerSdk\Shared\ComposerConstrainer\ComposerConstrainerConstants;
 
 class ComposerConstrainerConfig extends AbstractBundleConfig
 {
@@ -22,10 +23,18 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     /**
      * @codeCoverageIgnore Makes use of constant we only have in project context.
      *
-     * @return string
+     * @return stringå
      */
     public function getProjectRootPath(): string
     {
         return rtrim(APPLICATION_ROOT_DIR, '/') . '/';
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getCoreNamespaces(): array
+    {
+        return $this->get(ComposerConstrainerConstants::CORE_NAMESPACES);
     }
 }

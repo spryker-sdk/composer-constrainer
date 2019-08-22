@@ -7,8 +7,13 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder\SourceFinder;
 
+use Closure;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
+use ReflectionClass;
+use Roave\BetterReflection\BetterReflection;
+use Roave\BetterReflection\Reflector\ClassReflector;
+use Roave\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 use Symfony\Component\Finder\Finder;
@@ -41,7 +46,7 @@ class SourceFinder implements UsedModuleFinderInterface
         }
 
         foreach ($this->createFinder() as $splFileInfo) {
-            $usedModuleCollectionTransfer = $this->addUsedModules($usedModuleCollectionTransfer, $splFileInfo);
+            $usedModuleCollectionTransfer = $this->addExtendedModules($usedModuleCollectionTransfer, $splFileInfo);
         }
 
         return $usedModuleCollectionTransfer;
@@ -56,12 +61,17 @@ class SourceFinder implements UsedModuleFinderInterface
         $finder
             ->files()
             ->in($this->config->getSourceDirectory())
-            ->filter($this->getFileFilter());
+            ->filter($this->getFileFilter())
+            ->exclude(['Generated', 'Orm'])
+            ->name('*.php');
 
         return $finder;
     }
 
-    protected function getFileFilter()
+    /**
+     * @return \Closure
+     */
+    protected function getFileFilter(): Closure
     {
         return function (SplFileInfo $fileInfo) {
             $filePath = $fileInfo->getPathname();
@@ -79,24 +89,57 @@ class SourceFinder implements UsedModuleFinderInterface
      *
      * @return \Generated\Shared\Transfer\UsedModuleCollectionTransfer
      */
-    protected function addUsedModules(UsedModuleCollectionTransfer $usedModuleCollectionTransfer, SplFileInfo $splFileInfo): UsedModuleCollectionTransfer
+    protected function addExtendedModules(UsedModuleCollectionTransfer $usedModuleCollectionTransfer, SplFileInfo $splFileInfo): UsedModuleCollectionTransfer
     {
         $fileContent = $splFileInfo->getContents();
+        $coreNamespaces = $this->config->getCoreNamespaces();
+        $pattern = sprintf('/(?<organization>%s)\\\\(Client|Glue|Shared|Service|Yves|Zed)\\\\(?<module>\w*)\\\\/', implode('|', $coreNamespaces));
 
-        if (preg_match_all('/(namespace\s|use\s|@uses\s\\\\|@param\s\\\\|@return\s\\\\|@see\s\\\\)(?<organization>\w*)\\\\(Client|Glue|Shared|Yves|Zed)\\\\(?<module>\w*)\\\\/', $fileContent, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                if (in_array($match['organization'], ['Generated', 'Orm'], true)) {
-                    continue;
+        foreach ($this->getExtendedClassesInFile($splFileInfo) as $extendedClassName) {
+            if (preg_match_all($pattern, $extendedClassName, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $match) {
+                    $usedModuleTransfer = new UsedModuleTransfer();
+                    $usedModuleTransfer
+                        ->setOrganization($match['organization'])
+                        ->setModule($match['module']);
+
+                    $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
                 }
-                $usedModuleTransfer = new UsedModuleTransfer();
-                $usedModuleTransfer
-                    ->setOrganization($match['organization'])
-                    ->setModule($match['module']);
-
-                $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
             }
         }
 
         return $usedModuleCollectionTransfer;
+    }
+
+    /**
+     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     *
+     * @return string[]
+     */
+    protected function getExtendedClassesInFile(SplFileInfo $splFileInfo): array
+    {
+        $astLocator = (new BetterReflection())->astLocator();
+        $reflector = new ClassReflector(new SingleFileSourceLocator($splFileInfo->getPathname(), $astLocator));
+        $classes = $reflector->getAllClasses();
+        $extendedClasses = [];
+
+        foreach ($classes as $class) {
+            $classNameFragments = explode('\\', $class->getName());
+            array_shift($classNameFragments);
+            $reflectionClass = new ReflectionClass($class->getName());
+            $extended = $reflectionClass->getParentClass();
+
+            if ($extended) {
+                $extendedClassNameFragments = explode('\\', $extended->getName());
+                array_shift($extendedClassNameFragments);
+
+                if ($classNameFragments === $extendedClassNameFragments) {
+                    $extendedClasses[] = $extended->getName();
+                }
+
+            }
+        }
+
+        return $extendedClasses;
     }
 }

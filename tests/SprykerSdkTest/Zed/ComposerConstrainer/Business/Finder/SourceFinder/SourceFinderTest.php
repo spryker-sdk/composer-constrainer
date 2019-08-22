@@ -32,7 +32,7 @@ class SourceFinderTest extends Unit
     public function testFindShouldFindOverriddenModule(): void
     {
         // Arrange
-        $root = $this->tester->getVirtualDirectoryWhereModuleClassIsOverridden();
+        $root = $this->tester->getVirtualDirectoryWhereModuleClassIsExtended();
 
         $composerConstrainerConfig = $this->tester->mockConfigMethod('getProjectRootPath', function () use ($root) {
             return $root;
@@ -69,31 +69,10 @@ class SourceFinderTest extends Unit
     /**
      * @return void
      */
-    public function testFindShouldReturnEmptyUsedModuleTransferCollectionWhenOrmOrGeneratedDependencyWasFound(): void
-    {
-        // Arrange
-        $root = $this->tester->getVirtualDirectoryWithOrmAndGeneratedDependencies();
-
-        $composerConstrainerConfig = $this->tester->mockConfigMethod('getProjectRootPath', function () use ($root) {
-            return $root;
-        });
-
-        $sourceFinder = new SourceFinder($composerConstrainerConfig);
-
-        // Act
-        $usedModuleTransferCollection = $sourceFinder->find();
-
-        // Assert
-        $this->assertCount(0, $usedModuleTransferCollection->getUsedModules());
-    }
-
-    /**
-     * @return void
-     */
     public function testFindShouldNotFindTheModuleConfig(): void
     {
         // Arrange
-        $root = $this->tester->getVirtualDirectoryWhereModuleConfigIsOverridden();
+        $root = $this->tester->getVirtualDirectoryWhereModuleConfigIsExtended();
 
         $composerConstrainerConfig = $this->tester->mockConfigMethod('getProjectRootPath', function () use ($root) {
             return $root;
@@ -114,7 +93,7 @@ class SourceFinderTest extends Unit
     public function testFindShouldNotFindTheModuleDependencyProvider(): void
     {
         // Arrange
-        $root = $this->tester->getVirtualDirectoryWhereModuleDependencyProviderIsOverridden();
+        $root = $this->tester->getVirtualDirectoryWhereModuleDependencyProviderIsExtended();
 
         $composerConstrainerConfig = $this->tester->mockConfigMethod('getProjectRootPath', function () use ($root) {
             return $root;

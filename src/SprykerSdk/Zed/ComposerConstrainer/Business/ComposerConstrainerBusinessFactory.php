@@ -12,8 +12,6 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReader;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriter;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriterInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ConfigFinder\ConfigFinder;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\DirectoryFinder\DirectoryFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\SourceFinder\SourceFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface;
@@ -23,8 +21,6 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface;
-use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerDependencyProvider;
-use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeInterface;
 
 /**
  * @method \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig getConfig()
@@ -80,19 +76,8 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function getFinderStack(): array
     {
         return [
-            $this->createConfigFinder(),
             $this->createSourceFinder(),
         ];
-    }
-
-    /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface
-     */
-    public function createConfigFinder(): UsedModuleFinderInterface
-    {
-        return new ConfigFinder(
-            $this->getConfig()
-        );
     }
 
     /**
@@ -102,19 +87,6 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return new SourceFinder(
             $this->getConfig()
-        );
-    }
-
-    /**
-     * @deprecated Will be removed without replacement. This finder will finds all directories which are overridden on project side. We need to allow to override specific files and this finder makes it impossible to do so.
-     *
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface
-     */
-    public function createDirectoryFinder(): UsedModuleFinderInterface
-    {
-        return new DirectoryFinder(
-            $this->getConfig(),
-            $this->getModuleFinderFacade()
         );
     }
 
@@ -136,13 +108,5 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ComposerJsonWriter(
             $this->getConfig()
         );
-    }
-
-    /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeInterface
-     */
-    public function getModuleFinderFacade(): ComposerConstrainerToModuleFinderFacadeInterface
-    {
-        return $this->getProvidedDependency(ComposerConstrainerDependencyProvider::FACADE_MODULE_FINDER);
     }
 }

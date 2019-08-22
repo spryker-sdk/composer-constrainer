@@ -31,82 +31,124 @@ class ComposerConstrainerBusinessTester extends Actor
     /**
      * @return string
      */
-    public function getVirtualDirectoryWhereModuleClassIsOverridden(): string
+    public function getVirtualDirectoryWhereModuleClassIsExtended(): string
     {
-        return $this->getVirtualDirectory([
+        $structure = [
             'src' => [
-                'Pyz' => [
+                'Project' => [
                     'Zed' => [
                         'Module' => [
-                            'Business' => [
-                                'SubDirectory' => [
-                                    'FooClass.php' => 'use Spryker\Zed\Module\Business\SubDirectory\FooClass;',
-                                ],
-                            ],
+                            'FooClass.php' => $this->buildFileContent('Spryker', 'FooClass'),
                         ],
                     ],
                 ],
             ],
-        ]);
-    }
-    /**
-     * @return string
-     */
-    public function getVirtualDirectoryWithOrmAndGeneratedDependencies(): string
-    {
-        return $this->getVirtualDirectory([
-            'src' => [
-                'Pyz' => [
-                    'Zed' => [
-                        'Module' => [
-                            'Business' => [
-                                'SubDirectory' => [
-                                    'FooClass.php' => 'use Orm\Zed\Module\Business\SubDirectory\FooClass;',
-                                    'BarClass.php' => 'use Generated\Shared\Transfer\FooBarTransfer;',
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($structure);
+
+        $this->includeUsedClass($virtualDirectory, 'Spryker', 'FooClass');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/FooClass.php';
+
+        return $virtualDirectory;
     }
 
     /**
      * @return string
      */
-    public function getVirtualDirectoryWhereModuleConfigIsOverridden(): string
+    public function getVirtualDirectoryWhereModuleConfigIsExtended(): string
     {
-        return $this->getVirtualDirectory([
+        $structure = [
             'src' => [
-                'Pyz' => [
+                'Project' => [
                     'Zed' => [
                         'Module' => [
-                            'ModuleConfig.php' => 'use Spryker\Zed\Module\ModuleConfig;',
+                            'ModuleConfig.php' => $this->buildFileContent('Spryker', 'ModuleConfig'),
                         ],
                     ],
                 ],
             ],
-        ]);
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($structure);
+
+        $this->includeUsedClass($virtualDirectory, 'Spryker', 'ModuleConfig');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/ModuleConfig.php';
+
+        return $virtualDirectory;
     }
 
     /**
      * @return string
      */
-    public function getVirtualDirectoryWhereModuleDependencyProviderIsOverridden(): string
+    public function getVirtualDirectoryWhereModuleDependencyProviderIsExtended(): string
     {
-        return $this->getVirtualDirectory([
+        $structure = [
             'src' => [
-                'Pyz' => [
+                'Project' => [
                     'Zed' => [
                         'Module' => [
-                            'Business' => [
-                                'ModuleDependencyProvider.php' => 'use Spryker\Zed\Module\Business\ModuleDependencyProvider;',
-                            ],
+                            'ModuleDependencyProvider.php' => $this->buildFileContent('Spryker', 'ModuleDependencyProvider'),
                         ],
                     ],
                 ],
             ],
-        ]);
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($structure);
+
+        $this->includeUsedClass($virtualDirectory, 'Spryker', 'ModuleDependencyProvider');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/ModuleDependencyProvider.php';
+
+        return $virtualDirectory;
+    }
+
+    /**
+     * @param string $root
+     * @param string $organization
+     * @param string $className
+     *
+     * @return void
+     */
+    protected function includeUsedClass(string $root, string $organization, string $className): void
+    {
+        $fileContent = <<<CODE
+<?php
+namespace $organization\Zed\Module;
+
+class $className
+{
+}
+CODE;
+        $filePath = $root . $className . '.php';
+
+        file_put_contents($filePath, $fileContent);
+
+        require_once $filePath;
+    }
+
+    /**
+     * @param string $organization
+     * @param string $className
+     *
+     * @return string
+     */
+    protected function buildFileContent(string $organization, string $className): string
+    {
+        $fileContent = <<<CODE
+<?php
+namespace Project\Zed\Module;
+
+use $organization\Zed\Module\\$className as $organization$className;
+
+class $className extends $organization$className
+{
+}
+CODE;
+
+        return $fileContent;
     }
 }
