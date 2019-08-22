@@ -12,9 +12,9 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReader;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriter;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriterInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\SourceFinder\SourceFinder;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinder;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinder\ExtendedModuleFinder;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\Finder;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidator;
@@ -61,31 +61,31 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
      */
-    public function createUsedModuleFinder(): UsedModuleFinderInterface
+    public function createUsedModuleFinder(): FinderInterface
     {
-        return new UsedModuleFinder(
+        return new Finder(
             $this->getFinderStack()
         );
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface[]
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[]
      */
     public function getFinderStack(): array
     {
         return [
-            $this->createSourceFinder(),
+            $this->createExtendedModuleFinder(),
         ];
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
      */
-    public function createSourceFinder(): UsedModuleFinderInterface
+    public function createExtendedModuleFinder(): FinderInterface
     {
-        return new SourceFinder(
+        return new ExtendedModuleFinder(
             $this->getConfig()
         );
     }

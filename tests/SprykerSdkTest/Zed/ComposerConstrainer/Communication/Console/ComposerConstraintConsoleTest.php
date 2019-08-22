@@ -74,7 +74,6 @@ class ComposerConstraintConsoleTest extends Unit
     }
 
     /**
-     * @group single
      * @return void
      */
     public function testExecuteInDryRunWillOutputSuccessCodeWhenNoExtendedModuleFound(): void

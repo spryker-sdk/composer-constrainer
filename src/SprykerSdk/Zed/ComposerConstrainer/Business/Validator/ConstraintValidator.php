@@ -14,7 +14,7 @@ use Generated\Shared\Transfer\ConstraintTransfer;
 use Generated\Shared\Transfer\ConstraintValidationResultTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface;
 use Zend\Filter\FilterChain;
 use Zend\Filter\StringToLower;
@@ -23,7 +23,7 @@ use Zend\Filter\Word\CamelCaseToDash;
 class ConstraintValidator implements ConstraintValidatorInterface
 {
     /**
-     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface
+     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
      */
     protected $usedModuleFinder;
 
@@ -43,12 +43,12 @@ class ConstraintValidator implements ConstraintValidatorInterface
     protected $filterChain;
 
     /**
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface $usedModuleFinder
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface $usedModuleFinder
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface $composerJsonReader
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface $expectedVersionBuilder
      */
     public function __construct(
-        UsedModuleFinderInterface $usedModuleFinder,
+        FinderInterface $usedModuleFinder,
         ComposerJsonReaderInterface $composerJsonReader,
         ExpectedVersionBuilderInterface $expectedVersionBuilder
     ) {
