@@ -8,11 +8,6 @@
 namespace SprykerSdkTest\Zed\ComposerConstrainer;
 
 use Codeception\Actor;
-use Codeception\Stub;
-use Generated\Shared\Transfer\ModuleTransfer;
-use Generated\Shared\Transfer\OrganizationTransfer;
-use Spryker\Zed\ModuleFinder\Business\ModuleFinderFacade;
-use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeBridge;
 
 /**
  * Inherited Methods
@@ -64,6 +59,10 @@ class ComposerConstrainerCommunicationTester extends Actor
     }
 
     /**
+     * @param string $package
+     * @param string $version
+     * @param string $section
+     *
      * @return void
      */
     public function haveComposerJsonAndOverriddenClass(string $package, string $version, string $section = 'require'): void
@@ -72,7 +71,7 @@ class ComposerConstrainerCommunicationTester extends Actor
             'name' => 'project',
             $section => [
                 $package => $version,
-            ]
+            ],
         ];
 
         $virtualDirectory = $this->getVirtualDirectory($this->getStructure($composerJsonArray));
@@ -124,6 +123,10 @@ class ComposerConstrainerCommunicationTester extends Actor
     }
 
     /**
+     * @param string $package
+     * @param string $version
+     * @param string $section
+     *
      * @return void
      */
     public function haveComposerJson(string $package, string $version, string $section = 'require'): void
@@ -132,7 +135,7 @@ class ComposerConstrainerCommunicationTester extends Actor
             'name' => 'project',
             $section => [
                 $package => $version,
-            ]
+            ],
         ];
 
         $structure = [

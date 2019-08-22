@@ -23,7 +23,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     /**
      * @codeCoverageIgnore Makes use of constant we only have in project context.
      *
-     * @return stringå
+     * @return string
      */
     public function getProjectRootPath(): string
     {
