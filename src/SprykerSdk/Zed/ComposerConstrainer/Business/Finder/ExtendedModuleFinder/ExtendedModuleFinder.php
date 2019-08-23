@@ -136,7 +136,6 @@ class ExtendedModuleFinder implements FinderInterface
                 if ($classNameFragments === $extendedClassNameFragments) {
                     $extendedClasses[] = $extended->getName();
                 }
-
             }
         }
 
