@@ -78,8 +78,11 @@ class ComposerConstraintConsole extends Console
     {
         foreach ($constraintValidationResultTransfer->getInvalidConstraints() as $invalidConstraintTransfer) {
             $this->output->writeln(sprintf('<fg=yellow>%s</> appears to be extended on project level.', $invalidConstraintTransfer->getName()));
+            if (!$this->output->isVerbose()) {
+                continue;
+            }
             foreach ($invalidConstraintTransfer->getMessages() as $messageTransfer) {
-                $this->output->writeln($messageTransfer->getMessage());
+                $this->output->writeln('- ' . $messageTransfer->getMessage());
             }
         }
     }
