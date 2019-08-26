@@ -66,7 +66,6 @@ class ConstraintValidator implements ConstraintValidatorInterface
         $composerConstraints = $this->getComposerConstraints();
 
         $constraintValidationResultTransfer = new ConstraintValidationResultTransfer();
-        $constraintValidationResultTransfer->setIsSuccessful(true);
 
         if (count($usedModules) === 0) {
             return $constraintValidationResultTransfer;
@@ -74,7 +73,6 @@ class ConstraintValidator implements ConstraintValidatorInterface
 
         foreach ($usedModules as $composerName) {
             if (!isset($composerConstraints[$composerName])) {
-                $constraintValidationResultTransfer->setIsSuccessful(false);
                 $constraintTransfer = new ConstraintTransfer();
                 $constraintTransfer
                     ->setName($composerName)
@@ -91,7 +89,6 @@ class ConstraintValidator implements ConstraintValidatorInterface
             }
 
             if (isset($composerConstraints[$composerName]) && !$this->isVersionValid($composerConstraints[$composerName])) {
-                $constraintValidationResultTransfer->setIsSuccessful(false);
                 $constraintTransfer = new ConstraintTransfer();
                 $constraintTransfer
                     ->setName($composerName)
@@ -165,8 +162,11 @@ class ConstraintValidator implements ConstraintValidatorInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    protected function addToConstrainCollectionTransfer(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer, array $composerJsonAsArray, string $key)
-    {
+    protected function addToConstrainCollectionTransfer(
+        ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer,
+        array $composerJsonAsArray,
+        string $key
+    ): ComposerConstraintCollectionTransfer {
         if (!isset($composerJsonAsArray[$key])) {
             return $composerConstraintCollectionTransfer;
         }

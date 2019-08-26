@@ -81,6 +81,8 @@ class ConstraintUpdater implements ConstraintUpdaterInterface
 
         $this->composerJsonWriter->write($composerJsonArray);
 
+        $constraintUpdateResultTransfer->setUpdatedConstraints($constraintValidateResultTransfer->getInvalidConstraints());
+
         return $constraintUpdateResultTransfer;
     }
 }

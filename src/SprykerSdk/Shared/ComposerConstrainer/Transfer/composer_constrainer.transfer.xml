@@ -14,12 +14,10 @@
     </transfer>
 
     <transfer name="ConstraintUpdateResult">
-        <property name="isSuccessful" type="bool" />
         <property name="updatedConstraints" type="Constraint[]" singular="updatedConstraint" />
     </transfer>
 
     <transfer name="ConstraintValidationResult">
-        <property name="isSuccessful" type="bool" />
         <property name="invalidConstraints" type="Constraint[]" singular="invalidConstraint" />
     </transfer>
 

@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ComposerConstraintConsole extends Console
 {
-    public const COMMAND_NAME = 'code:constraint:modules';
+    public const COMMAND_NAME = 'code:constraints:modules';
     public const OPTION_DRY_RUN = 'dry-run';
     public const OPTION_DRY_RUN_SHORT = 'd';
 
@@ -29,9 +29,9 @@ class ComposerConstraintConsole extends Console
     {
         $this
             ->setName(static::COMMAND_NAME)
-            ->setDescription('Updates composer constraint in projects. When a module is extended on project level, this command will change ^ to ~ in the projects composer.json. This will make sure that a composer update will only pull the exact version or patch versions of it.');
+            ->setDescription('Updates composer constraints in projects. When a module is extended on project level, this command will change ^ to ~ in the project\'s composer.json. This will make sure that a composer update will only pull patch versions of it for better backwards compatibility.');
 
-        $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects constraints.');
+        $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
     }
 
     /**
@@ -56,13 +56,15 @@ class ComposerConstraintConsole extends Console
     {
         $constraintValidationResultTransfer = $this->getFacade()->validateConstraints();
 
-        if ($constraintValidationResultTransfer->getIsSuccessful()) {
+        if ($constraintValidationResultTransfer->getInvalidConstraints()->count() === 0) {
+            $this->output->writeln('<fg=green>No constraint issues found.</>');
+
             return static::CODE_SUCCESS;
         }
 
-        if ($this->output->isVerbose()) {
-            $this->outputValidationFindings($constraintValidationResultTransfer);
-        }
+        $this->outputValidationFindings($constraintValidationResultTransfer);
+
+        $this->output->writeln(sprintf('<fg=magenta>%s fixable constraint issues found.</>', $constraintValidationResultTransfer->getInvalidConstraints()->count()));
 
         return static::CODE_ERROR;
     }
@@ -75,7 +77,7 @@ class ComposerConstraintConsole extends Console
     protected function outputValidationFindings(ConstraintValidationResultTransfer $constraintValidationResultTransfer): void
     {
         foreach ($constraintValidationResultTransfer->getInvalidConstraints() as $invalidConstraintTransfer) {
-            $this->output->writeln(sprintf('<fg=green>%s</> appears to be extended on project level.', $invalidConstraintTransfer->getName()));
+            $this->output->writeln(sprintf('<fg=yellow>%s</> appears to be extended on project level.', $invalidConstraintTransfer->getName()));
             foreach ($invalidConstraintTransfer->getMessages() as $messageTransfer) {
                 $this->output->writeln($messageTransfer->getMessage());
             }
@@ -87,7 +89,13 @@ class ComposerConstraintConsole extends Console
      */
     protected function runUpdate(): int
     {
-        $this->getFacade()->updateConstraints();
+        $constraintUpdateResultTransfer = $this->getFacade()->updateConstraints();
+
+        if ($constraintUpdateResultTransfer->getUpdatedConstraints()->count() === 0) {
+            $this->output->writeln('<fg=green>No constraint issues found.</>');
+        } else {
+            $this->output->writeln(sprintf('<fg=green>%s constraint issues found and fixed.</>', $constraintUpdateResultTransfer->getUpdatedConstraints()->count()));
+        }
 
         return static::CODE_SUCCESS;
     }
