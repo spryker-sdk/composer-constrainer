@@ -1,5 +1,5 @@
 # ComposerConstrainer Module
-[![Build Status](https://travis-ci.org/spryker-sdk/composer-constrainer.svg)](https://travis-ci.org/spryker-sdk/composer-constrainer)
+[![Build Status](https://travis-ci.org/spryker-sdk/composer-constrainer.svg?branch=master)](https://travis-ci.org/spryker-sdk/composer-constrainer)
 [![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%207.1-8892BF.svg)](https://php.net/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
 
