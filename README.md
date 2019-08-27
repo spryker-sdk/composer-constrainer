@@ -26,7 +26,7 @@ What does it mean for my customized modules?
 
 When you customized Spryker modules (changed module behavior on project level) even minor changes could potentially cause migration efforts. 
 To avoid such cases and keep project updates safe and predictable a project should use `~` (tilde) composer constraint instead of `^` for modules with changed behavior. 
-And to simplify the process Spryker provides a development command `vendor/bin/console code:constraints:modules`, which will suggest required changes in composer.json.
+And to simplify the process Spryker provides a development command `vendor/bin/console code:constraint:modules`, which will suggest required changes in composer.json.
 It can also auto-adjust your composer.json. 
 
 ## Usage
@@ -34,7 +34,7 @@ It can also auto-adjust your composer.json.
 ### Dry-run the command 
 
 ```
-vendor/bin/console code:constraints:modules -d
+vendor/bin/console code:constraint:modules -d
 ```
 
 With this command no changes will be made in the composer.json. 
@@ -45,7 +45,7 @@ This is the recommended hook for your CI system.
 ### Run the command
 
 ```
-vendor/bin/console code:constraints:modules
+vendor/bin/console code:constraint:modules
 ```
 
 This command will change the composer.json. 

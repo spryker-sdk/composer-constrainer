@@ -18,7 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ComposerConstraintConsole extends Console
 {
-    public const COMMAND_NAME = 'code:constraints:modules';
+    public const COMMAND_NAME = 'code:constraint:modules';
     public const OPTION_DRY_RUN = 'dry-run';
     public const OPTION_DRY_RUN_SHORT = 'd';
 
