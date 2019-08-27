@@ -67,7 +67,7 @@ class ComposerConstraintConsoleTest extends Unit
             '--' . ComposerConstraintConsole::OPTION_DRY_RUN => true,
         ];
 
-        $commandTester->execute($arguments, ['verbosity' => Output::VERBOSITY_VERY_VERBOSE]);
+        $commandTester->execute($arguments, ['verbosity' => Output::VERBOSITY_VERBOSE]);
 
         $this->assertSame(ComposerConstraintConsole::CODE_ERROR, $commandTester->getStatusCode());
         $this->assertRegExp('/Expected to find a constraint for "spryker\/module" in your composer.json, but none found./', $commandTester->getDisplay());
@@ -90,7 +90,7 @@ class ComposerConstraintConsoleTest extends Unit
             '--' . ComposerConstraintConsole::OPTION_DRY_RUN => true,
         ];
 
-        $commandTester->execute($arguments, ['verbosity' => Output::VERBOSITY_VERY_VERBOSE]);
+        $commandTester->execute($arguments, ['verbosity' => Output::VERBOSITY_VERBOSE]);
 
         $this->assertSame(ComposerConstraintConsole::CODE_SUCCESS, $commandTester->getStatusCode());
     }
