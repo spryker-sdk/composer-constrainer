@@ -1,6 +1,7 @@
 # ComposerConstrainer Module
 [![Build Status](https://travis-ci.org/spryker-sdk/composer-constrainer.svg)](https://travis-ci.org/spryker-sdk/composer-constrainer)
-[![Coverage Status](https://coveralls.io/repos/github/spryker-sdk/composer-constrainer/badge.svg)](https://coveralls.io/github/spryker-sdk/composer-constrainer)
+[![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%207.1-8892BF.svg)](https://php.net/)
+[![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
 
 Tool to detect extended core modules and to update composer.json constraints fom using ^ (caret) to use ~ (tilde) for those extended modules. 
 
@@ -37,7 +38,9 @@ It can also auto-adjust your composer.json.
 vendor/bin/console code:constraint:modules -d
 ```
 
-With this command no changes will be made in the composer.json. 
+With this command no changes will be made to the `composer.json`.
+Use `-v` to see version details.
+
 The return code of this command is either `0` (success) or `1` (error, some constraints need to be changed).
 
 This is the recommended hook for your CI system.
@@ -48,5 +51,5 @@ This is the recommended hook for your CI system.
 vendor/bin/console code:constraint:modules
 ```
 
-This command will change the composer.json. 
+This command will change the project's `composer.json`. 
 Please dry-run the command before you apply any changes.
