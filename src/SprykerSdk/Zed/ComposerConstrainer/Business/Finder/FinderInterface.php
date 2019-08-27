@@ -9,7 +9,7 @@ namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder;
 
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 
-interface UsedModuleFinderInterface
+interface FinderInterface
 {
     /**
      * @return \Generated\Shared\Transfer\UsedModuleCollectionTransfer

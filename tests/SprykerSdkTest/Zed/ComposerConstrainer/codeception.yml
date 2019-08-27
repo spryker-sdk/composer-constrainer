@@ -27,8 +27,7 @@ suites:
                 - \SprykerTest\Shared\Testify\Helper\DependencyHelper
                 - \SprykerTest\Zed\Console\Helper\ConsoleHelper
                 - \SprykerTest\Zed\Testify\Helper\BusinessHelper
-                - \SprykerSdkTest\Zed\ComposerConstrainer\Helper\ComposerJsonHelper
-                - \SprykerSdkTest\Zed\ComposerConstrainer\Helper\ProjectModuleHelper
+                - \SprykerTest\Shared\Testify\Helper\VirtualFilesystemHelper
     Business:
         path: Business
         class_name: ComposerConstrainerBusinessTester
@@ -44,3 +43,4 @@ suites:
                           - SprykerSdk
                 - \SprykerTest\Shared\Testify\Helper\DependencyHelper
                 - \SprykerTest\Zed\Testify\Helper\BusinessHelper
+                - \SprykerTest\Shared\Testify\Helper\VirtualFilesystemHelper

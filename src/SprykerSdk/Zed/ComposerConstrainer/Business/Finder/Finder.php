@@ -9,15 +9,15 @@ namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder;
 
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 
-class UsedModuleFinder implements UsedModuleFinderInterface
+class Finder implements FinderInterface
 {
     /**
-     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface[]
+     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[]
      */
     protected $finders;
 
     /**
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface[] $finders
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[] $finders
      */
     public function __construct(array $finders)
     {
@@ -40,11 +40,11 @@ class UsedModuleFinder implements UsedModuleFinderInterface
 
     /**
      * @param \Generated\Shared\Transfer\UsedModuleCollectionTransfer $usedModuleCollectionTransfer
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedModuleFinderInterface $usedModuleFinder
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface $usedModuleFinder
      *
      * @return \Generated\Shared\Transfer\UsedModuleCollectionTransfer
      */
-    protected function addToCollection(UsedModuleCollectionTransfer $usedModuleCollectionTransfer, UsedModuleFinderInterface $usedModuleFinder): UsedModuleCollectionTransfer
+    protected function addToCollection(UsedModuleCollectionTransfer $usedModuleCollectionTransfer, FinderInterface $usedModuleFinder): UsedModuleCollectionTransfer
     {
         foreach ($usedModuleFinder->find()->getUsedModules() as $usedModule) {
             $usedModuleCollectionTransfer->addUsedModule($usedModule);

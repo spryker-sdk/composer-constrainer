@@ -8,11 +8,6 @@
 namespace SprykerSdkTest\Zed\ComposerConstrainer;
 
 use Codeception\Actor;
-use Codeception\Stub;
-use Generated\Shared\Transfer\ModuleTransfer;
-use Generated\Shared\Transfer\OrganizationTransfer;
-use Spryker\Zed\ModuleFinder\Business\ModuleFinderFacade;
-use SprykerSdk\Zed\ComposerConstrainer\Dependency\Facade\ComposerConstrainerToModuleFinderFacadeBridge;
 
 /**
  * Inherited Methods
@@ -34,59 +29,167 @@ class ComposerConstrainerCommunicationTester extends Actor
     use _generated\ComposerConstrainerCommunicationTesterActions;
 
     /**
+     * @param string $name
+     * @param string $version
+     *
      * @return void
      */
-    public function mockModuleFinder(): void
+    public function assertComposerRequire(string $name, string $version): void
     {
-        $moduleFinderFacadeMock = Stub::make(ModuleFinderFacade::class, [
-            'getModules' => function () {
-                return $this->getModuleCollection();
-            },
-        ]);
+        $composerJsonArray = json_decode(file_get_contents($this->getVirtualDirectory() . 'composer.json'), true);
 
-        $composerConstrainerToModuleFinderFacadeBridge = new ComposerConstrainerToModuleFinderFacadeBridge($moduleFinderFacadeMock);
-
-        $this->mockFactoryMethod('getModuleFinderFacade', $composerConstrainerToModuleFinderFacadeBridge);
+        $this->assertArrayHasKey('require', $composerJsonArray);
+        $this->assertArrayHasKey($name, $composerJsonArray['require']);
+        $this->assertSame($version, $composerJsonArray['require'][$name]);
     }
 
     /**
-     * @return array
+     * @param string $name
+     * @param string $version
+     *
+     * @return void
      */
-    protected function getModuleCollection(): array
+    public function assertComposerRequireDev(string $name, string $version): void
     {
-        $sprykerOrganizationTransfer = new OrganizationTransfer();
-        $sprykerOrganizationTransfer->setName('Spryker');
+        $composerJsonArray = json_decode(file_get_contents($this->getVirtualDirectory() . 'composer.json'), true);
 
-        $sprykerShopOrganizationTransfer = new OrganizationTransfer();
-        $sprykerShopOrganizationTransfer->setName('SprykerShop');
+        $this->assertArrayHasKey('require-dev', $composerJsonArray);
+        $this->assertArrayHasKey($name, $composerJsonArray['require-dev']);
+        $this->assertSame($version, $composerJsonArray['require-dev'][$name]);
+    }
 
-        $moduleTransferSprykerModuleA = new ModuleTransfer();
-        $moduleTransferSprykerModuleA
-            ->setName('ModuleA')
-            ->setOrganization($sprykerOrganizationTransfer);
-
-        $moduleTransferSprykerModuleB = new ModuleTransfer();
-        $moduleTransferSprykerModuleB
-            ->setName('ModuleB')
-            ->setOrganization($sprykerOrganizationTransfer);
-
-        $moduleTransferSprykerModuleC = new ModuleTransfer();
-        $moduleTransferSprykerModuleC
-            ->setName('ModuleC')
-            ->setOrganization($sprykerOrganizationTransfer);
-
-        $moduleTransferSprykerShopModuleC = new ModuleTransfer();
-        $moduleTransferSprykerShopModuleC
-            ->setName('ModuleC')
-            ->setOrganization($sprykerShopOrganizationTransfer);
-
-        $moduleCollection = [
-            $moduleTransferSprykerModuleA,
-            $moduleTransferSprykerModuleB,
-            $moduleTransferSprykerModuleC,
-            $moduleTransferSprykerShopModuleC,
+    /**
+     * @param string $package
+     * @param string $version
+     * @param string $section
+     *
+     * @return void
+     */
+    public function haveComposerJsonAndOverriddenClass(string $package, string $version, string $section = 'require'): void
+    {
+        $composerJsonArray = [
+            'name' => 'project',
+            $section => [
+                $package => $version,
+            ],
         ];
 
-        return $moduleCollection;
+        $virtualDirectory = $this->getVirtualDirectory($this->getStructure($composerJsonArray));
+
+        $this->includeUsedClass($virtualDirectory, 'Spryker', 'FooClass');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/FooClass.php';
+
+        $this->mockConfigMethod('getProjectRootPath', $virtualDirectory);
+    }
+
+    /**
+     * @return void
+     */
+    public function haveOverriddenClass(): void
+    {
+        $composerJsonArray = [
+            'name' => 'project',
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($this->getStructure($composerJsonArray));
+
+        $this->includeUsedClass($virtualDirectory, 'Spryker', 'FooClass');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/FooClass.php';
+
+        $this->mockConfigMethod('getProjectRootPath', $virtualDirectory);
+    }
+
+    /**
+     * @param array $composerJsonArray
+     *
+     * @return array
+     */
+    protected function getStructure(array $composerJsonArray): array
+    {
+        return [
+            'composer.json' => json_encode($composerJsonArray),
+            'src' => [
+                'Project' => [
+                    'Zed' => [
+                        'Module' => [
+                            'FooClass.php' => $this->buildFileContent('Spryker', 'FooClass'),
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param string $package
+     * @param string $version
+     * @param string $section
+     *
+     * @return void
+     */
+    public function haveComposerJson(string $package, string $version, string $section = 'require'): void
+    {
+        $composerJsonArray = [
+            'name' => 'project',
+            $section => [
+                $package => $version,
+            ],
+        ];
+
+        $structure = [
+            'composer.json' => json_encode($composerJsonArray),
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($structure);
+
+        $this->mockConfigMethod('getProjectRootPath', $virtualDirectory);
+    }
+
+    /**
+     * @param string $root
+     * @param string $organization
+     * @param string $className
+     *
+     * @return void
+     */
+    protected function includeUsedClass(string $root, string $organization, string $className): void
+    {
+        $fileContent = <<<CODE
+<?php
+namespace $organization\Zed\Module;
+
+class $className
+{
+}
+CODE;
+        $filePath = $root . $className . '.php';
+
+        file_put_contents($filePath, $fileContent);
+
+        require_once $filePath;
+    }
+
+    /**
+     * @param string $organization
+     * @param string $className
+     *
+     * @return string
+     */
+    protected function buildFileContent(string $organization, string $className): string
+    {
+        $fileContent = <<<CODE
+<?php
+namespace Project\Zed\Module;
+
+use $organization\Zed\Module\\$className as $organization$className;
+
+class $className extends $organization$className
+{
+}
+CODE;
+
+        return $fileContent;
     }
 }
