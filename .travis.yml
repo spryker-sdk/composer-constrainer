@@ -22,8 +22,7 @@ install:
     - composer update --no-interaction --prefer-dist
 
 script:
-    - vendor/bin/phpcs src --standard=vendor/spryker/code-sniffer/Spryker/ruleset.xml
-    - vendor/bin/phpcs tests --standard=vendor/spryker/code-sniffer/Spryker/ruleset.xml
+    - composer cs-check
 
 after_success:
     - vendor/bin/coveralls -vvv
