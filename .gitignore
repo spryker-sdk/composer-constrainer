@@ -23,4 +23,5 @@ _support/_generated/*
 /tests/_data/Fixtures/*
 !/tests/_output/.gitkeep
 
+composer.lock
 /vendor/
