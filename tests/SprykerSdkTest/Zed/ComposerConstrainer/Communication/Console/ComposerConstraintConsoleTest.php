@@ -13,6 +13,7 @@ use Symfony\Component\Console\Output\Output;
 
 /**
  * Auto-generated group annotations
+ *
  * @group SprykerSdkTest
  * @group Zed
  * @group ComposerConstrainer
