@@ -5,6 +5,16 @@
 
 Tool to detect extended core modules and to update composer.json constraints fom using ^ (caret) to use ~ (tilde) for those extended modules. 
 
+### What will be found by this tool
+
+- Extended API and non-API classes.
+
+### What is ignored by this tool
+
+- Extended ModuleDependencyProvider.
+- Extended ModuleConfig.
+
+
 ## Installation
 
 ```
@@ -29,6 +39,7 @@ When you customized Spryker modules (changed module behavior on project level) e
 To avoid such cases and keep project updates safe and predictable a project should use `~` (tilde) composer constraint instead of `^` for modules with changed behavior. 
 And to simplify the process Spryker provides a development command `vendor/bin/console code:constraint:modules`, which will suggest required changes in composer.json.
 It can also auto-adjust your composer.json. 
+
 
 ## Usage
 

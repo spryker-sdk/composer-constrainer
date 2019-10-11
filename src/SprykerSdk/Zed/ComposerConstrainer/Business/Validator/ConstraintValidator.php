@@ -149,8 +149,8 @@ class ConstraintValidator implements ConstraintValidatorInterface
 
         $composerConstraintCollectionTransfer = new ComposerConstraintCollectionTransfer();
 
-        $this->addToConstrainCollectionTransfer($composerConstraintCollectionTransfer, $composerJsonArray, 'require');
-        $this->addToConstrainCollectionTransfer($composerConstraintCollectionTransfer, $composerJsonArray, 'require-dev');
+        $this->addToConstraintCollectionTransfer($composerConstraintCollectionTransfer, $composerJsonArray, 'require');
+        $this->addToConstraintCollectionTransfer($composerConstraintCollectionTransfer, $composerJsonArray, 'require-dev');
 
         return $composerConstraintCollectionTransfer;
     }
@@ -162,7 +162,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    protected function addToConstrainCollectionTransfer(
+    protected function addToConstraintCollectionTransfer(
         ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer,
         array $composerJsonAsArray,
         string $key
