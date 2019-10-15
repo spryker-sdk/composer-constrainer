@@ -85,6 +85,45 @@ class ComposerConstrainerCommunicationTester extends Actor
     }
 
     /**
+     * @param string $package
+     * @param string $version
+     * @param string $section
+     *
+     * @return void
+     */
+    public function haveComposerLockAndOverriddenClass(string $package, string $version, string $section = 'require'): void
+    {
+        $composerJsonArray = [
+            'name' => 'project',
+            $section => [],
+        ];
+
+        $composerLockArray = [
+            ($section === 'require') ? 'packages' : 'packages-dev' => [
+                [
+                    'name' => $package,
+                    'version' => ltrim($version, '^~'),
+                ],
+            ],
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($this->getStructure($composerJsonArray, $composerLockArray));
+
+        $this->includeUsedClass($virtualDirectory, 'Spryker', 'FooClass');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/FooClass.php';
+
+        $this->mockConfigMethod('getProjectRootPath', $virtualDirectory);
+    }
+
+    /**
+     * @return void
+     */
+    protected function includeComposerLock()
+    {
+    }
+
+    /**
      * @return void
      */
     public function haveOverriddenClass(): void
@@ -104,13 +143,15 @@ class ComposerConstrainerCommunicationTester extends Actor
 
     /**
      * @param array $composerJsonArray
+     * @param array $composerLockAsArray
      *
      * @return array
      */
-    protected function getStructure(array $composerJsonArray): array
+    protected function getStructure(array $composerJsonArray, array $composerLockAsArray = []): array
     {
         return [
             'composer.json' => json_encode($composerJsonArray),
+            'composer.lock' => json_encode($composerLockAsArray),
             'src' => [
                 'Project' => [
                     'Zed' => [
@@ -138,9 +179,18 @@ class ComposerConstrainerCommunicationTester extends Actor
                 $package => $version,
             ],
         ];
+        $composerLockArray = [
+            $section => [
+                [
+                    'name' => $package,
+                    'version' => $version,
+                ],
+            ],
+        ];
 
         $structure = [
             'composer.json' => json_encode($composerJsonArray),
+            'composer.lock' => json_encode($composerLockArray),
         ];
 
         $virtualDirectory = $this->getVirtualDirectory($structure);

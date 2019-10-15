@@ -7,12 +7,12 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Updater;
 
-use Generated\Shared\Transfer\ConstraintUpdateResultTransfer;
+use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 
 interface ConstraintUpdaterInterface
 {
     /**
-     * @return \Generated\Shared\Transfer\ConstraintUpdateResultTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateConstraints(): ConstraintUpdateResultTransfer;
+    public function updateConstraints(): ComposerConstraintCollectionTransfer;
 }

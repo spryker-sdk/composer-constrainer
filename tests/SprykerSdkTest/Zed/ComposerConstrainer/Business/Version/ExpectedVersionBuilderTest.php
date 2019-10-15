@@ -15,6 +15,14 @@ namespace SprykerSdkTest\Zed\ComposerConstrainer\Business\Version;
 use Codeception\Test\Unit;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilder;
 
+/**
+ * @group SprykerSdkTest
+ * @group Zed
+ * @group ComposerConstrainer
+ * @group Business
+ * @group Version
+ * @group ExpectedVersionBuilderTest
+ */
 class ExpectedVersionBuilderTest extends Unit
 {
     /**
@@ -38,7 +46,9 @@ class ExpectedVersionBuilderTest extends Unit
     public function getVersionMap(): array
     {
         return [
+            ['1.0.0', '~1.0.0'],
             ['^1.0.0', '~1.0.0'],
+            ['^1.0.0 | ^3.0.0', '~1.0.0 | ~3.0.0'],
             ['~1.0.0', '~1.0.0'],
             ['^0.1.0', '^0.1.0'],
         ];

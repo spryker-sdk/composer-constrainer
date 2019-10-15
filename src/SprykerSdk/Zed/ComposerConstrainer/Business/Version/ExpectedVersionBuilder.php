@@ -21,6 +21,12 @@ class ExpectedVersionBuilder implements ExpectedVersionBuilderInterface
         foreach ($currentVersions as $currentVersion) {
             $currentVersion = trim($currentVersion);
 
+            if ($currentVersion[0] === '~') {
+                $expectedVersions[] = $currentVersion;
+
+                continue;
+            }
+
             if ($currentVersion[0] === '^' && $currentVersion[1] !== '0') {
                 $currentVersion[0] = '~';
                 $expectedVersions[] = $currentVersion;
@@ -28,7 +34,13 @@ class ExpectedVersionBuilder implements ExpectedVersionBuilderInterface
                 continue;
             }
 
-            $expectedVersions[] = $currentVersion;
+            if ($currentVersion[0] === '^' && $currentVersion[1] === '0') {
+                $expectedVersions[] = $currentVersion;
+
+                continue;
+            }
+
+            $expectedVersions[] = '~' . $currentVersion;
         }
 
         return implode(' | ', $expectedVersions);

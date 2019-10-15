@@ -5,9 +5,9 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer;
+namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock;
 
-interface ComposerJsonReaderInterface
+interface ComposerLockReaderInterface
 {
     /**
      * @return array

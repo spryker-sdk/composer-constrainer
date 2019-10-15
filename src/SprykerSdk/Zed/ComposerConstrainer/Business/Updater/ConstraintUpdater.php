@@ -7,11 +7,10 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Updater;
 
-use Generated\Shared\Transfer\ConstraintUpdateResultTransfer;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriterInterface;
+use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonWriterInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface;
 
 class ConstraintUpdater implements ConstraintUpdaterInterface
 {
@@ -21,68 +20,62 @@ class ConstraintUpdater implements ConstraintUpdaterInterface
     protected $validator;
 
     /**
-     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface
-     */
-    protected $expectedVersionBuilder;
-
-    /**
-     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface
+     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface
      */
     protected $composerJsonReader;
 
     /**
-     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriterInterface
+     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonWriterInterface
      */
     protected $composerJsonWriter;
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface $validator
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface $expectedVersionBuilder
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface $composerJsonReader
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriterInterface $composerJsonWriter
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface $composerJsonReader
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonWriterInterface $composerJsonWriter
      */
     public function __construct(
         ConstraintValidatorInterface $validator,
-        ExpectedVersionBuilderInterface $expectedVersionBuilder,
         ComposerJsonReaderInterface $composerJsonReader,
         ComposerJsonWriterInterface $composerJsonWriter
     ) {
         $this->validator = $validator;
-        $this->expectedVersionBuilder = $expectedVersionBuilder;
         $this->composerJsonReader = $composerJsonReader;
         $this->composerJsonWriter = $composerJsonWriter;
     }
 
     /**
-     * @return \Generated\Shared\Transfer\ConstraintUpdateResultTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateConstraints(): ConstraintUpdateResultTransfer
+    public function updateConstraints(): ComposerConstraintCollectionTransfer
     {
-        $constraintUpdateResultTransfer = new ConstraintUpdateResultTransfer();
-        $constraintValidateResultTransfer = $this->validator->validateConstraints();
+        $constraintConstraintCollectionTransfer = $this->validator->validateConstraints();
 
-        if ($constraintValidateResultTransfer->getInvalidConstraints()->count() === 0) {
-            return $constraintUpdateResultTransfer;
+        if ($constraintConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
+            return new ComposerConstraintCollectionTransfer();
         }
 
         $composerJsonArray = $this->composerJsonReader->read();
 
-        foreach ($constraintValidateResultTransfer->getInvalidConstraints() as $invalidConstraintTransfer) {
-            $expectedVersion = $this->expectedVersionBuilder->buildExpectedVersion($invalidConstraintTransfer->getVersion());
-
-            if (isset($composerJsonArray['require']) && isset($composerJsonArray['require'][$invalidConstraintTransfer->getName()])) {
-                $composerJsonArray['require'][$invalidConstraintTransfer->getName()] = $expectedVersion;
+        foreach ($constraintConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
+            if ($composerConstraintTransfer->getIsDev() === false) {
+                $composerJsonArray['require'][$composerConstraintTransfer->getName()] = $composerConstraintTransfer->getExpectedVersion();
             }
 
-            if (isset($composerJsonArray['require-dev']) && isset($composerJsonArray['require-dev'][$invalidConstraintTransfer->getName()])) {
-                $composerJsonArray['require-dev'][$invalidConstraintTransfer->getName()] = $expectedVersion;
+            if ($composerConstraintTransfer->getIsDev() === true) {
+                $composerJsonArray['require-dev'][$composerConstraintTransfer->getName()] = $composerConstraintTransfer->getExpectedVersion();
             }
+
+//            if (isset($composerJsonArray['require']) && isset($composerJsonArray['require'][$composerConstraintTransfer->getName()])) {
+//            }
+//
+//            if (isset($composerJsonArray['require-dev']) && isset($composerJsonArray['require-dev'][$composerConstraintTransfer->getName()])) {
+//                $composerJsonArray['require-dev'][$composerConstraintTransfer->getName()] = $composerConstraintTransfer->getExpectedVersion();
+//            }
         }
 
         $this->composerJsonWriter->write($composerJsonArray);
 
-        $constraintUpdateResultTransfer->setUpdatedConstraints($constraintValidateResultTransfer->getInvalidConstraints());
-
-        return $constraintUpdateResultTransfer;
+        return $constraintConstraintCollectionTransfer;
     }
 }

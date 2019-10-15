@@ -8,10 +8,12 @@
 namespace SprykerSdk\Zed\ComposerConstrainer\Business;
 
 use Spryker\Zed\Kernel\Business\AbstractBusinessFactory;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReader;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriter;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriterInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReader;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonWriter;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonWriterInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReader;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinder\ExtendedModuleFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\Finder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
@@ -34,7 +36,6 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return new ConstraintUpdater(
             $this->createConstraintValidator(),
-            $this->createExpectedVersionBuilder(),
             $this->createComposerJsonReader(),
             $this->createComposerJsonWriter()
         );
@@ -56,6 +57,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ConstraintValidator(
             $this->createUsedModuleFinder(),
             $this->createComposerJsonReader(),
+            $this->createComposerLockReader(),
             $this->createExpectedVersionBuilder()
         );
     }
@@ -91,7 +93,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonReaderInterface
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface
      */
     public function createComposerJsonReader(): ComposerJsonReaderInterface
     {
@@ -101,7 +103,17 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJsonWriterInterface
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface
+     */
+    public function createComposerLockReader(): ComposerLockReaderInterface
+    {
+        return new ComposerLockReader(
+            $this->getConfig()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonWriterInterface
      */
     public function createComposerJsonWriter(): ComposerJsonWriterInterface
     {

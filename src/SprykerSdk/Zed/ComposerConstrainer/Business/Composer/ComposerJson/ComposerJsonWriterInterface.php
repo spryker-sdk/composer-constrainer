@@ -5,7 +5,7 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer;
+namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson;
 
 interface ComposerJsonWriterInterface
 {

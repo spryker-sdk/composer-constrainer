@@ -7,7 +7,7 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Communication\Console;
 
-use Generated\Shared\Transfer\ConstraintValidationResultTransfer;
+use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 use Spryker\Zed\Kernel\Communication\Console\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -54,34 +54,34 @@ class ComposerConstraintConsole extends Console
      */
     protected function runValidation(): int
     {
-        $constraintValidationResultTransfer = $this->getFacade()->validateConstraints();
+        $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints();
 
-        if ($constraintValidationResultTransfer->getInvalidConstraints()->count() === 0) {
+        if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
 
             return static::CODE_SUCCESS;
         }
 
-        $this->outputValidationFindings($constraintValidationResultTransfer);
+        $this->outputValidationFindings($composerConstraintCollectionTransfer);
 
-        $this->output->writeln(sprintf('<fg=magenta>%s fixable constraint issues found.</>', $constraintValidationResultTransfer->getInvalidConstraints()->count()));
+        $this->output->writeln(sprintf('<fg=magenta>%s fixable constraint issues found.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
 
         return static::CODE_ERROR;
     }
 
     /**
-     * @param \Generated\Shared\Transfer\ConstraintValidationResultTransfer $constraintValidationResultTransfer
+     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
      *
      * @return void
      */
-    protected function outputValidationFindings(ConstraintValidationResultTransfer $constraintValidationResultTransfer): void
+    protected function outputValidationFindings(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer): void
     {
-        foreach ($constraintValidationResultTransfer->getInvalidConstraints() as $invalidConstraintTransfer) {
-            $this->output->writeln(sprintf('<fg=yellow>%s</> appears to be extended on project level.', $invalidConstraintTransfer->getName()));
+        foreach ($composerConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
+            $this->output->writeln(sprintf('<fg=yellow>%s</> appears to be extended on project level.', $composerConstraintTransfer->getName()));
             if (!$this->output->isVerbose()) {
                 continue;
             }
-            foreach ($invalidConstraintTransfer->getMessages() as $messageTransfer) {
+            foreach ($composerConstraintTransfer->getMessages() as $messageTransfer) {
                 $this->output->writeln('- ' . $messageTransfer->getMessage());
             }
         }
@@ -92,12 +92,12 @@ class ComposerConstraintConsole extends Console
      */
     protected function runUpdate(): int
     {
-        $constraintUpdateResultTransfer = $this->getFacade()->updateConstraints();
+        $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
 
-        if ($constraintUpdateResultTransfer->getUpdatedConstraints()->count() === 0) {
+        if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
         } else {
-            $this->output->writeln(sprintf('<fg=green>%s constraint issues found and fixed.</>', $constraintUpdateResultTransfer->getUpdatedConstraints()->count()));
+            $this->output->writeln(sprintf('<fg=green>%s constraint issues found and fixed.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
         }
 
         return static::CODE_SUCCESS;

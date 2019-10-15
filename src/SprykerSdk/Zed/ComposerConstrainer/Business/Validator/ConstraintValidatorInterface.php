@@ -7,12 +7,12 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Validator;
 
-use Generated\Shared\Transfer\ConstraintValidationResultTransfer;
+use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 
 interface ConstraintValidatorInterface
 {
     /**
-     * @return \Generated\Shared\Transfer\ConstraintValidationResultTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function validateConstraints(): ConstraintValidationResultTransfer;
+    public function validateConstraints(): ComposerConstraintCollectionTransfer;
 }
