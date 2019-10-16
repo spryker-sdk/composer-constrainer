@@ -128,6 +128,8 @@ class ConstraintValidator implements ConstraintValidatorInterface
             $usedModules[$composerName] = $composerName;
         }
 
+        ksort($usedModules);
+
         return $usedModules;
     }
 
@@ -155,6 +157,8 @@ class ConstraintValidator implements ConstraintValidatorInterface
             }
         }
 
+        ksort($composerConstraints);
+
         return $composerConstraints;
     }
 
@@ -181,6 +185,8 @@ class ConstraintValidator implements ConstraintValidatorInterface
                 $composerConstraints[$name] = $composerConstraintTransfer;
             }
         }
+
+        ksort($composerConstraints);
 
         return $composerConstraints;
     }
