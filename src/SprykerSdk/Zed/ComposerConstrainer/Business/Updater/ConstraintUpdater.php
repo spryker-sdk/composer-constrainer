@@ -65,13 +65,6 @@ class ConstraintUpdater implements ConstraintUpdaterInterface
             if ($composerConstraintTransfer->getIsDev() === true) {
                 $composerJsonArray['require-dev'][$composerConstraintTransfer->getName()] = $composerConstraintTransfer->getExpectedVersion();
             }
-
-//            if (isset($composerJsonArray['require']) && isset($composerJsonArray['require'][$composerConstraintTransfer->getName()])) {
-//            }
-//
-//            if (isset($composerJsonArray['require-dev']) && isset($composerJsonArray['require-dev'][$composerConstraintTransfer->getName()])) {
-//                $composerJsonArray['require-dev'][$composerConstraintTransfer->getName()] = $composerConstraintTransfer->getExpectedVersion();
-//            }
         }
 
         $this->composerJsonWriter->write($composerJsonArray);

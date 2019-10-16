@@ -221,8 +221,8 @@ class ConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @param ComposerConstraintTransfer $composerLockConstraintTransfer
-     * @param ComposerConstraintTransfer $composerJsonConstraintTransfer
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer $composerLockConstraintTransfer
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer $composerJsonConstraintTransfer
      *
      * @return bool
      */
