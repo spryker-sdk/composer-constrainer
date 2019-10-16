@@ -34,7 +34,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteInDryRunWillOutputErrorCodeWhenModuleExtendedAndConstrainedWithCaret(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -56,7 +56,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteInDryRunWillOutputErrorCodeAndMessageWhenModuleExtendedButNotConstrainedInComposerJson(): void
     {
-        $this->tester->haveComposerLockAndOverriddenClass('spryker/module', '1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -101,7 +101,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteInDryRunWillOutputSuccessCodeWhenModuleExtendedAndConstrainedWithTilde(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '~1.0.0');
+        $this->tester->haveConstrainedComposerAndOverriddenClass('spryker/module', '~1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -122,7 +122,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteWillUpdateComposerJsonRequireWhenModuleExtendedAndConstrainedWithCaret(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -142,7 +142,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteWillAddComposerJsonRequireWhenModuleExtendedAndNotConstrainedInComposerJson(): void
     {
-        $this->tester->haveComposerLockAndOverriddenClass('spryker/module', '1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -162,7 +162,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteWillUpdateComposerJsonRequireDevWhenModuleExtendedAndConstrainedWithCaret(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0', 'require-dev');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0', 'require-dev');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -202,7 +202,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteWillNotUpdateComposerJsonWhenMoreThanOneMatchingModuleFound(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());

@@ -21,8 +21,6 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilder;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface;
 
 /**
  * @method \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig getConfig()
@@ -42,14 +40,6 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface
-     */
-    public function createExpectedVersionBuilder(): ExpectedVersionBuilderInterface
-    {
-        return new ExpectedVersionBuilder();
-    }
-
-    /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface
      */
     public function createConstraintValidator(): ConstraintValidatorInterface
@@ -57,8 +47,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ConstraintValidator(
             $this->createUsedModuleFinder(),
             $this->createComposerJsonReader(),
-            $this->createComposerLockReader(),
-            $this->createExpectedVersionBuilder()
+            $this->createComposerLockReader()
         );
     }
 

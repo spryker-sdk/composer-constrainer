@@ -91,7 +91,7 @@ class ComposerConstrainerCommunicationTester extends Actor
      *
      * @return void
      */
-    public function haveComposerLockAndOverriddenClass(string $package, string $version, string $section = 'require'): void
+    public function haveUnConstrainedComposerAndOverriddenClass(string $package, string $version, string $section = 'require'): void
     {
         $composerJsonArray = [
             'name' => 'project',
@@ -117,10 +117,37 @@ class ComposerConstrainerCommunicationTester extends Actor
     }
 
     /**
+     * @param string $package
+     * @param string $version
+     * @param string $section
+     *
      * @return void
      */
-    protected function includeComposerLock()
+    public function haveConstrainedComposerAndOverriddenClass(string $package, string $version, string $section = 'require'): void
     {
+        $composerJsonArray = [
+            'name' => 'project',
+            $section => [
+                $package => $version,
+            ],
+        ];
+
+        $composerLockArray = [
+            ($section === 'require') ? 'packages' : 'packages-dev' => [
+                [
+                    'name' => $package,
+                    'version' => ltrim($version, '^~'),
+                ],
+            ],
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($this->getStructure($composerJsonArray, $composerLockArray));
+
+        $this->includeUsedClass($virtualDirectory, 'Spryker', 'FooClass');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/FooClass.php';
+
+        $this->mockConfigMethod('getProjectRootPath', $virtualDirectory);
     }
 
     /**

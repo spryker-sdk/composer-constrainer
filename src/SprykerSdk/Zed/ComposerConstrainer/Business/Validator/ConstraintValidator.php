@@ -14,7 +14,6 @@ use Generated\Shared\Transfer\UsedModuleTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface;
 use Zend\Filter\FilterChain;
 use Zend\Filter\StringToLower;
 use Zend\Filter\Word\CamelCaseToDash;
@@ -37,11 +36,6 @@ class ConstraintValidator implements ConstraintValidatorInterface
     protected $composerLockReader;
 
     /**
-     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface
-     */
-    protected $expectedVersionBuilder;
-
-    /**
      * @var \Zend\Filter\FilterChain|null
      */
     protected $filterChain;
@@ -50,18 +44,15 @@ class ConstraintValidator implements ConstraintValidatorInterface
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface $usedModuleFinder
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface $composerJsonReader
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface $composerLockReader
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Version\ExpectedVersionBuilderInterface $expectedVersionBuilder
      */
     public function __construct(
         FinderInterface $usedModuleFinder,
         ComposerJsonReaderInterface $composerJsonReader,
-        ComposerLockReaderInterface $composerLockReader,
-        ExpectedVersionBuilderInterface $expectedVersionBuilder
+        ComposerLockReaderInterface $composerLockReader
     ) {
         $this->usedModuleFinder = $usedModuleFinder;
         $this->composerJsonReader = $composerJsonReader;
         $this->composerLockReader = $composerLockReader;
-        $this->expectedVersionBuilder = $expectedVersionBuilder;
     }
 
     /**
@@ -70,7 +61,6 @@ class ConstraintValidator implements ConstraintValidatorInterface
     public function validateConstraints(): ComposerConstraintCollectionTransfer
     {
         $usedModules = $this->getUsedModulesAsComposerName();
-        $composerConstraints = $this->getComposerConstraints();
 
         $composerConstraintCollectionTransfer = new ComposerConstraintCollectionTransfer();
 
@@ -78,9 +68,17 @@ class ConstraintValidator implements ConstraintValidatorInterface
             return $composerConstraintCollectionTransfer;
         }
 
+        $composerLockConstraints = $this->getComposerLockConstraints();
+        $composerJsonConstraints = $this->getComposerJsonConstraints();
+
         foreach ($usedModules as $composerName) {
-            if (!$this->isVersionValid($composerConstraints[$composerName])) {
-                $composerConstraintCollectionTransfer = $this->addInvalidConstraint($composerName, $composerConstraints, $composerConstraintCollectionTransfer);
+            if (!isset($composerJsonConstraints[$composerName])) {
+                $composerConstraintCollectionTransfer = $this->addInvalidConstraint($composerName, $composerLockConstraints, $composerConstraintCollectionTransfer);
+                continue;
+            }
+
+            if (!$this->isVersionValid($composerLockConstraints[$composerName], $composerJsonConstraints[$composerName])) {
+                $composerConstraintCollectionTransfer = $this->addInvalidConstraint($composerName, $composerLockConstraints, $composerConstraintCollectionTransfer);
             }
         }
 
@@ -101,7 +99,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
     ): ComposerConstraintCollectionTransfer {
         $composerConstraintTransfer = $composerConstraints[$composerName];
 
-        $expectedVersion = $this->expectedVersionBuilder->buildExpectedVersion($composerConstraintTransfer->getVersion());
+        $expectedVersion = sprintf('~%s', $composerConstraintTransfer->getVersion());
         $composerConstraintTransfer->setExpectedVersion($expectedVersion);
 
         $constraintMessageTransfer = new ConstraintMessageTransfer();
@@ -136,38 +134,9 @@ class ConstraintValidator implements ConstraintValidatorInterface
     /**
      * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
      */
-    protected function getComposerConstraints(): array
+    protected function getComposerLockConstraints(): array
     {
-        $composerConstraintCollectionTransfer = $this->getComposerConstraintCollectionTransfer();
         $composerConstraints = [];
-
-        foreach ($composerConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
-            $composerConstraints[$composerConstraintTransfer->getName()] = $composerConstraintTransfer;
-        }
-
-        return $composerConstraints;
-    }
-
-    /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
-     */
-    protected function getComposerConstraintCollectionTransfer(): ComposerConstraintCollectionTransfer
-    {
-        $composerConstraintCollectionTransfer = new ComposerConstraintCollectionTransfer();
-
-        $composerConstraintCollectionTransfer = $this->addConstraintsFromComposerLock($composerConstraintCollectionTransfer);
-        $composerConstraintCollectionTransfer = $this->addConstraintsFromComposerJson($composerConstraintCollectionTransfer);
-
-        return $composerConstraintCollectionTransfer;
-    }
-
-    /**
-     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
-     *
-     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
-     */
-    protected function addConstraintsFromComposerLock(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer): ComposerConstraintCollectionTransfer
-    {
         $composerArray = $this->composerLockReader->read();
 
         foreach (['packages', 'packages-dev'] as $type) {
@@ -182,20 +151,19 @@ class ConstraintValidator implements ConstraintValidatorInterface
                     ->setVersion($package['version'])
                     ->setIsDev($type === 'packages-dev');
 
-                $composerConstraintCollectionTransfer->addComposerConstraint($composerConstraintTransfer);
+                $composerConstraints[$package['name']] = $composerConstraintTransfer;
             }
         }
 
-        return $composerConstraintCollectionTransfer;
+        return $composerConstraints;
     }
 
     /**
-     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
-     *
-     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
      */
-    protected function addConstraintsFromComposerJson(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer): ComposerConstraintCollectionTransfer
+    protected function getComposerJsonConstraints(): array
     {
+        $composerConstraints = [];
         $composerArray = $this->composerJsonReader->read();
 
         foreach (['require', 'require-dev'] as $type) {
@@ -210,11 +178,11 @@ class ConstraintValidator implements ConstraintValidatorInterface
                     ->setVersion($version)
                     ->setIsDev($type === 'require-dev');
 
-                $composerConstraintCollectionTransfer->addComposerConstraint($composerConstraintTransfer);
+                $composerConstraints[$name] = $composerConstraintTransfer;
             }
         }
 
-        return $composerConstraintCollectionTransfer;
+        return $composerConstraints;
     }
 
     /**
@@ -247,21 +215,16 @@ class ConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer $composerConstraintTransfer
+     * @param ComposerConstraintTransfer $composerLockConstraintTransfer
+     * @param ComposerConstraintTransfer $composerJsonConstraintTransfer
      *
      * @return bool
      */
-    protected function isVersionValid(ComposerConstraintTransfer $composerConstraintTransfer): bool
+    protected function isVersionValid(ComposerConstraintTransfer $composerLockConstraintTransfer, ComposerConstraintTransfer $composerJsonConstraintTransfer): bool
     {
-        $currentVersions = explode('|', $composerConstraintTransfer->getVersion());
-        foreach ($currentVersions as $currentVersion) {
-            $currentVersion = trim($currentVersion);
+        $lockedVersion = $composerLockConstraintTransfer->getVersion();
+        $expectedLockedVersion = sprintf('~%s', $lockedVersion);
 
-            if ($currentVersion[0] !== '~' && $currentVersion[1] !== '0') {
-                return false;
-            }
-        }
-
-        return true;
+        return $expectedLockedVersion === $composerJsonConstraintTransfer->getVersion();
     }
 }
