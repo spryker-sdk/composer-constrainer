@@ -7,22 +7,21 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business;
 
-use Generated\Shared\Transfer\ConstraintUpdateResultTransfer;
-use Generated\Shared\Transfer\ConstraintValidationResultTransfer;
+use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 
 interface ComposerConstrainerFacadeInterface
 {
     /**
      * @api
      *
-     * @return \Generated\Shared\Transfer\ConstraintUpdateResultTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateConstraints(): ConstraintUpdateResultTransfer;
+    public function updateConstraints(): ComposerConstraintCollectionTransfer;
 
     /**
      * @api
      *
-     * @return \Generated\Shared\Transfer\ConstraintValidationResultTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function validateConstraints(): ConstraintValidationResultTransfer;
+    public function validateConstraints(): ComposerConstraintCollectionTransfer;
 }

@@ -7,8 +7,7 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business;
 
-use Generated\Shared\Transfer\ConstraintUpdateResultTransfer;
-use Generated\Shared\Transfer\ConstraintValidationResultTransfer;
+use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 use Spryker\Zed\Kernel\Business\AbstractFacade;
 
 /**
@@ -21,9 +20,9 @@ class ComposerConstrainerFacade extends AbstractFacade implements ComposerConstr
      *
      * @api
      *
-     * @return \Generated\Shared\Transfer\ConstraintUpdateResultTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateConstraints(): ConstraintUpdateResultTransfer
+    public function updateConstraints(): ComposerConstraintCollectionTransfer
     {
         return $this->getFactory()->createConstraintUpdater()->updateConstraints();
     }
@@ -33,9 +32,9 @@ class ComposerConstrainerFacade extends AbstractFacade implements ComposerConstr
      *
      * @api
      *
-     * @return \Generated\Shared\Transfer\ConstraintValidationResultTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function validateConstraints(): ConstraintValidationResultTransfer
+    public function validateConstraints(): ComposerConstraintCollectionTransfer
     {
         return $this->getFactory()->createConstraintValidator()->validateConstraints();
     }

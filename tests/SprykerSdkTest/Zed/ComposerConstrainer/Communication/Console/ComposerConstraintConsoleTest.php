@@ -34,7 +34,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteInDryRunWillOutputErrorCodeWhenModuleExtendedAndConstrainedWithCaret(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -56,7 +56,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteInDryRunWillOutputErrorCodeAndMessageWhenModuleExtendedButNotConstrainedInComposerJson(): void
     {
-        $this->tester->haveOverriddenClass();
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -71,7 +71,7 @@ class ComposerConstraintConsoleTest extends Unit
         $commandTester->execute($arguments, ['verbosity' => Output::VERBOSITY_VERBOSE]);
 
         $this->assertSame(ComposerConstraintConsole::CODE_ERROR, $commandTester->getStatusCode());
-        $this->assertRegExp('/Expected to find a constraint for "spryker\/module" in your composer.json, but none found./', $commandTester->getDisplay());
+        $this->assertRegExp('/"spryker\/module" expected in version "~1.0.0" to be locked down in your composer.json/', $commandTester->getDisplay());
     }
 
     /**
@@ -101,7 +101,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteInDryRunWillOutputSuccessCodeWhenModuleExtendedAndConstrainedWithTilde(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '~1.0.0');
+        $this->tester->haveConstrainedComposerAndOverriddenClass('spryker/module', '~1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -122,7 +122,27 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteWillUpdateComposerJsonRequireWhenModuleExtendedAndConstrainedWithCaret(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0');
+
+        $command = new ComposerConstraintConsole();
+        $command->setFacade($this->tester->getFacade());
+        $commandTester = $this->tester->getConsoleTester($command);
+
+        $arguments = [
+            'command' => $command->getName(),
+        ];
+
+        $commandTester->execute($arguments);
+
+        $this->tester->assertComposerRequire('spryker/module', '~1.0.0');
+    }
+
+    /**
+     * @return void
+     */
+    public function testExecuteWillAddComposerJsonRequireWhenModuleExtendedAndNotConstrainedInComposerJson(): void
+    {
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -142,7 +162,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteWillUpdateComposerJsonRequireDevWhenModuleExtendedAndConstrainedWithCaret(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0', 'require-dev');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0', 'require-dev');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());
@@ -182,7 +202,7 @@ class ComposerConstraintConsoleTest extends Unit
      */
     public function testExecuteWillNotUpdateComposerJsonWhenMoreThanOneMatchingModuleFound(): void
     {
-        $this->tester->haveComposerJsonAndOverriddenClass('spryker/module', '^1.0.0');
+        $this->tester->haveUnConstrainedComposerAndOverriddenClass('spryker/module', '^1.0.0');
 
         $command = new ComposerConstraintConsole();
         $command->setFacade($this->tester->getFacade());

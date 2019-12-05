@@ -3,31 +3,13 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="spryker:transfer-01 http://static.spryker.com/transfer-01.xsd">
 
-    <transfer name="Constraint">
-        <property name="name" type="string"/>
-        <property name="version" type="string"/>
-        <property name="messages" type="ConstraintMessage[]" singular="message"/>
-    </transfer>
-
-    <transfer name="ConstraintMessage">
-        <property name="message" type="string"/>
-    </transfer>
-
-    <transfer name="ConstraintUpdateResult">
-        <property name="updatedConstraints" type="Constraint[]" singular="updatedConstraint"/>
-    </transfer>
-
-    <transfer name="ConstraintValidationResult">
-        <property name="invalidConstraints" type="Constraint[]" singular="invalidConstraint"/>
+    <transfer name="UsedModule">
+        <property name="organization" type="string"/>
+        <property name="module" type="string"/>
     </transfer>
 
     <transfer name="UsedModuleCollection">
         <property name="usedModules" type="UsedModule[]" singular="usedModule"/>
-    </transfer>
-
-    <transfer name="UsedModule">
-        <property name="organization" type="string"/>
-        <property name="module" type="string"/>
     </transfer>
 
     <transfer name="ComposerConstraintCollection">
@@ -38,6 +20,12 @@
         <property name="name" type="string"/>
         <property name="version" type="string"/>
         <property name="isDev" type="bool"/>
+        <property name="expectedVersion" type="string"/>
+        <property name="messages" type="ConstraintMessage[]" singular="message"/>
+    </transfer>
+
+    <transfer name="ConstraintMessage">
+        <property name="message" type="string"/>
     </transfer>
 
 </transfers>
