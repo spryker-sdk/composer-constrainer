@@ -3,7 +3,7 @@
 [![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%207.2-8892BF.svg)](https://php.net/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
 
-Tool to detect extended core modules and to update composer.json constraints fom using ^ (caret) to use ~ (tilde) for those extended modules. 
+Tool to detect extended core modules and to update composer.json constraints from using `^` (caret) to using `~` (tilde) for those extended modules. 
 
 ### What will be found by this tool
 
