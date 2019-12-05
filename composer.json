@@ -4,7 +4,7 @@
   "description": "ComposerConstrainer module",
   "license": "proprietary",
   "require": {
-    "php": ">=7.1",
+    "php": ">=7.2",
     "spryker/kernel": "^3.33.0",
     "spryker/symfony": "^3.2.2",
     "spryker/zend": "^2.1.0"
@@ -28,8 +28,8 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "scripts": {
-    "cs-check": "phpcs --colors -v -p -s --extensions=php --standard=vendor/spryker/code-sniffer/SprykerStrict src/ tests/",
-    "cs-fix": "phpcbf --colors -v --extensions=php --standard=vendor/spryker/code-sniffer/SprykerStrict src/ tests/"
+    "cs-check": "phpcs --colors -p -s --extensions=php --standard=vendor/spryker/code-sniffer/SprykerStrict src/ tests/",
+    "cs-fix": "phpcbf --colors -p --extensions=php --standard=vendor/spryker/code-sniffer/SprykerStrict src/ tests/"
   },
   "extra": {
     "branch-alias": {

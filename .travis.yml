@@ -1,12 +1,11 @@
 language: php
 
 php:
-    - 7.1
-    - 7.3
+    - 7.2
+    - 7.4
 
 cache:
     directories:
-        - vendor
         - $HOME/.composer/cache
 
 env:
@@ -15,17 +14,13 @@ env:
         - APPLICATION_STORE=DE
 
 before_install:
-    - echo "memory_limit = -1" >> travis.ini
-    - phpenv config-add travis.ini
+    - if [[ ${TRAVIS_PHP_VERSION} != "7.4" ]]; then phpenv config-rm xdebug.ini ; fi
 
-install:
-    - composer update --no-interaction --prefer-dist
+before_script:
+    - COMPOSER_MEMORY_LIMIT=-1 composer install --prefer-dist --no-interaction
 
 script:
     - composer cs-check
-
-after_success:
-    - vendor/bin/coveralls -vvv
 
 notifications:
     email: false
