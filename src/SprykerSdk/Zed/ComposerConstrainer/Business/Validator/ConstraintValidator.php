@@ -74,6 +74,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
         foreach ($usedModules as $composerName) {
             if (!isset($composerJsonConstraints[$composerName])) {
                 $composerConstraintCollectionTransfer = $this->addInvalidConstraint($composerName, $composerLockConstraints, $composerConstraintCollectionTransfer);
+
                 continue;
             }
 
