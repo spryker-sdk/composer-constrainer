@@ -44,8 +44,10 @@ class Finder implements FinderInterface
      *
      * @return \Generated\Shared\Transfer\UsedModuleCollectionTransfer
      */
-    protected function addToCollection(UsedModuleCollectionTransfer $usedModuleCollectionTransfer, FinderInterface $usedModuleFinder): UsedModuleCollectionTransfer
-    {
+    protected function addToCollection(
+        UsedModuleCollectionTransfer $usedModuleCollectionTransfer,
+        FinderInterface $usedModuleFinder
+    ): UsedModuleCollectionTransfer {
         foreach ($usedModuleFinder->find()->getUsedModules() as $usedModule) {
             $usedModuleCollectionTransfer->addUsedModule($usedModule);
         }

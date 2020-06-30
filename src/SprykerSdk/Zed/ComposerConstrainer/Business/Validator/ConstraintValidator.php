@@ -227,8 +227,10 @@ class ConstraintValidator implements ConstraintValidatorInterface
      *
      * @return bool
      */
-    protected function isVersionValid(ComposerConstraintTransfer $composerLockConstraintTransfer, ComposerConstraintTransfer $composerJsonConstraintTransfer): bool
-    {
+    protected function isVersionValid(
+        ComposerConstraintTransfer $composerLockConstraintTransfer,
+        ComposerConstraintTransfer $composerJsonConstraintTransfer
+    ): bool {
         $lockedVersion = $composerLockConstraintTransfer->getVersion();
         $expectedLockedVersion = sprintf('~%s', $lockedVersion);
 

@@ -13,6 +13,8 @@ use SprykerSdk\Shared\ComposerConstrainer\ComposerConstrainerConstants;
 class ComposerConstrainerConfig extends AbstractBundleConfig
 {
     /**
+     * @api
+     *
      * @return string
      */
     public function getSourceDirectory(): string
@@ -21,6 +23,8 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     }
 
     /**
+     * @api
+     *
      * @codeCoverageIgnore Makes use of constant we only have in project context.
      *
      * @return string
@@ -31,6 +35,8 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     }
 
     /**
+     * @api
+     *
      * @return string[]
      */
     public function getCoreNamespaces(): array
