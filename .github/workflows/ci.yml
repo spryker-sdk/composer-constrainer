@@ -1,10 +1,11 @@
 name: CI
 
 on:
-  push:
   pull_request:
   schedule:
   - cron: "0 0 * * *"
+    branches:
+      - 'master'
 
 env:
   APPLICATION_ENV: 'development'
@@ -91,8 +92,8 @@ jobs:
 
       - name: Composer prefer-lowest
         run: |
-            composer require --dev dereuromark/composer-prefer-lowest
             composer update --prefer-dist --no-interaction --prefer-lowest --prefer-stable
+            composer require --dev dereuromark/composer-prefer-lowest
 
       - name: Check PHP for syntax errors
         run: find ./src -path src -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors detected" )
