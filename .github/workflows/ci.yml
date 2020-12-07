@@ -7,8 +7,8 @@ on:
   - cron: "0 0 * * *"
 
 env:
-  - APPLICATION_ENV=development
-  - APPLICATION_STORE=DE
+  APPLICATION_ENV: 'development'
+  APPLICATION_STORE: 'DE'
 
 jobs:
   validation:
@@ -45,11 +45,7 @@ jobs:
         with:
             path: ${{ steps.composer-cache.outputs.dir }}
             key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-            restore-keys: |
-            ${{ runner.os }}-composer-
-
-      - name: Remove xdebug.ini
-        run: phpenv config-rm xdebug.ini
+            restore-keys: ${{ runner.os }}-composer-
 
       - name: Composer install
         run: composer install --prefer-dist --no-interaction --optimize-autoloader
@@ -91,13 +87,12 @@ jobs:
         with:
             path: ${{ steps.composer-cache.outputs.dir }}
             key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-            restore-keys: |
-            ${{ runner.os }}-composer-
+            restore-keys: ${{ runner.os }}-composer-
 
       - name: Composer prefer-lowest
         run: |
-            composer update --prefer-dist --no-interaction --prefer-lowest --prefer-stable
             composer require --dev dereuromark/composer-prefer-lowest
+            composer update --prefer-dist --no-interaction --prefer-lowest --prefer-stable
 
       - name: Check PHP for syntax errors
         run: find ./src -path src -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 -P4 php -l -n | (! grep -v "No syntax errors detected" )
