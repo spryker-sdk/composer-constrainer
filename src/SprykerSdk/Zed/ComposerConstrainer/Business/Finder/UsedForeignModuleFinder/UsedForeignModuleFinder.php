@@ -94,21 +94,31 @@ class UsedForeignModuleFinder implements FinderInterface
         $fileContent = $splFileInfo->getContents();
         $coreNamespaces = $this->config->getCoreNamespaces();
         $pattern = sprintf('/(?<organization>%s)\\\\(Client|Glue|Shared|Service|Yves|Zed)\\\\(?<module>\w*)\\\\/', implode('|', $coreNamespaces));
-
-        foreach ($this->getUsedClassesInFile($splFileInfo) as $extendedClassName) {
-            if (preg_match_all($pattern, $extendedClassName, $matches, PREG_SET_ORDER)) {
-                foreach ($matches as $match) {
-                    $usedModuleTransfer = new UsedModuleTransfer();
-                    $usedModuleTransfer
-                        ->setOrganization($match['organization'])
-                        ->setModule($match['module']);
-
-                    //$usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
+        foreach ($this->getUsedClassesInFile($splFileInfo) as $usedClassName) {
+            if (!preg_match_all($pattern, $usedClassName, $matches, PREG_SET_ORDER)) {
+                $usedModuleTransfer = $this->getUsedModuleByClassName($usedClassName);
+                if ($usedModuleTransfer) {
+                    $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
                 }
             }
         }
 
         return $usedModuleCollectionTransfer;
+    }
+
+    /**
+     * @param string $className
+     *
+     * @return \Spryker\Shared\Kernel\Transfer\AbstractTransfer\UsedModuleTransfer|null
+     */
+    protected function getUsedModuleByClassName(string $className): ?UsedModuleTransfer
+    {
+        $usedModuleTransfer = new UsedModuleTransfer();
+        $usedModuleTransfer
+            ->setOrganization('Organization')
+            ->setModule('Module');
+
+        return null;
     }
 
     /**
@@ -118,28 +128,15 @@ class UsedForeignModuleFinder implements FinderInterface
      */
     protected function getUsedClassesInFile(SplFileInfo $splFileInfo): array
     {
-        $astLocator = (new BetterReflection())->astLocator();
-        $reflector = new ClassReflector(new SingleFileSourceLocator($splFileInfo->getPathname(), $astLocator));
-        $classes = $reflector->getAllClasses();
-        $extendedClasses = [];
-
-        /*
-        foreach ($classes as $class) {
-            $classNameFragments = explode('\\', $class->getName());
-            array_shift($classNameFragments);
-            $reflectionClass = new ReflectionClass($class->getName());
-            $extended = $reflectionClass->getParentClass();
-
-            if ($extended) {
-                $extendedClassNameFragments = explode('\\', $extended->getName());
-                array_shift($extendedClassNameFragments);
-
-                if ($classNameFragments === $extendedClassNameFragments) {
-                    $extendedClasses[] = $extended->getName();
-                }
+        $pattern = '/use (.*);/';
+        $fileContent = $splFileInfo->getContents();
+        $usedClasses = [];
+        if (preg_match_all($pattern, $fileContent, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $usedClasses[] = explode(' ', $match[1])[0];
             }
-        }*/
+        }
 
-        return $extendedClasses;
+        return $usedClasses;
     }
 }
