@@ -21,6 +21,8 @@ class ComposerConstraintConsole extends Console
     public const COMMAND_NAME = 'code:constraint:modules';
     public const OPTION_DRY_RUN = 'dry-run';
     public const OPTION_DRY_RUN_SHORT = 'd';
+    public const OPTION_FOREIGN = 'foreign';
+    public const OPTION_FOREIGN_SHORT = 'f';
 
     /**
      * @return void
@@ -32,6 +34,7 @@ class ComposerConstraintConsole extends Console
             ->setDescription('Updates composer constraints in projects. When a module is extended on project level, this command will change ^ to ~ in the project\'s composer.json. This will make sure that a composer update will only pull patch versions of it for better backwards compatibility.');
 
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
+        $this->addOption(static::OPTION_FOREIGN, static::OPTION_FOREIGN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate also foreign modules\' constraints.');
     }
 
     /**
