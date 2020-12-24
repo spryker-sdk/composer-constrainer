@@ -15,6 +15,7 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJs
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReader;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinder\ExtendedModuleFinder;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinder\UsedForeignModuleFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\Finder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdater;
@@ -67,7 +68,8 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function getFinderStack(): array
     {
         return [
-            $this->createExtendedModuleFinder(),
+            //TODO: $this->createExtendedModuleFinder(),
+            $this->createUsedForeignModuleFinder(),
         ];
     }
 
@@ -77,6 +79,16 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createExtendedModuleFinder(): FinderInterface
     {
         return new ExtendedModuleFinder(
+            $this->getConfig()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
+     */
+    public function createUsedForeignModuleFinder(): FinderInterface
+    {
+        return new UsedForeignModuleFinder(
             $this->getConfig()
         );
     }
