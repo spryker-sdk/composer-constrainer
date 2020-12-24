@@ -43,4 +43,14 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     {
         return $this->get(ComposerConstrainerConstants::CORE_NAMESPACES);
     }
+
+    /**
+     * @api
+     *
+     * @return string
+     */
+    public function getVendorDirectory(): string
+    {
+        return $this->getProjectRootPath() . 'vendor/';
+    }
 }

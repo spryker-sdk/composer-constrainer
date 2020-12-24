@@ -52,6 +52,7 @@ class UsedForeignModuleFinder implements FinderInterface
         return $usedModuleCollectionTransfer;
     }
 
+
     /**
      * @return \Symfony\Component\Finder\Finder|\Symfony\Component\Finder\SplFileInfo[]
      */
@@ -94,8 +95,9 @@ class UsedForeignModuleFinder implements FinderInterface
         $fileContent = $splFileInfo->getContents();
         $coreNamespaces = $this->config->getCoreNamespaces();
         $pattern = sprintf('/(?<organization>%s)\\\\(Client|Glue|Shared|Service|Yves|Zed)\\\\(?<module>\w*)\\\\/', implode('|', $coreNamespaces));
-        foreach ($this->getUsedClassesInFile($splFileInfo) as $usedClassName) {
+        foreach ($this->getUsedClassesInFile($fileContent) as $usedClassName) {
             if (!preg_match_all($pattern, $usedClassName, $matches, PREG_SET_ORDER)) {
+
                 $usedModuleTransfer = $this->getUsedModuleByClassName($usedClassName);
                 if ($usedModuleTransfer) {
                     $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
@@ -113,23 +115,34 @@ class UsedForeignModuleFinder implements FinderInterface
      */
     protected function getUsedModuleByClassName(string $className): ?UsedModuleTransfer
     {
-        $usedModuleTransfer = new UsedModuleTransfer();
-        $usedModuleTransfer
-            ->setOrganization('Organization')
-            ->setModule('Module');
+        $usedModuleTransfer = null;
+        if ($this->isVendorClass($className)) {
+            $usedModuleTransfer = new UsedModuleTransfer();
+            $usedModuleTransfer
+                ->setOrganization('Organization')
+                ->setModule('Module');
+        }
 
-        return null;
+        return $usedModuleTransfer;
     }
 
+    protected function isVendorClass(string $className): bool
+    {
+        $reflection = new ReflectionClass($className);
+        $fileName = $reflection->getFileName();
+        $pattern = sprintf('/%s/',str_replace('/', '\/', $this->config->getVendorDirectory()));
+        return preg_match($pattern, $fileName);
+    }
+
+
     /**
-     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     * @param string $fileContent
      *
      * @return string[]
      */
-    protected function getUsedClassesInFile(SplFileInfo $splFileInfo): array
+    protected function getUsedClassesInFile(string $fileContent): array
     {
         $pattern = '/use (.*);/';
-        $fileContent = $splFileInfo->getContents();
         $usedClasses = [];
         if (preg_match_all($pattern, $fileContent, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {

@@ -11,6 +11,8 @@ use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerJsonReader implements ComposerJsonReaderInterface
 {
+    public const COMPOSER_JSON_FILENAME = 'composer.json';
+
     /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
      */
@@ -29,6 +31,16 @@ class ComposerJsonReader implements ComposerJsonReaderInterface
      */
     public function read(): array
     {
-        return json_decode(file_get_contents($this->config->getProjectRootPath() . 'composer.json'), true);
+        return $this->readFromPath($this->config->getProjectRootPath());
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return array
+     */
+    public function readFromFilePath(string $filePath): array
+    {
+        return json_decode(file_get_contents($path . static::COMPOSER_JSON_FILENAME), true);
     }
 }

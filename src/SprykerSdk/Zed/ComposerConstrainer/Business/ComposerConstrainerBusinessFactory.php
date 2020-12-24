@@ -112,7 +112,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function getCoreAndForeignFinderStack(): array
     {
         return [
-            $this->createExtendedModuleFinder(),
+            //$this->createExtendedModuleFinder(),
             $this->createUsedForeignModuleFinder(),
         ];
     }
