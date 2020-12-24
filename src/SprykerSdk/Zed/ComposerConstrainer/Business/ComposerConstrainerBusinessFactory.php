@@ -41,6 +41,18 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface
+     */
+    public function createCoreAndForeignConstraintUpdater(): ConstraintUpdaterInterface
+    {
+        return new ConstraintUpdater(
+            $this->createCoreAndForeignConstraintValidator(),
+            $this->createComposerJsonReader(),
+            $this->createComposerJsonWriter()
+        );
+    }
+
+    /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface
      */
     public function createConstraintValidator(): ConstraintValidatorInterface
@@ -91,7 +103,6 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return [
             $this->createExtendedModuleFinder(),
-            $this->createUsedForeignModuleFinder(),
         ];
     }
 

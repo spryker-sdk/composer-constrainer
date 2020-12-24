@@ -56,7 +56,9 @@ class ComposerConstraintConsole extends Console
      */
     protected function runValidation(): int
     {
-        $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints();
+        $composerConstraintCollectionTransfer = $this->input->getOption(static::OPTION_FOREIGN) ?
+            $this->getFacade()->validateCoreAndForeignConstraints() :
+            $this->getFacade()->validateConstraints();
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
@@ -94,11 +96,14 @@ class ComposerConstraintConsole extends Console
      */
     protected function runUpdate(): int
     {
-        $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
+        $composerConstraintCollectionTransfer = $this->input->getOption(static::OPTION_FOREIGN) ?
+            $this->getFacade()->updateCoreAndForeignConstraints() :
+            $this->getFacade()->updateConstraints();
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
         } else {
+            $this->output->writeln(sprintf('<fg=green>%s constraint issues found and fixed.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
             $this->output->writeln(sprintf('<fg=green>%s constraint issues found and fixed.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
         }
 
