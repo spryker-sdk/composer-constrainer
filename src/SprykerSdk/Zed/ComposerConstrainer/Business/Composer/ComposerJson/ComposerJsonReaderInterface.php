@@ -13,4 +13,11 @@ interface ComposerJsonReaderInterface
      * @return array
      */
     public function read(): array;
+
+    /**
+     * @param string $path
+     *
+     * @return array
+     */
+    public function readFromFilePath(string $filePath): array;
 }

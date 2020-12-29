@@ -47,6 +47,29 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     /**
      * @api
      *
+     * @return string[]
+     */
+    public function getProjectNamespaces(): array
+    {
+        return $this->get(ComposerConstrainerConstants::PROJECT_NAMESPACES);
+    }
+
+    /**
+     * @api
+     *
+     * @return string[]
+     */
+    public function getExcludedNamespaces()
+    {
+        return [
+            'Generated',
+            'Orm'
+        ];
+    }
+
+    /**
+     * @api
+     *
      * @return string
      */
     public function getVendorDirectory(): string

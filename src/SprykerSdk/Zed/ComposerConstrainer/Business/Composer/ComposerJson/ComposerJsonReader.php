@@ -41,6 +41,6 @@ class ComposerJsonReader implements ComposerJsonReaderInterface
      */
     public function readFromFilePath(string $filePath): array
     {
-        return json_decode(file_get_contents($path . static::COMPOSER_JSON_FILENAME), true);
+        return json_decode(file_get_contents($filePath . static::COMPOSER_JSON_FILENAME), true);
     }
 }

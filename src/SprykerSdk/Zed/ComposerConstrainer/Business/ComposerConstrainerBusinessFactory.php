@@ -133,7 +133,8 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createUsedForeignModuleFinder(): FinderInterface
     {
         return new UsedForeignModuleFinder(
-            $this->getConfig()
+            $this->getConfig(),
+            $this->createComposerJsonReader()
         );
     }
 

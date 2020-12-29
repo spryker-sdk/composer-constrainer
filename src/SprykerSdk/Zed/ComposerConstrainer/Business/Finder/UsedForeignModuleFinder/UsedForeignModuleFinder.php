@@ -14,6 +14,8 @@ use ReflectionClass;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflector\ClassReflector;
 use Roave\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReader;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 use Symfony\Component\Finder\Finder;
@@ -22,6 +24,11 @@ use Symfony\Component\Finder\SplFileInfo;
 class UsedForeignModuleFinder implements FinderInterface
 {
     /**
+     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface
+     */
+    protected $composerJsonReader;
+
+    /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
      */
     protected $config;
@@ -29,9 +36,10 @@ class UsedForeignModuleFinder implements FinderInterface
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
      */
-    public function __construct(ComposerConstrainerConfig $config)
+    public function __construct(ComposerConstrainerConfig $config, ComposerJsonReaderInterface $composerJsonReader)
     {
         $this->config = $config;
+        $this->composerJsonReader = $composerJsonReader;
     }
 
     /**
@@ -63,7 +71,7 @@ class UsedForeignModuleFinder implements FinderInterface
             ->files()
             ->in($this->config->getSourceDirectory())
             ->filter($this->getFileFilter())
-            ->exclude(['Generated', 'Orm'])
+            ->exclude($this->config->getExcludedNamespaces())
             ->name('*.php');
 
         return $finder;
@@ -93,19 +101,31 @@ class UsedForeignModuleFinder implements FinderInterface
     protected function addUsedForeignModules(UsedModuleCollectionTransfer $usedModuleCollectionTransfer, SplFileInfo $splFileInfo): UsedModuleCollectionTransfer
     {
         $fileContent = $splFileInfo->getContents();
-        $coreNamespaces = $this->config->getCoreNamespaces();
-        $pattern = sprintf('/(?<organization>%s)\\\\(Client|Glue|Shared|Service|Yves|Zed)\\\\(?<module>\w*)\\\\/', implode('|', $coreNamespaces));
         foreach ($this->getUsedClassesInFile($fileContent) as $usedClassName) {
-            if (!preg_match_all($pattern, $usedClassName, $matches, PREG_SET_ORDER)) {
-
+            if (!$this->isExcludedClass($usedClassName) && $this->isVendorClass($usedClassName)) {
                 $usedModuleTransfer = $this->getUsedModuleByClassName($usedClassName);
-                if ($usedModuleTransfer) {
-                    $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
-                }
+                $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
             }
         }
 
         return $usedModuleCollectionTransfer;
+    }
+
+    /**
+     * @param $className
+     *
+     * @return bool
+     */
+    protected function isExcludedClass($className): bool
+    {
+        $namespaces = array_merge(
+            $this->config->getCoreNamespaces(),
+            $this->config->getExcludedNameSpaces(),
+            $this->config->getProjectNamespaces()
+        );
+        $pattern = sprintf('/(%s)\\\\/', implode('|', $namespaces));
+
+        return preg_match_all($pattern, $className);
     }
 
     /**
@@ -115,25 +135,59 @@ class UsedForeignModuleFinder implements FinderInterface
      */
     protected function getUsedModuleByClassName(string $className): ?UsedModuleTransfer
     {
-        $usedModuleTransfer = null;
-        if ($this->isVendorClass($className)) {
-            $usedModuleTransfer = new UsedModuleTransfer();
-            $usedModuleTransfer
-                ->setOrganization('Organization')
-                ->setModule('Module');
-        }
+        $classFilename = $this->getClassFileNameByClassName($className);
+        $composerJsonData = $this->getComposerJsonDataByClassFilename($classFilename);
+        $packageName = explode('/',$composerJsonData['name']);
+        $usedModuleTransfer = (new UsedModuleTransfer())
+            ->setOrganization($packageName[0])
+            ->setModule($packageName[1]);
 
         return $usedModuleTransfer;
     }
 
-    protected function isVendorClass(string $className): bool
+    /**
+     * @param string $classFilename
+     *
+     * @return array
+     */
+    protected function getComposerJsonDataByClassFilename(string $classFilename): array
     {
-        $reflection = new ReflectionClass($className);
-        $fileName = $reflection->getFileName();
-        $pattern = sprintf('/%s/',str_replace('/', '\/', $this->config->getVendorDirectory()));
-        return preg_match($pattern, $fileName);
+        $vendorDirectory = $this->config->getVendorDirectory();
+        $pattern = sprintf('/(%s)([^\/]+\/+){2}/', str_replace('/', '\/', $vendorDirectory));
+        preg_match($pattern, $classFilename, $matches);
+        $composerJsonFilePath = $matches[0];
+        $composerJsonData = $this->composerJsonReader->readFromFilePath($composerJsonFilePath);
+
+        return $composerJsonData;
     }
 
+    /**
+     * @param string $className
+     * @return bool
+     *
+     * @throws \ReflectionException
+     */
+    protected function isVendorClass(string $className): bool
+    {
+        $filename = $this->getClassFileNameByClassName($className);
+        $pattern = sprintf('/%s/',str_replace('/', '\/', $this->config->getVendorDirectory()));
+
+        return $result;
+    }
+
+    /**
+     * @param string $className
+     *
+     * @return string
+     *
+     * @throws \ReflectionException
+     */
+    protected function getClassFileNameByClassName(string $className): string
+    {
+        $reflection = new ReflectionClass($className);
+
+        return $reflection->getFileName();
+    }
 
     /**
      * @param string $fileContent
