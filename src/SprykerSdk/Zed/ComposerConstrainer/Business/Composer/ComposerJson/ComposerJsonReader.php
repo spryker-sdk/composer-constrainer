@@ -31,11 +31,11 @@ class ComposerJsonReader implements ComposerJsonReaderInterface
      */
     public function read(): array
     {
-        return $this->readFromPath($this->config->getProjectRootPath());
+        return $this->readFromFilePath($this->config->getProjectRootPath());
     }
 
     /**
-     * @param string $path
+     * @param string $filePath
      *
      * @return array
      */

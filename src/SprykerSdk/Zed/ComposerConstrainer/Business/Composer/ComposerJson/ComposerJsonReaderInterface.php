@@ -15,7 +15,7 @@ interface ComposerJsonReaderInterface
     public function read(): array;
 
     /**
-     * @param string $path
+     * @param string $filePath
      *
      * @return array
      */

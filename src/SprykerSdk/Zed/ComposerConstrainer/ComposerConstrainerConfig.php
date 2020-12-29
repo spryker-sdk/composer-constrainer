@@ -63,7 +63,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     {
         return [
             'Generated',
-            'Orm'
+            'Orm',
         ];
     }
 

@@ -11,10 +11,6 @@ use Closure;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
 use ReflectionClass;
-use Roave\BetterReflection\BetterReflection;
-use Roave\BetterReflection\Reflector\ClassReflector;
-use Roave\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
-use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReader;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
@@ -35,6 +31,7 @@ class UsedForeignModuleFinder implements FinderInterface
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface $composerJsonReader
      */
     public function __construct(ComposerConstrainerConfig $config, ComposerJsonReaderInterface $composerJsonReader)
     {
@@ -59,7 +56,6 @@ class UsedForeignModuleFinder implements FinderInterface
 
         return $usedModuleCollectionTransfer;
     }
-
 
     /**
      * @return \Symfony\Component\Finder\Finder|\Symfony\Component\Finder\SplFileInfo[]
@@ -112,11 +108,11 @@ class UsedForeignModuleFinder implements FinderInterface
     }
 
     /**
-     * @param $className
+     * @param string $className
      *
      * @return bool
      */
-    protected function isExcludedClass($className): bool
+    protected function isExcludedClass(string $className): bool
     {
         $namespaces = array_merge(
             $this->config->getCoreNamespaces(),
@@ -125,7 +121,7 @@ class UsedForeignModuleFinder implements FinderInterface
         );
         $pattern = sprintf('/(%s)\\\\/', implode('|', $namespaces));
 
-        return preg_match_all($pattern, $className);
+        return (bool)preg_match_all($pattern, $className);
     }
 
     /**
@@ -137,7 +133,7 @@ class UsedForeignModuleFinder implements FinderInterface
     {
         $classFilename = $this->getClassFileNameByClassName($className);
         $composerJsonData = $this->getComposerJsonDataByClassFilename($classFilename);
-        $packageName = explode('/',$composerJsonData['name']);
+        $packageName = explode('/', $composerJsonData['name']);
         $usedModuleTransfer = (new UsedModuleTransfer())
             ->setOrganization($packageName[0])
             ->setModule($packageName[1]);
@@ -152,8 +148,7 @@ class UsedForeignModuleFinder implements FinderInterface
      */
     protected function getComposerJsonDataByClassFilename(string $classFilename): array
     {
-        $vendorDirectory = $this->config->getVendorDirectory();
-        $pattern = sprintf('/(%s)([^\/]+\/+){2}/', str_replace('/', '\/', $vendorDirectory));
+        $pattern = sprintf('/(%s)([^\/]+\/+){2}/', str_replace('/', '\/', $this->config->getVendorDirectory()));
         preg_match($pattern, $classFilename, $matches);
         $composerJsonFilePath = $matches[0];
         $composerJsonData = $this->composerJsonReader->readFromFilePath($composerJsonFilePath);
@@ -163,30 +158,25 @@ class UsedForeignModuleFinder implements FinderInterface
 
     /**
      * @param string $className
-     * @return bool
      *
-     * @throws \ReflectionException
+     * @return bool
      */
     protected function isVendorClass(string $className): bool
     {
         $filename = $this->getClassFileNameByClassName($className);
-        $pattern = sprintf('/%s/',str_replace('/', '\/', $this->config->getVendorDirectory()));
+        $pattern = sprintf('/%s/', str_replace('/', '\/', $this->config->getVendorDirectory()));
 
-        return $result;
+        return (bool)preg_match($pattern, $filename);
     }
 
     /**
      * @param string $className
      *
      * @return string
-     *
-     * @throws \ReflectionException
      */
     protected function getClassFileNameByClassName(string $className): string
     {
-        $reflection = new ReflectionClass($className);
-
-        return $reflection->getFileName();
+        return (new ReflectionClass($className))->getFileName();
     }
 
     /**
@@ -196,7 +186,7 @@ class UsedForeignModuleFinder implements FinderInterface
      */
     protected function getUsedClassesInFile(string $fileContent): array
     {
-        $pattern = '/use (.*);/';
+        $pattern = '/^use (.*);/m';
         $usedClasses = [];
         if (preg_match_all($pattern, $fileContent, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
