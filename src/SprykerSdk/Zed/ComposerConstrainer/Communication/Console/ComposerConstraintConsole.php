@@ -104,7 +104,6 @@ class ComposerConstraintConsole extends Console
             $this->output->writeln('<fg=green>No constraint issues found.</>');
         } else {
             $this->output->writeln(sprintf('<fg=green>%s constraint issues found and fixed.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
-            $this->output->writeln(sprintf('<fg=green>%s constraint issues found and fixed.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
         }
 
         return static::CODE_SUCCESS;
