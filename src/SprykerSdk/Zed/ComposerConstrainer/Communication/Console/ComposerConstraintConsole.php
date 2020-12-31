@@ -33,7 +33,7 @@ class ComposerConstraintConsole extends Console
             ->setName(static::COMMAND_NAME)
             ->setDescription('Updates composer constraints in projects. When a module is extended on project level, this command will change ^ to ~ in the project\'s composer.json. This will make sure that a composer update will only pull patch versions of it for better backwards compatibility.');
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
-        $this->addOption(static::OPTION_FOREIGN, static::OPTION_FOREIGN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate also foreign modules\' constraints.');
+        $this->addOption(static::OPTION_WITH_FOREIGN, static::OPTION_WITH_FOREIGN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate also foreign modules\' constraints.');
     }
 
     /**
@@ -57,7 +57,7 @@ class ComposerConstraintConsole extends Console
     protected function runValidation(): int
     {
         $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints();
-        if ($this->input->getOption(static::OPTION_FOREIGN)) {
+        if ($this->input->getOption(static::OPTION_WITH_FOREIGN)) {
             $composerForeignConstraintCollectionTransfer = $this->getFacade()->validateForeignConstraints();
             $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
                 $composerConstraintCollectionTransfer,
@@ -89,12 +89,11 @@ class ComposerConstraintConsole extends Console
         ComposerConstraintCollectionTransfer  $composerConstraintCollectionTransferB) :
         ComposerConstraintCollectionTransfer {
 
-        return (new ComposerConstraintCollectionTransfer())->setComposerConstraints(
-            array_merge(
-                $composerConstraintCollectionTransferA->getComposerConstraints(),
-                $composerConstraintCollectionTransferB->getComposerConstraints()
-            )
-        );
+        foreach ($composerConstraintCollectionTransferB->getComposerConstraints() as $composerConstraint) {
+            $composerConstraintCollectionTransferA->addComposerConstraint($composerConstraint);
+        }
+
+        return $composerConstraintCollectionTransferA;
     }
 
     /**
@@ -120,14 +119,14 @@ class ComposerConstraintConsole extends Console
      */
     protected function runUpdate(): int
     {
-        $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
+        //$composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
 
-        if ($this->input->getOption(static::OPTION_FOREIGN) ) {
+        if ($this->input->getOption(static::OPTION_WITH_FOREIGN) ) {
             $composerForeignConstraintCollectionTransfer = $this->getFacade()->updateForeignConstraints();
-            $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
-                $composerConstraintCollectionTransfer,
-                $composerForeignConstraintCollectionTransfer
-            );
+            //$composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
+            //    $composerConstraintCollectionTransfer,
+            //    $composerForeignConstraintCollectionTransfer
+            //);
         }
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
