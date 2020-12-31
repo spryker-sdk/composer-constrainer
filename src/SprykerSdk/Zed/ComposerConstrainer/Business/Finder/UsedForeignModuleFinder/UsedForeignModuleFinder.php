@@ -94,8 +94,9 @@ class UsedForeignModuleFinder implements FinderInterface
      *
      * @return \Generated\Shared\Transfer\UsedModuleCollectionTransfer
      */
-    protected function addUsedForeignModules(UsedModuleCollectionTransfer $usedModuleCollectionTransfer, SplFileInfo $splFileInfo): UsedModuleCollectionTransfer
-    {
+    protected function addUsedForeignModules(
+        UsedModuleCollectionTransfer $usedModuleCollectionTransfer,
+        SplFileInfo $splFileInfo): UsedModuleCollectionTransfer {
         $fileContent = $splFileInfo->getContents();
         foreach ($this->getUsedClassNamesInFile($fileContent) as $usedClassName) {
             if (!$this->isExcludedClass($usedClassName) && $this->isVendorClass($usedClassName)) {
