@@ -85,10 +85,9 @@ class ComposerConstraintConsole extends Console
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
     protected function mergeComposerConstraintCollectionTransfers(
-        ComposerConstraintCollectionTransfer  $composerConstraintCollectionTransferA,
-        ComposerConstraintCollectionTransfer  $composerConstraintCollectionTransferB) :
-        ComposerConstraintCollectionTransfer {
-
+        ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferA,
+        ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferB
+    ): ComposerConstraintCollectionTransfer {
         foreach ($composerConstraintCollectionTransferB->getComposerConstraints() as $composerConstraint) {
             $composerConstraintCollectionTransferA->addComposerConstraint($composerConstraint);
         }
@@ -119,14 +118,14 @@ class ComposerConstraintConsole extends Console
      */
     protected function runUpdate(): int
     {
-        //$composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
+        $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
 
         if ($this->input->getOption(static::OPTION_WITH_FOREIGN) ) {
             $composerForeignConstraintCollectionTransfer = $this->getFacade()->updateForeignConstraints();
-            //$composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
-            //    $composerConstraintCollectionTransfer,
-            //    $composerForeignConstraintCollectionTransfer
-            //);
+            $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
+                $composerConstraintCollectionTransfer,
+                $composerForeignConstraintCollectionTransfer
+            );
         }
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
