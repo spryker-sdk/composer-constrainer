@@ -12,6 +12,9 @@ use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 interface ComposerConstrainerFacadeInterface
 {
     /**
+     * Specification:
+     * - Updates core modules constrains.
+     *
      * @api
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
@@ -19,6 +22,9 @@ interface ComposerConstrainerFacadeInterface
     public function updateConstraints(): ComposerConstraintCollectionTransfer;
 
     /**
+     * Specification:
+     * - Validates core modules constrains.
+     *
      * @api
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
@@ -27,7 +33,7 @@ interface ComposerConstrainerFacadeInterface
 
     /**
      * Specification:
-     * - Validates core and foreign module constrains.
+     * - Validates foreign modules constrains.
      *
      * @api
      *
@@ -37,7 +43,7 @@ interface ComposerConstrainerFacadeInterface
 
     /**
      * Specification:
-     * - Updates core and foreign module constrains.
+     * - Updates foreign modules constrains.
      *
      * @api
      *
