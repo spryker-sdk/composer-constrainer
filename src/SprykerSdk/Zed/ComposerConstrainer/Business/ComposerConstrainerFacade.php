@@ -34,9 +34,9 @@ class ComposerConstrainerFacade extends AbstractFacade implements ComposerConstr
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateCoreAndForeignConstraints(): ComposerConstraintCollectionTransfer
+    public function updateForeignConstraints(): ComposerConstraintCollectionTransfer
     {
-        return $this->getFactory()->createCoreAndForeignConstraintUpdater()->updateConstraints();
+        return $this->getFactory()->createForeignConstraintUpdater()->updateConstraints();
     }
 
     /**
@@ -58,8 +58,8 @@ class ComposerConstrainerFacade extends AbstractFacade implements ComposerConstr
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function validateCoreAndForeignConstraints(): ComposerConstraintCollectionTransfer
+    public function validateForeignConstraints(): ComposerConstraintCollectionTransfer
     {
-        return $this->getFactory()->createCoreAndForeignConstraintValidator()->validateConstraints();
+        return $this->getFactory()->createForeignConstraintValidator()->validateConstraints();
     }
 }

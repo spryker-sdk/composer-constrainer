@@ -43,10 +43,10 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface
      */
-    public function createCoreAndForeignConstraintUpdater(): ConstraintUpdaterInterface
+    public function createForeignConstraintUpdater(): ConstraintUpdaterInterface
     {
         return new ConstraintUpdater(
-            $this->createCoreAndForeignConstraintValidator(),
+            $this->createForeignConstraintValidator(),
             $this->createComposerJsonReader(),
             $this->createComposerJsonWriter()
         );
@@ -67,10 +67,10 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface
      */
-    public function createCoreAndForeignConstraintValidator(): ConstraintValidatorInterface
+    public function createForeignConstraintValidator(): ConstraintValidatorInterface
     {
         return new ConstraintValidator(
-            $this->createUsedCoreAndForeignModuleFinder(),
+            $this->createForeignModuleFinder(),
             $this->createComposerJsonReader(),
             $this->createComposerLockReader()
         );
@@ -89,10 +89,10 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
      */
-    public function createUsedCoreAndForeignModuleFinder(): FinderInterface
+    public function createForeignModuleFinder(): FinderInterface
     {
         return new Finder(
-            $this->getCoreAndForeignFinderStack()
+            $this->getUsedForeignFinderStack()
         );
     }
 
@@ -109,10 +109,9 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[]
      */
-    public function getCoreAndForeignFinderStack(): array
+    public function getUsedForeignFinderStack(): array
     {
         return [
-            $this->createExtendedModuleFinder(),
             $this->createUsedForeignModuleFinder(),
         ];
     }

@@ -33,7 +33,7 @@ interface ComposerConstrainerFacadeInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function validateCoreAndForeignConstraints(): ComposerConstraintCollectionTransfer;
+    public function validateForeignConstraints(): ComposerConstraintCollectionTransfer;
 
     /**
      * Specification:
@@ -43,5 +43,5 @@ interface ComposerConstrainerFacadeInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateCoreAndForeignConstraints(): ComposerConstraintCollectionTransfer;
+    public function updateForeignConstraints(): ComposerConstraintCollectionTransfer;
 }

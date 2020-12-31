@@ -21,8 +21,8 @@ class ComposerConstraintConsole extends Console
     public const COMMAND_NAME = 'code:constraint:modules';
     public const OPTION_DRY_RUN = 'dry-run';
     public const OPTION_DRY_RUN_SHORT = 'd';
-    public const OPTION_FOREIGN = 'foreign';
-    public const OPTION_FOREIGN_SHORT = 'f';
+    public const OPTION_WITH_FOREIGN = 'with-foreign';
+    public const OPTION_WITH_FOREIGN_SHORT = 'w';
 
     /**
      * @return void
@@ -56,9 +56,14 @@ class ComposerConstraintConsole extends Console
      */
     protected function runValidation(): int
     {
-        $composerConstraintCollectionTransfer = $this->input->getOption(static::OPTION_FOREIGN) ?
-            $this->getFacade()->validateCoreAndForeignConstraints() :
-            $this->getFacade()->validateConstraints();
+        $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints();
+        if ($this->input->getOption(static::OPTION_FOREIGN)) {
+            $composerForeignConstraintCollectionTransfer = $this->getFacade()->validateForeignConstraints();
+            $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
+                $composerConstraintCollectionTransfer,
+                $composerForeignConstraintCollectionTransfer
+            );
+        }
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
@@ -71,6 +76,25 @@ class ComposerConstraintConsole extends Console
         $this->output->writeln(sprintf('<fg=magenta>%s fixable constraint issues found.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
 
         return static::CODE_ERROR;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferA
+     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferB
+     *
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
+     */
+    protected function mergeComposerConstraintCollectionTransfers(
+        ComposerConstraintCollectionTransfer  $composerConstraintCollectionTransferA,
+        ComposerConstraintCollectionTransfer  $composerConstraintCollectionTransferB) :
+        ComposerConstraintCollectionTransfer {
+
+        return (new ComposerConstraintCollectionTransfer())->setComposerConstraints(
+            array_merge(
+                $composerConstraintCollectionTransferA->getComposerConstraints(),
+                $composerConstraintCollectionTransferB->getComposerConstraints()
+            )
+        );
     }
 
     /**
@@ -96,9 +120,15 @@ class ComposerConstraintConsole extends Console
      */
     protected function runUpdate(): int
     {
-        $composerConstraintCollectionTransfer = $this->input->getOption(static::OPTION_FOREIGN) ?
-            $this->getFacade()->updateCoreAndForeignConstraints() :
-            $this->getFacade()->updateConstraints();
+        $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
+
+        if ($this->input->getOption(static::OPTION_FOREIGN) ) {
+            $composerForeignConstraintCollectionTransfer = $this->getFacade()->updateForeignConstraints();
+            $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
+                $composerConstraintCollectionTransfer,
+                $composerForeignConstraintCollectionTransfer
+            );
+        }
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
