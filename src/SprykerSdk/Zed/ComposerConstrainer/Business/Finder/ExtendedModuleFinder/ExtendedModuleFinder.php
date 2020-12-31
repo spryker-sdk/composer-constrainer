@@ -62,7 +62,7 @@ class ExtendedModuleFinder implements FinderInterface
             ->files()
             ->in($this->config->getSourceDirectory())
             ->filter($this->getFileFilter())
-            ->exclude($this->config->getExcludedNameSpaces())
+            ->exclude($this->config->getExcludedNamespaces())
             ->name('*.php');
 
         return $finder;
