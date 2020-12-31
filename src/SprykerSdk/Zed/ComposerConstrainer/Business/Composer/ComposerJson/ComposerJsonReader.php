@@ -43,7 +43,6 @@ class ComposerJsonReader implements ComposerJsonReaderInterface
     {
         $composerJsonFileName = $filePath . static::COMPOSER_JSON_FILENAME;
         if (!file_exists($composerJsonFileName)) {
-
             return [];
         }
 

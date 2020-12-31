@@ -96,7 +96,8 @@ class UsedForeignModuleFinder implements FinderInterface
      */
     protected function addUsedForeignModules(
         UsedModuleCollectionTransfer $usedModuleCollectionTransfer,
-        SplFileInfo $splFileInfo): UsedModuleCollectionTransfer {
+        SplFileInfo $splFileInfo
+    ): UsedModuleCollectionTransfer {
         $fileContent = $splFileInfo->getContents();
         foreach ($this->getUsedClassNamesInFile($fileContent) as $usedClassName) {
             if (!$this->isExcludedClass($usedClassName) && $this->isVendorClass($usedClassName)) {
@@ -135,7 +136,6 @@ class UsedForeignModuleFinder implements FinderInterface
         $classFilename = $this->getClassFileNameByClassName($className);
         $composerJsonData = $this->getComposerJsonDataByClassFilename($classFilename);
         if (empty($composerJsonData)) {
-
             return null;
         }
         $packageName = explode('/', $composerJsonData['name']);

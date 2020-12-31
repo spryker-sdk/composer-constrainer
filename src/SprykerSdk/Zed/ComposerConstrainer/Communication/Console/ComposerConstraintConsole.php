@@ -120,7 +120,7 @@ class ComposerConstraintConsole extends Console
     {
         $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
 
-        if ($this->input->getOption(static::OPTION_WITH_FOREIGN) ) {
+        if ($this->input->getOption(static::OPTION_WITH_FOREIGN)) {
             $composerForeignConstraintCollectionTransfer = $this->getFacade()->updateForeignConstraints();
             $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
                 $composerConstraintCollectionTransfer,
