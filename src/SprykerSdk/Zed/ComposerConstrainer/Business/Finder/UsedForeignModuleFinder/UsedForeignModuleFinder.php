@@ -116,7 +116,7 @@ class UsedForeignModuleFinder implements FinderInterface
     {
         $namespaces = array_merge(
             $this->config->getCoreNamespaces(),
-            $this->config->getExcludedNameSpaces(),
+            $this->config->getExcludedNamespaces(),
             $this->config->getProjectNamespaces()
         );
         $pattern = sprintf('/(%s)\\\\/', implode('|', $namespaces));
@@ -133,6 +133,10 @@ class UsedForeignModuleFinder implements FinderInterface
     {
         $classFilename = $this->getClassFileNameByClassName($className);
         $composerJsonData = $this->getComposerJsonDataByClassFilename($classFilename);
+        if (empty($composerJsonData)) {
+
+            return null;
+        }
         $packageName = explode('/', $composerJsonData['name']);
         $usedModuleTransfer = (new UsedModuleTransfer())
             ->setOrganization($packageName[0])
@@ -184,7 +188,7 @@ class UsedForeignModuleFinder implements FinderInterface
      *
      * @return string[]
      */
-    protected function getUsedClassesInFile(string $fileContent): array
+    protected function getUsedClassNamesInFile(string $fileContent): array
     {
         $pattern = '/^use (.*);/m';
         $usedClasses = [];

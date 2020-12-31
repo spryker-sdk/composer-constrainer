@@ -26,9 +26,22 @@ interface ComposerConstrainerFacadeInterface
     public function validateConstraints(): ComposerConstraintCollectionTransfer;
 
     /**
+     * Specification:
+     * - Validates core and foreign module constrains.
+     *
      * @api
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
     public function validateCoreAndForeignConstraints(): ComposerConstraintCollectionTransfer;
+
+    /**
+     * Specification:
+     * - Updates core and foreign module constrains.
+     *
+     * @api
+     *
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
+     */
+    public function updateCoreAndForeignConstraints(): ComposerConstraintCollectionTransfer;
 }
