@@ -74,9 +74,9 @@ class ComposerConstrainerBusinessTester extends Actor
                 'foreign' => [
                     'bar' => [
                         'composer.json' => $this->buildPackageComposerJsonFile('foreign', 'bar')
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
         $virtualDirectory = $this->getVirtualDirectory($structure);
@@ -88,14 +88,13 @@ class ComposerConstrainerBusinessTester extends Actor
         return $virtualDirectory;
     }
 
-
     /**
      * @param string $vendorName
-     * @param $namespace
+     * @param string $namespace
      *
      * @return string
      */
-    protected function buildPackageComposerJsonFile(string $vendorName, $namespace): string
+    protected function buildPackageComposerJsonFile(string $vendorName, string $namespace): string
     {
         $fileContent = <<<CODE
 {
@@ -164,6 +163,8 @@ CODE;
      * @param string $organization
      * @param string $className
      * @param string $subNamespace
+     *
+     * @return void
      */
     protected function includeUsedClass(
         string $path,
@@ -189,11 +190,15 @@ CODE;
     /**
      * @param string $organization
      * @param string $className
+     * @param string $subNamespace
      *
      * @return string
      */
-    protected function buildFileContent(string $organization, string $className, string $subNamespace = '\Zed\Module\\'): string
-    {
+    protected function buildFileContent(
+        string $organization,
+        string $className,
+        string $subNamespace = '\Zed\Module\\'
+    ): string {
         $fileContent = <<<CODE
 <?php
 namespace Project\Zed\Module;

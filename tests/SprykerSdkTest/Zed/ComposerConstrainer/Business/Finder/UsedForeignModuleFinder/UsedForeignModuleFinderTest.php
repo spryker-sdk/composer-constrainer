@@ -108,8 +108,8 @@ class UsedForeignModuleFinderTest extends Unit
     /**
      * @param string $root
      *
-     * @return UsedForeignModuleFinder
-    */
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedForeignModuleFinder\UsedForeignModuleFinder
+     */
     protected function getFinder(string $root): UsedForeignModuleFinder
     {
         $this->tester->mockConfigMethod('getProjectRootPath', function () use ($root) {
@@ -122,6 +122,6 @@ class UsedForeignModuleFinderTest extends Unit
 
         $composerJsonReader = new ComposerJsonReader($composerConstrainerConfig);
 
-        return  new UsedForeignModuleFinder($composerConstrainerConfig, $composerJsonReader);
+        return new UsedForeignModuleFinder($composerConstrainerConfig, $composerJsonReader);
     }
 }
