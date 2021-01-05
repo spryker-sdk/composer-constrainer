@@ -58,6 +58,59 @@ class ComposerConstrainerBusinessTester extends Actor
     /**
      * @return string
      */
+    public function getVirtualDirectoryWhereForeignModuleIsUsed(): string
+    {
+        $structure = [
+            'src' => [
+                'Project' => [
+                    'Zed' => [
+                        'Module' => [
+                            'BarClass.php' => $this->buildFileContent('Foreign', 'BarClass', '\Foo\\'),
+                        ],
+                    ],
+                ],
+            ],
+            'vendor' => [
+                'foreign' => [
+                    'bar' => [
+                        //'BarClass.php' => $this->buildFileContent('Foreign', 'BarClass', '\Foo\\'),
+                        'composer.json' => $this->buildPackageComposerJsonFile('foreign', 'bar')
+                    ]
+                ]
+            ]
+        ];
+
+        $virtualDirectory = $this->getVirtualDirectory($structure);
+
+        $this->includeUsedClass($virtualDirectory . 'vendor/foreign/bar/', 'Foreign', 'BarClass', '\Foo');
+
+        require_once $virtualDirectory . 'src/Project/Zed/Module/BarClass.php';
+
+        return $virtualDirectory;
+    }
+
+
+    /**
+     * @param string $vendorName
+     * @param $namespace
+     *
+     * @return string
+     */
+    protected function buildPackageComposerJsonFile(string $vendorName, $namespace): string
+    {
+        $fileContent = <<<CODE
+{
+  "name": "$vendorName/$namespace"
+}
+
+CODE;
+
+        return $fileContent;
+    }
+
+    /**
+     * @return string
+     */
     public function getVirtualDirectoryWhereModuleConfigIsExtended(): string
     {
         $structure = [
@@ -108,23 +161,26 @@ class ComposerConstrainerBusinessTester extends Actor
     }
 
     /**
-     * @param string $root
+     * @param string $path
      * @param string $organization
      * @param string $className
-     *
-     * @return void
+     * @param string $subNamespace
      */
-    protected function includeUsedClass(string $root, string $organization, string $className): void
-    {
+    protected function includeUsedClass(
+        string $path,
+        string $organization,
+        string $className,
+        string $subNamespace = '\Zed\Module'
+    ): void {
         $fileContent = <<<CODE
 <?php
-namespace $organization\Zed\Module;
+namespace $organization$subNamespace;
 
 class $className
 {
 }
 CODE;
-        $filePath = $root . $className . '.php';
+        $filePath = $path . $className . '.php';
 
         file_put_contents($filePath, $fileContent);
 
@@ -137,13 +193,13 @@ CODE;
      *
      * @return string
      */
-    protected function buildFileContent(string $organization, string $className): string
+    protected function buildFileContent(string $organization, string $className, string $subNamespace = '\Zed\Module\\'): string
     {
         $fileContent = <<<CODE
 <?php
 namespace Project\Zed\Module;
 
-use $organization\Zed\Module\\$className as $organization$className;
+use $organization$subNamespace$className as $organization$className;
 
 class $className extends $organization$className
 {
