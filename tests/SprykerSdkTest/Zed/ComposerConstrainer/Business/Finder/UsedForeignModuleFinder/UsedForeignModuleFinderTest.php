@@ -10,7 +10,6 @@ namespace SprykerSdkTest\Zed\ComposerConstrainer\Business\Finder\UsedForeignModu
 use Codeception\Test\Unit;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReader;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedForeignModuleFinder\UsedForeignModuleFinder;
-use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 /**
  * @group SprykerSdk
@@ -19,7 +18,7 @@ use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
  * @group Business
  * @group Finder
  * @group ExtendedModuleFinder
- * @group ExtendedModuleFinderTest
+ * @group ExtendedModuleFinderTes
  */
 class UsedForeignModuleFinderTest extends Unit
 {
@@ -59,6 +58,9 @@ class UsedForeignModuleFinderTest extends Unit
         $this->assertCount(0, $usedModuleTransferCollection->getUsedModules());
     }
 
+    /**
+     * @return void
+     */
     public function testFindSkipsConfigExtended(): void
     {
         $root = $this->tester->getVirtualDirectoryWhereModuleConfigIsExtended();
@@ -71,6 +73,9 @@ class UsedForeignModuleFinderTest extends Unit
         $this->assertCount(0, $usedModuleTransferCollection->getUsedModules());
     }
 
+    /**
+     * @return void
+     */
     public function testFindSkipsCoreModules(): void
     {
         // Arrange
@@ -107,12 +112,12 @@ class UsedForeignModuleFinderTest extends Unit
     */
     protected function getFinder(string $root): UsedForeignModuleFinder
     {
-        $composerConstrainerConfig = $this->tester->mockConfigMethod('getProjectRootPath', function () use ($root) {
+        $this->tester->mockConfigMethod('getProjectRootPath', function () use ($root) {
             return $root;
         });
 
         $composerConstrainerConfig = $this->tester->mockConfigMethod('getVendorDirectory', function () use ($root) {
-            return $root . 'vendor/';;
+            return $root . 'vendor/';
         });
 
         $composerJsonReader = new ComposerJsonReader($composerConstrainerConfig);

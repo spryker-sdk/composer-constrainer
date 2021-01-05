@@ -73,7 +73,6 @@ class ComposerConstrainerBusinessTester extends Actor
             'vendor' => [
                 'foreign' => [
                     'bar' => [
-                        //'BarClass.php' => $this->buildFileContent('Foreign', 'BarClass', '\Foo\\'),
                         'composer.json' => $this->buildPackageComposerJsonFile('foreign', 'bar')
                     ]
                 ]
