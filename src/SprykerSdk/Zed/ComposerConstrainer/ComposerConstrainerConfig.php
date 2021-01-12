@@ -59,7 +59,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
      *
      * @return string[]
      */
-    public function getExcludedNamespaces()
+    public function getExcludedNamespaces(): array
     {
         return [
             'Generated',
