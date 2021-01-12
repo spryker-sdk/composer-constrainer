@@ -13,7 +13,7 @@ interface ComposerConstrainerFacadeInterface
 {
     /**
      * Specification:
-     * - Updates core modules constrains.
+     * - Updates core modules constraints.
      *
      * @api
      *
@@ -23,7 +23,7 @@ interface ComposerConstrainerFacadeInterface
 
     /**
      * Specification:
-     * - Validates core modules constrains.
+     * - Validates core modules constraints.
      *
      * @api
      *
@@ -33,7 +33,7 @@ interface ComposerConstrainerFacadeInterface
 
     /**
      * Specification:
-     * - Validates foreign modules constrains.
+     * - Validates foreign modules constraints.
      *
      * @api
      *
@@ -43,7 +43,7 @@ interface ComposerConstrainerFacadeInterface
 
     /**
      * Specification:
-     * - Updates foreign modules constrains.
+     * - Updates foreign modules constraints.
      *
      * @api
      *
