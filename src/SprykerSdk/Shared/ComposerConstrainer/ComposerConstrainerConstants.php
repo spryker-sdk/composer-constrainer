@@ -21,4 +21,14 @@ interface ComposerConstrainerConstants
      * @api
      */
     public const CORE_NAMESPACES = 'CORE_NAMESPACES';
+
+    /**
+     * Specification:
+     * - Returns a list of configured project namespaces which are used to separate vendor namespaces from projects.
+     *
+     * @uses \Spryker\Shared\Kernel\KernelConstants::PROJECT_NAMESPACES
+     *
+     * @api
+     */
+    public const PROJECT_NAMESPACES = 'PROJECT_NAMESPACES';
 }

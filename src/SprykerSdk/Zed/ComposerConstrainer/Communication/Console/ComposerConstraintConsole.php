@@ -21,6 +21,8 @@ class ComposerConstraintConsole extends Console
     public const COMMAND_NAME = 'code:constraint:modules';
     public const OPTION_DRY_RUN = 'dry-run';
     public const OPTION_DRY_RUN_SHORT = 'd';
+    public const OPTION_WITH_FOREIGN = 'with-foreign';
+    public const OPTION_WITH_FOREIGN_SHORT = 'w';
 
     /**
      * @return void
@@ -30,8 +32,8 @@ class ComposerConstraintConsole extends Console
         $this
             ->setName(static::COMMAND_NAME)
             ->setDescription('Updates composer constraints in projects. When a module is extended on project level, this command will change ^ to ~ in the project\'s composer.json. This will make sure that a composer update will only pull patch versions of it for better backwards compatibility.');
-
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
+        $this->addOption(static::OPTION_WITH_FOREIGN, static::OPTION_WITH_FOREIGN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate also foreign modules\' constraints.');
     }
 
     /**
@@ -55,6 +57,13 @@ class ComposerConstraintConsole extends Console
     protected function runValidation(): int
     {
         $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints();
+        if ($this->input->getOption(static::OPTION_WITH_FOREIGN)) {
+            $composerForeignConstraintCollectionTransfer = $this->getFacade()->validateForeignConstraints();
+            $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
+                $composerConstraintCollectionTransfer,
+                $composerForeignConstraintCollectionTransfer
+            );
+        }
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
@@ -67,6 +76,23 @@ class ComposerConstraintConsole extends Console
         $this->output->writeln(sprintf('<fg=magenta>%s fixable constraint issues found.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
 
         return static::CODE_ERROR;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferA
+     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferB
+     *
+     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
+     */
+    protected function mergeComposerConstraintCollectionTransfers(
+        ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferA,
+        ComposerConstraintCollectionTransfer $composerConstraintCollectionTransferB
+    ): ComposerConstraintCollectionTransfer {
+        foreach ($composerConstraintCollectionTransferB->getComposerConstraints() as $composerConstraint) {
+            $composerConstraintCollectionTransferA->addComposerConstraint($composerConstraint);
+        }
+
+        return $composerConstraintCollectionTransferA;
     }
 
     /**
@@ -93,6 +119,14 @@ class ComposerConstraintConsole extends Console
     protected function runUpdate(): int
     {
         $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints();
+
+        if ($this->input->getOption(static::OPTION_WITH_FOREIGN)) {
+            $composerForeignConstraintCollectionTransfer = $this->getFacade()->updateForeignConstraints();
+            $composerConstraintCollectionTransfer = $this->mergeComposerConstraintCollectionTransfers(
+                $composerConstraintCollectionTransfer,
+                $composerForeignConstraintCollectionTransfer
+            );
+        }
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
