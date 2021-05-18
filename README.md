@@ -1,5 +1,6 @@
 # ComposerConstrainer Module
-[![Build Status](https://github.com/spryker-sdk/composer-constrainer/workflows/CI/badge.svg?branch=master)](https://github.com/spryker-sdk/composer-constrainer/actions?query=workflow%3ACI+branch%3Amaster)
+[![CI](https://github.com/spryker-sdk/composer-constrainer/workflows/CI/badge.svg?branch=master)](https://github.com/spryker-sdk/composer-constrainer/actions?query=workflow%3ACI+branch%3Amaster)
+[![Latest Stable Version](https://poser.pugx.org/spryker-sdk/composer-constrainer/v/stable.svg)](https://packagist.org/packages/spryker-sdk/composer-constrainer)
 [![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%207.3-8892BF.svg)](https://php.net/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
 
@@ -13,7 +14,6 @@ Tool to detect extended core modules and to update composer.json constraints fro
 
 - Extended ModuleDependencyProvider.
 - Extended ModuleConfig.
-
 
 ## Installation
 
@@ -39,7 +39,6 @@ When you customized Spryker modules (changed module behavior on project level) e
 To avoid such cases and keep project updates safe and predictable a project should use `~` (tilde) composer constraint instead of `^` for modules with changed behavior. 
 And to simplify the process Spryker provides a development command `vendor/bin/console code:constraint:modules`, which will suggest required changes in composer.json.
 It can also auto-adjust your composer.json. 
-
 
 ## Usage
 
