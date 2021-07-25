@@ -17,10 +17,12 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLo
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinder\ExtendedModuleFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\Finder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\VerboseFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\VerboseConstraintValidator;
 
 /**
  * @method \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig getConfig()
@@ -46,6 +48,18 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return new ConstraintValidator(
             $this->createUsedModuleFinder(),
+            $this->createComposerJsonReader(),
+            $this->createComposerLockReader()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface
+     */
+    public function createVerboseConstraintValidator(): ConstraintValidatorInterface
+    {
+        return new VerboseConstraintValidator(
+            new VerboseFinder($this->getConfig()),
             $this->createComposerJsonReader(),
             $this->createComposerLockReader()
         );

@@ -6,6 +6,10 @@
     <transfer name="UsedModule">
         <property name="organization" type="string"/>
         <property name="module" type="string"/>
+        <property name="packageName" type="string"/>
+        <property name="isCustomised" type="bool"/>
+        <property name="isConfigured" type="bool"/>
+        <property name="customisedLineCount" type="int"/>
     </transfer>
 
     <transfer name="UsedModuleCollection">
@@ -21,7 +25,19 @@
         <property name="version" type="string"/>
         <property name="isDev" type="bool"/>
         <property name="expectedVersion" type="string"/>
+        <property name="moduleInfo" type="ComposerConstraintModuleInfo"/>
         <property name="messages" type="ConstraintMessage[]" singular="message"/>
+    </transfer>
+
+    <transfer name="ComposerConstraintModuleInfo">
+        <property name="isCustomised" type="bool"/>
+        <property name="isConfigured" type="bool"/>
+        <property name="customisedLogicLineCount" type="int"/>
+
+        <property name="expectedConstraintLock" type="string"/>
+        <property name="jsonConstraintLock" type="string"/>
+        <property name="jsonVersion" type="string"/>
+        <property name="lockedVersion" type="string"/>
     </transfer>
 
     <transfer name="ConstraintMessage">

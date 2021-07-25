@@ -8,6 +8,7 @@
 namespace SprykerSdk\Zed\ComposerConstrainer\Communication\Console;
 
 use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
+use Generated\Shared\Transfer\ComposerConstraintTransfer;
 use Spryker\Zed\Kernel\Communication\Console\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -21,6 +22,8 @@ class ComposerConstraintConsole extends Console
     public const COMMAND_NAME = 'code:constraint:modules';
     public const OPTION_DRY_RUN = 'dry-run';
     public const OPTION_DRY_RUN_SHORT = 'd';
+    public const OPTION_VERBOSE_RUN = 'verbose-run';
+    public const OPTION_VERBOSE_RUN_SHORT = 'p';
 
     /**
      * @return void
@@ -32,6 +35,7 @@ class ComposerConstraintConsole extends Console
             ->setDescription('Updates composer constraints in projects. When a module is extended on project level, this command will change ^ to ~ in the project\'s composer.json. This will make sure that a composer update will only pull patch versions of it for better backwards compatibility.');
 
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
+        $this->addOption(static::OPTION_VERBOSE_RUN, static::OPTION_VERBOSE_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
     }
 
     /**
@@ -42,6 +46,9 @@ class ComposerConstraintConsole extends Console
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if ($input->getOption(static::OPTION_VERBOSE_RUN)) {
+            return $this->runVerboseValidation();
+        }
         if ($input->getOption(static::OPTION_DRY_RUN)) {
             return $this->runValidation();
         }
@@ -67,6 +74,63 @@ class ComposerConstraintConsole extends Console
         $this->output->writeln(sprintf('<fg=magenta>%s fixable constraint issues found.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
 
         return static::CODE_ERROR;
+    }
+
+    /**
+     * @return int
+     */
+    protected function runVerboseValidation(): int
+    {
+        $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints(true);
+
+        if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
+            $this->output->writeln('<fg=green>No constraint issues found.</>');
+
+            return static::CODE_SUCCESS;
+        }
+
+        $this->outputVerboseValidationFindings($composerConstraintCollectionTransfer);
+
+        $this->output->writeln(sprintf('<fg=magenta>%s constraint issues found.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
+
+        return static::CODE_ERROR;
+    }
+
+    /**
+     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
+     *
+     * @return void
+     */
+    protected function outputVerboseValidationFindings(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer): void
+    {
+        $this->output->writeln(
+            sprintf(
+                '%-70s | %10s %10s | %10s | %8s | %8s | %10s | %10s',
+                'Module',
+                'Customised',
+                'Configured',
+                'Line count',
+                'Expected',
+                'Json',
+                'Json',
+                'Locked'
+            )
+        );
+        foreach ($composerConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
+            $this->output->writeln(
+                sprintf(
+                    '%-70s | %10s %10s | %10s | %8s | %8s | %10s | %10s',
+                    $composerConstraintTransfer->getName(),
+                    $composerConstraintTransfer->getModuleInfo()->getIsCustomised() ? 'Yes' : '',
+                    $composerConstraintTransfer->getModuleInfo()->getIsConfigured() ? 'Yes' : '',
+                    $composerConstraintTransfer->getModuleInfo()->getCustomisedLogicLineCount() ?: 0,
+                    $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock(),
+                    $composerConstraintTransfer->getModuleInfo()->getJsonConstraintLock(),
+                    $composerConstraintTransfer->getModuleInfo()->getJsonVersion(),
+                    $composerConstraintTransfer->getModuleInfo()->getLockedVersion()
+                )
+            );
+        }
     }
 
     /**

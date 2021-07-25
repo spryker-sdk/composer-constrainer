@@ -23,5 +23,5 @@ interface ComposerConstrainerFacadeInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function validateConstraints(): ComposerConstraintCollectionTransfer;
+    public function validateConstraints($verboseRun = false): ComposerConstraintCollectionTransfer;
 }
