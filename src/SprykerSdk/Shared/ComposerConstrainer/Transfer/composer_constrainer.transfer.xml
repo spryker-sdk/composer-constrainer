@@ -10,6 +10,7 @@
         <property name="isCustomised" type="bool"/>
         <property name="isConfigured" type="bool"/>
         <property name="customisedLineCount" type="int"/>
+        <property name="constraintReasons" type="string[]" singular="constraintReason" strict="true" />
     </transfer>
 
     <transfer name="UsedModuleCollection">
@@ -38,6 +39,8 @@
         <property name="jsonConstraintLock" type="string"/>
         <property name="jsonVersion" type="string"/>
         <property name="lockedVersion" type="string"/>
+
+        <property name="constraintReasons" type="string[]" singular="constraintReason" strict="true" />
     </transfer>
 
     <transfer name="ConstraintMessage">

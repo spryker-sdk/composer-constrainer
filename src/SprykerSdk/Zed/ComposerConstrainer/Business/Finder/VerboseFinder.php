@@ -124,6 +124,7 @@ class VerboseFinder implements FinderInterface
         }
 
         $usedModules[$packageName]->setIsCustomised(true);
+        $usedModules[$packageName]->addConstraintReason('Customised: validation.yaml defined');
 
         return $usedModules;
     }
@@ -158,9 +159,12 @@ class VerboseFinder implements FinderInterface
 
         if (preg_match('/navigation\.xml/', $splFileInfo->getFilename())) {
             $usedModules[$packageName]->setIsCustomised(true);
+            $usedModules[$packageName]->addConstraintReason('Customised: navigation.xml defined');
+
+            return $usedModules;
         }
 
-        // no changes on UsedModuleTransfer by schema files since they are simple major dependency toward the module
+        $usedModules[$packageName]->addConstraintReason('Dependency: schema.xml');
 
         return $usedModules;
     }
@@ -182,10 +186,10 @@ class VerboseFinder implements FinderInterface
      * Specification
      * - Config and dependency provider class extension: public entity overriding is configuration
      * - Config and dependency provider class extension: entity addition or call to a protected/private entity is customisation
-     * - Current module, external API class extension: overriding public entity is depenency toward the module's major version
-     * - Current module, external API class extension: entity addition or call to a protected/private entity is customisation
-     * - Current module, class extension: class extension is customisation
-     * - For trail version all customisation lines are added to line count
+     * - External API class extension: public entity overriding is depenency toward the module's major version
+     * - External API class extension: entity addition or call to a protected/private entity is customisation
+     * - Class extension: class extension is customisation
+     * - For trail version all customisation lines are added to line count except Factory changes and adding public API public entity
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
@@ -196,6 +200,7 @@ class VerboseFinder implements FinderInterface
     {
         // TODO creating new class that is not extended from core is also customisation if there is such core module
         // TODO calling protected/private entity in an extended external API class is customisation
+        // TODO adding constants & properties on top of method checks
 
         $content = $splFileInfo->getContents();
         preg_match_all('#\nnamespace +(\\w+\\\\\\w+\\\\(\\w+)[^;]*);#', $content, $match);
@@ -210,6 +215,7 @@ class VerboseFinder implements FinderInterface
 
         $isCurrentExternalApiClass = preg_match('#(' .implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)). ')#', $currentClassReflection->getFileName());
         $isCurrentConfigurationClass = preg_match('#(' .implode('|', $this->configurationClassSuffixes). ')#', $currentClassReflection->getFileName());
+        $isFactory = preg_match('#Factory.php#', $currentClassReflection->getFileName());
 
         $parentNamespace = $currentClassReflection->getParentClass() ? $currentClassReflection->getParentClass()->getNamespaceName() : "";
         $parentClassName = $currentClassReflection->getParentClass() ? $currentClassReflection->getParentClass()->getShortName() : "";
@@ -230,9 +236,18 @@ class VerboseFinder implements FinderInterface
             }
             $usedModules[$parentPackageName]->setIsCustomised(true);
             foreach ($currentClassReflection->getMethods() as $method) {
-                $usedModules[$parentPackageName]->setCustomisedLineCount(
-                    $usedModules[$parentPackageName]->getCustomisedLineCount() - $currentClassReflection->getStartLine() + ($currentClassReflection->getEndLine() ?: $currentClassReflection->getStartLine())
-                );
+                if ($method->getDeclaringClass()->getNamespaceName() !== $currentClassReflection->getNamespaceName()) { // only interested in project methods
+                    continue;
+                }
+
+                if ($isFactory) {
+                    $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()');
+                } else {
+                    $customisedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
+                    $customisedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
+                    $usedModules[$parentPackageName]->setCustomisedLineCount($usedModules[$parentPackageName]->getCustomisedLineCount() + $customisedLineCount);
+                    $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customisedLineCount);
+                }
             }
 
             return $usedModules;
@@ -241,32 +256,45 @@ class VerboseFinder implements FinderInterface
         $parentClassReflection = new \ReflectionClass($parentNamespace . '\\' . $parentClassName);
         $parentMethods = [];
         foreach($parentClassReflection->getMethods() as $method) {
-            $parentMethods[$method->getShortName()] = $method;
+            $parentMethods[$method->getShortName()] = $method->getShortName();
         }
 
-        $isPublicMethodOverriden = false;
-        $isProtectedMethodDefined = false;
         foreach($currentClassReflection->getMethods() as $method) {
+            if ($method->getDeclaringClass()->getNamespaceName() !== $currentClassReflection->getNamespaceName()) { // only interested in project methods
+                continue;
+            }
+
             $isPublic = ($method->getModifiers() & \ReflectionMethod::IS_PUBLIC) > 0;
             $isProtected = ($method->getModifiers() & (\ReflectionMethod::IS_PROTECTED + \ReflectionMethod::IS_PRIVATE)) > 0;
-            $isPublicMethodOverriden = $isPublicMethodOverriden || $isPublic && array_key_exists($method->getShortName(), $parentMethods);
-            $isProtectedMethodDefined = $isProtectedMethodDefined || $isProtected;
-        }
+            $isPublicMethodOverriden = $isPublic && array_key_exists($method->getShortName(), $parentMethods);
 
-        if (!($isPublicMethodOverriden || $isProtectedMethodDefined)) {
-            return $usedModules;
-        }
+            if (!isset($usedModules[$parentPackageName])) {
+                $usedModules[$parentPackageName] = $this->initUsedModuleTransfer($parentPackageName, $parentOrganisation, $parentModule);
+            }
 
-        if (!isset($usedModules[$parentPackageName])) {
-            $usedModules[$parentPackageName] = $this->initUsedModuleTransfer($parentPackageName, $parentOrganisation, $parentModule);
-        }
-        if ($isPublicMethodOverriden && $isCurrentConfigurationClass) {
-            $usedModules[$parentPackageName]->setIsConfigured(true);
+            if ($isPublicMethodOverriden) {
+                if ($isCurrentConfigurationClass) {
+                    $usedModules[$parentPackageName]->setIsConfigured(true);
+                    $usedModules[$parentPackageName]->addConstraintReason('Configured: public method overriden ' . $currentClassName . '::' . $method->getShortName() . '()');
+                } else {
+                    $usedModules[$parentPackageName]->setIsConfigured(true);
+                    $usedModules[$parentPackageName]->addConstraintReason('Dependency: public API method overriden ' . $currentClassName . '::' . $method->getShortName() . '()');
+                }
 
-            return $usedModules;
-        }
+                continue;
+            }
 
-        $usedModules[$parentPackageName]->setIsCustomised(true);
+            $usedModules[$parentPackageName]->setIsCustomised(true);
+
+            if ($isPublic) {
+                $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()');
+            } else {
+                $customisedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
+                $customisedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
+                $usedModules[$parentPackageName]->setCustomisedLineCount($usedModules[$parentPackageName]->getCustomisedLineCount() + $customisedLineCount);
+                $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customisedLineCount);
+            }
+        }
 
         return $usedModules;
     }
@@ -295,11 +323,11 @@ class VerboseFinder implements FinderInterface
             $module = $match[2][$key];
 
             $packageName = $this->namespaceToPackageName($organisation, $module);
-            if (isset($usedModules[$packageName])) {
-                continue;
+            if (!isset($usedModules[$packageName])) {
+                $usedModules[$packageName] = $this->initUsedModuleTransfer($packageName, $organisation, $module);
             }
 
-            $usedModules[$packageName] = $this->initUsedModuleTransfer($packageName, $organisation, $module);
+            $usedModules[$packageName]->addConstraintReason('Dependency: incoming from ' . $splFileInfo->getFilename());
         }
 
         return $usedModules;
@@ -362,6 +390,7 @@ class VerboseFinder implements FinderInterface
             ->setCustomisedLineCount(0)
             ->setModule($module)
             ->setOrganization($organisation)
-            ->setPackageName($packageName);
+            ->setPackageName($packageName)
+            ->setConstraintReasons([]);
     }
 }

@@ -35,6 +35,12 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
      */
     protected $composerLockReader;
 
+    protected $projectOnlyPackageNamePatterns = [
+
+        "spryker/kernel$", # kernel has completley different customisation rules
+
+    ];
+
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface $verboseFinder
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface $composerJsonReader
@@ -66,13 +72,15 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
         $composerLockConstraints = $this->getComposerLockConstraints();
 
         $composerConstraintTransfers = [];
+        /** @var \Generated\Shared\Transfer\UsedModuleTransfer $usedModuleTransfer */
         foreach ($usedModuleCollectionTransfer->getUsedModules() as $usedModuleTransfer) {
             $usedModulePackageName = $usedModuleTransfer->getPackageName();
 
             $usedModuleInfo = $this->createModuleInfoTransfer(
                 $usedModuleTransfer->getIsCustomised(),
                 $usedModuleTransfer->getIsConfigured(),
-                (int)$usedModuleTransfer->getCustomisedLineCount()
+                (int)$usedModuleTransfer->getCustomisedLineCount(),
+                $usedModuleTransfer->getConstraintReasons()
             );
 
             $usedModuleInfo = $this->setJsonModuleInfo($usedModuleInfo, $composerJsonConstraints[$usedModulePackageName] ?? null);
@@ -86,12 +94,13 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
         }
 
         $composerConstraintTransfers = $this->removeCorrectModules($composerConstraintTransfers);
+
         ksort($composerConstraintTransfers);
 
         return $composerConstraintCollectionTransfer->setComposerConstraints(new \ArrayObject($composerConstraintTransfers));
     }
 
-    protected function createModuleInfoTransfer(bool $isCustomised, bool $isConfigured, int $customizedLineCount) : ComposerConstraintModuleInfoTransfer
+    protected function createModuleInfoTransfer(bool $isCustomised, bool $isConfigured, int $customizedLineCount, array $reasons) : ComposerConstraintModuleInfoTransfer
     {
         return (new ComposerConstraintModuleInfoTransfer())
             ->setIsCustomised($isCustomised)
@@ -99,7 +108,8 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
             ->setCustomisedLogicLineCount($customizedLineCount)
             ->setJsonConstraintLock("")
             ->setJsonVersion("")
-            ->setLockedVersion("");
+            ->setLockedVersion("")
+            ->setConstraintReasons($reasons);
     }
 
     protected function setJsonModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ComposerConstraintTransfer $jsonConstraint = null): ComposerConstraintModuleInfoTransfer
@@ -139,11 +149,13 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
      */
     protected function removeCorrectModules(array $composerConstraintTransfers): array
     {
-        return array_filter($composerConstraintTransfers, function(ComposerConstraintTransfer $composerConstraintTransfer): bool {
+        $projectOnlyPackageNamePattern = '#(' . implode('|', $this->projectOnlyPackageNamePatterns). ')#';
+        return array_filter($composerConstraintTransfers, function(ComposerConstraintTransfer $composerConstraintTransfer) use ($projectOnlyPackageNamePattern): bool {
             $isExpectedMatchesActual = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getJsonConstraintLock();
             $noCustomisedLineCouunt = $composerConstraintTransfer->getModuleInfo()->getCustomisedLogicLineCount() === 0;
+            $isProjectOnlyModule = (bool)preg_match($projectOnlyPackageNamePattern, $composerConstraintTransfer->getName());
 
-            return $isExpectedMatchesActual && $noCustomisedLineCouunt ? false : true;
+            return $isExpectedMatchesActual && $noCustomisedLineCouunt || $isProjectOnlyModule ? false : true;
         });
     }
 

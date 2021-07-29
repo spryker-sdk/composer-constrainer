@@ -24,6 +24,8 @@ class ComposerConstraintConsole extends Console
     public const OPTION_DRY_RUN_SHORT = 'd';
     public const OPTION_VERBOSE_RUN = 'verbose-run';
     public const OPTION_VERBOSE_RUN_SHORT = 'p';
+    public const OPTION_ADD_REASONS = 'add-reasons';
+    public const OPTION_ADD_REASONS_SHORT = 'r';
 
     /**
      * @return void
@@ -36,6 +38,7 @@ class ComposerConstraintConsole extends Console
 
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
         $this->addOption(static::OPTION_VERBOSE_RUN, static::OPTION_VERBOSE_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
+        $this->addOption(static::OPTION_ADD_REASONS, static::OPTION_ADD_REASONS_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
     }
 
     /**
@@ -47,7 +50,7 @@ class ComposerConstraintConsole extends Console
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($input->getOption(static::OPTION_VERBOSE_RUN)) {
-            return $this->runVerboseValidation();
+            return $this->runVerboseValidation((bool)$input->getOption(static::OPTION_ADD_REASONS));
         }
         if ($input->getOption(static::OPTION_DRY_RUN)) {
             return $this->runValidation();
@@ -79,7 +82,7 @@ class ComposerConstraintConsole extends Console
     /**
      * @return int
      */
-    protected function runVerboseValidation(): int
+    protected function runVerboseValidation(bool $addReasons): int
     {
         $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints(true);
 
@@ -89,7 +92,7 @@ class ComposerConstraintConsole extends Console
             return static::CODE_SUCCESS;
         }
 
-        $this->outputVerboseValidationFindings($composerConstraintCollectionTransfer);
+        $this->outputVerboseValidationFindings($composerConstraintCollectionTransfer, $addReasons);
 
         $this->output->writeln(sprintf('<fg=magenta>%s constraint issues found.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
 
@@ -101,11 +104,11 @@ class ComposerConstraintConsole extends Console
      *
      * @return void
      */
-    protected function outputVerboseValidationFindings(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer): void
+    protected function outputVerboseValidationFindings(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer, bool $addReasons): void
     {
         $this->output->writeln(
             sprintf(
-                '%-70s | %10s %10s | %10s | %8s | %8s | %10s | %10s',
+                '%-70s | %10s %10s | %10s | %8s | %8s | %10s | %10s | Reasons',
                 'Module',
                 'Customised',
                 'Configured',
@@ -119,7 +122,7 @@ class ComposerConstraintConsole extends Console
         foreach ($composerConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
             $this->output->writeln(
                 sprintf(
-                    '%-70s | %10s %10s | %10s | %8s | %8s | %10s | %10s',
+                    '%-70s | %10s %10s | %10s | %8s | %8s | %10s | %10s | %s',
                     $composerConstraintTransfer->getName(),
                     $composerConstraintTransfer->getModuleInfo()->getIsCustomised() ? 'Yes' : '',
                     $composerConstraintTransfer->getModuleInfo()->getIsConfigured() ? 'Yes' : '',
@@ -127,7 +130,8 @@ class ComposerConstraintConsole extends Console
                     $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock(),
                     $composerConstraintTransfer->getModuleInfo()->getJsonConstraintLock(),
                     $composerConstraintTransfer->getModuleInfo()->getJsonVersion(),
-                    $composerConstraintTransfer->getModuleInfo()->getLockedVersion()
+                    $composerConstraintTransfer->getModuleInfo()->getLockedVersion(),
+                    $addReasons ? '{"reasons:": ["' . implode('","', array_unique($composerConstraintTransfer->getModuleInfo()->getConstraintReasons())) . '"]}' : ''
                 )
             );
         }
