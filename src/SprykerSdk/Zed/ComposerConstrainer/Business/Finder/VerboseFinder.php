@@ -42,7 +42,7 @@ class VerboseFinder implements FinderInterface
         'PluginInterface.php',
     ];
 
-    protected $configurationSuffixes = [
+    protected $configurationClassSuffixes = [
         'Config.php',
         'DependencyProvider.php',
     ];
@@ -76,6 +76,9 @@ class VerboseFinder implements FinderInterface
                 case "xml":
                     $usedModules = $this->addXmlUsedModules($usedModules, $splFileInfo);
                     break;
+                case "yaml":
+                    $usedModules = $this->addYamlUsedModules($usedModules, $splFileInfo);
+                    break;
                 case "twig":
                     $usedModules = $this->addTwigUsedModules($usedModules, $splFileInfo);
                     break;
@@ -95,9 +98,34 @@ class VerboseFinder implements FinderInterface
             ->files()
             ->in( 'src/Pyz/')
             ->exclude(['Generated', 'Orm'])
-            ->name([ '*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml']);
+            ->name([ '*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml', '*validation.yaml']);
 
         return $finder;
+    }
+
+    /**
+     * Specification:
+     * - Validation changes are customisiation
+     * - Validation files are located in Spryker and SprykerEco namespace
+     * - Validation changes CAN NOT be transformed to pluggable so line count is irrelevant
+     *
+     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param SplFileInfo $splFileInfo
+     *
+     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     */
+    protected function addYamlUsedModules(array $usedModules, SplFileInfo $splFileInfo): array
+    {
+        // TODO Selector between Spryker and SprykerEco
+        $packageName = $this->relativeFilePathToPackageName('Spryker', $splFileInfo->getRelativePathname());
+        if (!isset($usedModules[$packageName])) {
+            [$organisation, $module] = $this->packageNameToNamespace($packageName);
+            $usedModules[$packageName] = $this->initUsedModuleTransfer($packageName, $organisation, $module);
+        }
+
+        $usedModules[$packageName]->setIsCustomised(true);
+
+        return $usedModules;
     }
 
     /**
@@ -122,7 +150,7 @@ class VerboseFinder implements FinderInterface
         }
 
         // TODO Selector between Spryker and SprykerEco
-        $packageName = $this->filePathToPackageName('Spryker', $splFileInfo->getRelativePathname());
+        $packageName = $this->relativeFilePathToPackageName('Spryker', $splFileInfo->getRelativePathname());
         if (!isset($usedModules[$packageName])) {
             [$organisation, $module] = $this->packageNameToNamespace($packageName);
             $usedModules[$packageName] = $this->initUsedModuleTransfer($packageName, $organisation, $module);
@@ -178,46 +206,47 @@ class VerboseFinder implements FinderInterface
         preg_match_all('#\n(class|abstract class|interface) +(\\w+)#', $content, $match);
         $currentClassName = $match[2][0];
 
-        $reflection = new \ReflectionClass($currentNamespace . '\\' . $currentClassName);
+        $currentClassReflection = new \ReflectionClass($currentNamespace . '\\' . $currentClassName);
 
-        $isCurrentExternalApi = preg_match('#(' .implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)). ')#', $reflection->getFileName());
-        $isCurrentConfiguration = preg_match('#(' .implode('|', $this->configurationSuffixes). ')#', $reflection->getFileName());
+        $isCurrentExternalApiClass = preg_match('#(' .implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)). ')#', $currentClassReflection->getFileName());
+        $isCurrentConfigurationClass = preg_match('#(' .implode('|', $this->configurationClassSuffixes). ')#', $currentClassReflection->getFileName());
 
-        $parentNamespace = $reflection->getParentClass() ? $reflection->getParentClass()->getNamespaceName() : "";
-        $parentClassName = $reflection->getParentClass() ? $reflection->getParentClass()->getShortName() : "";
+        $parentNamespace = $currentClassReflection->getParentClass() ? $currentClassReflection->getParentClass()->getNamespaceName() : "";
+        $parentClassName = $currentClassReflection->getParentClass() ? $currentClassReflection->getParentClass()->getShortName() : "";
         preg_match_all('#(\\w+)\\\\\\w+\\\\(\\w+)#', $parentNamespace, $match);
         $parentOrganisation = count($match[1]) > 0 ? $match[1][0] : "";
         $parentModule = count($match[2]) > 0 ? $match[2][0] : "";
 
-        if (!($parentModule && in_array($parentOrganisation, $this->config->getCoreNamespaces(), true))) { // if class is NOT extended from core, it's irrelevant for investigation
+        $isParentFromCore = $parentModule && in_array($parentOrganisation, $this->config->getCoreNamespaces(), true);
+        if (!$isParentFromCore) {
             return $usedModules;
         }
 
         $parentPackageName = $this->namespaceToPackageName($parentOrganisation, $parentModule);
 
-        if (!$isCurrentExternalApi) {
+        if (!$isCurrentExternalApiClass) {
             if (!isset($usedModules[$parentPackageName])) {
                 $usedModules[$parentPackageName] = $this->initUsedModuleTransfer($parentPackageName, $parentOrganisation, $parentModule);
             }
             $usedModules[$parentPackageName]->setIsCustomised(true);
-            foreach ($reflection->getMethods() as $method) {
+            foreach ($currentClassReflection->getMethods() as $method) {
                 $usedModules[$parentPackageName]->setCustomisedLineCount(
-                    $usedModules[$parentPackageName]->getCustomisedLineCount() - $reflection->getStartLine() + ($reflection->getEndLine() ?: $reflection->getStartLine())
+                    $usedModules[$parentPackageName]->getCustomisedLineCount() - $currentClassReflection->getStartLine() + ($currentClassReflection->getEndLine() ?: $currentClassReflection->getStartLine())
                 );
             }
 
             return $usedModules;
         }
 
-        $parentReflection = new \ReflectionClass($parentNamespace . '\\' . $parentClassName);
+        $parentClassReflection = new \ReflectionClass($parentNamespace . '\\' . $parentClassName);
         $parentMethods = [];
-        foreach($parentReflection->getMethods() as $method) {
+        foreach($parentClassReflection->getMethods() as $method) {
             $parentMethods[$method->getShortName()] = $method;
         }
 
         $isPublicMethodOverriden = false;
         $isProtectedMethodDefined = false;
-        foreach($reflection->getMethods() as $method) {
+        foreach($currentClassReflection->getMethods() as $method) {
             $isPublic = ($method->getModifiers() & \ReflectionMethod::IS_PUBLIC) > 0;
             $isProtected = ($method->getModifiers() & (\ReflectionMethod::IS_PROTECTED + \ReflectionMethod::IS_PRIVATE)) > 0;
             $isPublicMethodOverriden = $isPublicMethodOverriden || $isPublic && array_key_exists($method->getShortName(), $parentMethods);
@@ -231,7 +260,7 @@ class VerboseFinder implements FinderInterface
         if (!isset($usedModules[$parentPackageName])) {
             $usedModules[$parentPackageName] = $this->initUsedModuleTransfer($parentPackageName, $parentOrganisation, $parentModule);
         }
-        if ($isPublicMethodOverriden && $isCurrentConfiguration) {
+        if ($isPublicMethodOverriden && $isCurrentConfigurationClass) {
             $usedModules[$parentPackageName]->setIsConfigured(true);
 
             return $usedModules;
@@ -281,13 +310,13 @@ class VerboseFinder implements FinderInterface
      *
      * @return string
      */
-    protected function filePathToPackageName(string $organisation, string $filepath): string
+    protected function relativeFilePathToPackageName(string $organisation, string $relativeFilepath): string
     {
         $transformer = function(string $camelCase):string {
             return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
         };
 
-        preg_match_all('#^[^/]*/(?<module>[^/]*)/#', $filepath, $match);
+        preg_match_all('#^[^/]*/(?<module>[^/]*)/#', $relativeFilepath, $match);
 
         return $transformer($organisation) . '/' . $transformer($match['module'][0]);
     }
