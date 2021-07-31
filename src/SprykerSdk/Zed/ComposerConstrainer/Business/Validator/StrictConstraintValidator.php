@@ -181,7 +181,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     protected function removeCorrectPackages(array $composerConstraintTransfers): array
     {
         $ignoredPackages = '#(' . implode('|', $this->config->getStrictValidationIgnoredPackages()). ')#';
-        return array_filter($composerConstraintTransfers, function(ComposerConstraintTransfer $composerConstraintTransfer) use ($projectOnlyPackageNamePattern): bool {
+        return array_filter($composerConstraintTransfers, function(ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages): bool {
             $isIgnoredPackage = (bool)preg_match($ignoredPackages, $composerConstraintTransfer->getName());
             $isExpectedMatchesDefined = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
             $noCustomizedLineCount = $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
