@@ -10,7 +10,6 @@ namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder;
 use ArrayObject;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
-use ReflectionClass;
 use ReflectionMethod;
 use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector;
 use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerReflectionHelper;
@@ -26,29 +25,6 @@ class StrictFinder implements FinderInterface
      * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
      */
     protected $config;
-
-    protected $publicApiClassSuffixes = [
-        'Service.php',
-        'Client.php',
-        'Facade.php',
-        'QueryContainer.php',
-        'Controller.php',
-        'Config.php',
-        'DependencyProvider.php',
-    ];
-
-    protected $publicApiInterfaceSuffixes = [
-        'ServiceInterface.php',
-        'ClientInterface.php',
-        'FacadeInterface.php',
-        'QueryContainerInterface.php',
-        'PluginInterface.php',
-    ];
-
-    protected $configurationClassSuffixes = [
-        'Config.php',
-        'DependencyProvider.php',
-    ];
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
@@ -74,7 +50,8 @@ class StrictFinder implements FinderInterface
             switch ($splFileInfo->getExtension()) {
                 case "php":
                     $sprykerClassReflector = new SprykerClassReflector($this->config, $splFileInfo);
-                    $usedModules = $this->checkPhpCustomization($usedModules, $splFileInfo);
+                    $usedModules = $this->checkPhpPublicApiCustomization($usedModules, $sprykerClassReflector);
+                    $usedModules = $this->checkPhpNonPublicApiCustomization($usedModules, $sprykerClassReflector);
                     $usedModules = $this->checkPhpDependencies($usedModules, $sprykerClassReflector);
                     break;
                 case "xml":
@@ -115,7 +92,7 @@ class StrictFinder implements FinderInterface
      * - Validation changes CAN NOT be transformed to pluggable so no impact on line count
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
-     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerYamlReflector $sprykerYamlReflector
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
@@ -144,7 +121,7 @@ class StrictFinder implements FinderInterface
      * - Schema changes CAN NOT be transformed to pluggable so no impact on line count
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
-     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerXmlReflector $sprykerXmlReflector
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
@@ -189,6 +166,56 @@ class StrictFinder implements FinderInterface
 
     /**
      * Specification
+     * - Only core class extensions are evaluted for customisation
+     * - Class extension is customization
+     * - All customization lines are added to line count except Factory
+     *
+     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector $sprykerClassReflector
+     *
+     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     */
+    protected function checkPhpNonPublicApiCustomization(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
+    {
+        // TODO calling protected/private entity in an extended external API class is customization
+        // TODO adding constants & properties on top of method checks
+
+        if ($sprykerClassReflector->getIsPublicApi()) {
+            return $usedModules;
+        }
+
+        if (!$sprykerClassReflector->getIsParentCore()) {
+            return $usedModules;
+        }
+
+        $usedModuleTransfer = $this->setrieveUsedModule(
+            $usedModules,
+            $sprykerClassReflector->getParentPackageName(),
+            $sprykerClassReflector->getParentOrganisation(),
+            $sprykerClassReflector->getParentModuleName()
+        );
+
+        $usedModuleTransfer->setIsCustomized(true);
+
+        foreach ($sprykerClassReflector->getNewMethods() as $method) {
+            if ($sprykerClassReflector->getIsFactory()) {
+                $usedModuleTransfer->addConstraintReason('Customized: ' . $sprykerClassReflector->getClassName() . '::' . $method->getShortName() . '()');
+
+                continue;
+            }
+
+            $customizedLineCount = $this->getMethodBodySize($method, $sprykerClassReflector->getIsInterface());
+            $usedModuleTransfer->setCustomizedLineCount($usedModuleTransfer->getCustomizedLineCount() + $customizedLineCount);
+            $usedModuleTransfer->addConstraintReason('Customized: ' . $sprykerClassReflector->getClassName() . '::' . $method->getShortName() . '()' . ' - ' . $customizedLineCount);
+        }
+
+        return $usedModules;
+    }
+
+    /**
+     * Specification
+     * - ?? New Facade with interface only?
+     * - Only core class extensions are evaluted for customisation. ?? New Facade with interface only?
      * - Config and dependency provider class extension: public entity overriding is configuration
      * - Config and dependency provider class extension: entity addition or call to a protected/private entity is customization
      * - External API class extension: public entity overriding is depenency toward the module's major version
@@ -197,111 +224,71 @@ class StrictFinder implements FinderInterface
      * - For trail version all customization lines are added to line count except Factory changes and adding public API public entity
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
-     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector $sprykerClassReflector
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
-    protected function checkPhpCustomization(array $usedModules, SplFileInfo $splFileInfo): array
+    protected function checkPhpPublicApiCustomization(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
     {
-        // TODO creating new class that is not extended from core is also customization if there is such core module
-        // TODO calling protected/private entity in an extended external API class is customization
-        // TODO adding constants & properties on top of method checks
-
-        $content = $splFileInfo->getContents();
-        preg_match_all('#\nnamespace +(\\w+\\\\\\w+\\\\(\\w+)[^;]*);#', $content, $match);
-
-        $currentModule = $match[2][0];
-        $currentNamespace = $match[1][0];
-
-        preg_match_all('#\n(class|abstract class|interface) +(\\w+)#', $content, $match);
-        $currentClassName = $match[2][0];
-
-        $currentClassReflection = new ReflectionClass($currentNamespace . '\\' . $currentClassName);
-
-        $isCurrentExternalApiClass = preg_match('#(' . implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)) . ')#', $currentClassReflection->getFileName());
-        $isCurrentConfigurationClass = preg_match('#(' . implode('|', $this->configurationClassSuffixes) . ')#', $currentClassReflection->getFileName());
-        $isFactory = preg_match('#Factory.php#', $currentClassReflection->getFileName());
-
-        $parentNamespace = $currentClassReflection->getParentClass() ? $currentClassReflection->getParentClass()->getNamespaceName() : "";
-        $parentClassName = $currentClassReflection->getParentClass() ? $currentClassReflection->getParentClass()->getShortName() : "";
-        preg_match_all('#(\\w+)\\\\\\w+\\\\(\\w+)#', $parentNamespace, $match);
-        $parentOrganisation = count($match[1]) > 0 ? $match[1][0] : "";
-        $parentModule = count($match[2]) > 0 ? $match[2][0] : "";
-
-        $isParentFromCore = $parentModule && in_array($parentOrganisation, $this->config->getCoreNamespaces(), true);
-        if (!$isParentFromCore) {
+        if (!$sprykerClassReflector->getIsPublicApi()) {
             return $usedModules;
         }
 
-        $parentPackageName = SprykerReflectionHelper::namespaceToPackageName($parentOrganisation, $parentModule);
-
-        if (!$isCurrentExternalApiClass) {
-            if (!isset($usedModules[$parentPackageName])) {
-                $usedModules[$parentPackageName] = $this->initUsedModuleTransfer($parentPackageName, $parentOrganisation, $parentModule);
-            }
-            $usedModules[$parentPackageName]->setIsCustomized(true);
-            foreach ($currentClassReflection->getMethods() as $method) {
-                if ($method->getDeclaringClass()->getNamespaceName() !== $currentClassReflection->getNamespaceName()) { // only interested in project methods
-                    continue;
-                }
-
-                if ($isFactory) {
-                    $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()');
-                } else {
-                    $customizedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
-                    $customizedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
-                    $usedModules[$parentPackageName]->setCustomizedLineCount($usedModules[$parentPackageName]->getCustomizedLineCount() + $customizedLineCount);
-                    $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' . ' - ' . $customizedLineCount);
-                }
-            }
-
+        if (!$sprykerClassReflector->getIsParentCore()) {
             return $usedModules;
         }
 
-        $parentClassReflection = new ReflectionClass($parentNamespace . '\\' . $parentClassName);
-        $parentMethods = [];
-        foreach ($parentClassReflection->getMethods() as $method) {
-            $parentMethods[$method->getShortName()] = $method->getShortName();
+        $inheritedMethodNames = [];
+        $parentMethods = $sprykerClassReflector->getParentMethods();
+        foreach ($parentMethods as $method) {
+            $inheritedMethodNames[$method->getShortName()] = $method->getShortName();
         }
 
-        foreach ($currentClassReflection->getMethods() as $method) {
-            if ($method->getDeclaringClass()->getNamespaceName() !== $currentClassReflection->getNamespaceName()) { // only interested in project methods
-                continue;
-            }
-
+        foreach ($sprykerClassReflector->getNewMethods() as $method) {
             $isPublic = ($method->getModifiers() & ReflectionMethod::IS_PUBLIC) > 0;
             $isProtected = ($method->getModifiers() & (ReflectionMethod::IS_PROTECTED + ReflectionMethod::IS_PRIVATE)) > 0;
-            $isPublicMethodOverriden = $isPublic && array_key_exists($method->getShortName(), $parentMethods);
+            $isPublicMethodOverriden = $isPublic && array_key_exists($method->getShortName(), $inheritedMethodNames);
 
-            if (!isset($usedModules[$parentPackageName])) {
-                $usedModules[$parentPackageName] = $this->initUsedModuleTransfer($parentPackageName, $parentOrganisation, $parentModule);
-            }
+            $usedModuleTransfer = $this->setrieveUsedModule(
+                $usedModules,
+                $sprykerClassReflector->getParentPackageName(),
+                $sprykerClassReflector->getParentOrganisation(),
+                $sprykerClassReflector->getParentModuleName()
+            );
 
             if ($isPublicMethodOverriden) {
-                if ($isCurrentConfigurationClass) {
-                    $usedModules[$parentPackageName]->setIsConfigured(true);
-                    $usedModules[$parentPackageName]->addConstraintReason('Configured: public method overriden ' . $currentClassName . '::' . $method->getShortName() . '()');
+                if ($sprykerClassReflector->getIsConfiguration()) {
+                    $usedModuleTransfer->setIsConfigured(true);
+                    $usedModuleTransfer->addConstraintReason('Configured: public API method overriden by ' . $sprykerClassReflector->getClassName() . '::' . $method->getShortName() . '()');
                 } else {
-                    $usedModules[$parentPackageName]->setIsConfigured(true);
-                    $usedModules[$parentPackageName]->addConstraintReason('Dependency: public API method overriden ' . $currentClassName . '::' . $method->getShortName() . '()');
+                    $usedModuleTransfer->addConstraintReason('Dependency: public API method overriden by ' . $sprykerClassReflector->getClassName() . '::' . $method->getShortName() . '()');
                 }
 
                 continue;
             }
 
-            $usedModules[$parentPackageName]->setIsCustomized(true);
+            $usedModuleTransfer->setIsCustomized(true);
 
             if ($isPublic) {
-                $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()');
-            } else {
-                $customizedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
-                $customizedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
-                $usedModules[$parentPackageName]->setCustomizedLineCount($usedModules[$parentPackageName]->getCustomizedLineCount() + $customizedLineCount);
-                $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' . ' - ' . $customizedLineCount);
+                $usedModuleTransfer->addConstraintReason('Customized: ' . $sprykerClassReflector->getClassName() . '::' . $method->getShortName() . '()');
+                continue;
             }
+
+            $customizedLineCount = $this->getMethodBodySize($method, $sprykerClassReflector->getIsInterface());
+            $usedModuleTransfer->setCustomizedLineCount($usedModuleTransfer->getCustomizedLineCount() + $customizedLineCount);
+            $usedModuleTransfer->addConstraintReason('Customized: ' . $sprykerClassReflector->getClassName() . '::' . $method->getShortName() . '()' . ' - ' . $customizedLineCount);
         }
 
         return $usedModules;
+    }
+
+    protected function getMethodBodySize(ReflectionMethod $method, bool $isClassInterface): int
+    {
+        $startLine = $method->getStartLine();
+        $endLine = $method->getEndLine() ?? $method->getStartLine();
+        $compensation = ($method->isAbstract() || $isClassInterface) ? 0 : 2;
+
+        return $endLine - $startLine - $compensation;
     }
 
     /**
@@ -310,7 +297,7 @@ class StrictFinder implements FinderInterface
      * - Another core module: using another core module's non-external API is prohibited
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
-     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector $sprykerClassReflector
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
@@ -335,7 +322,8 @@ class StrictFinder implements FinderInterface
 
     /**
      * Specification:
-     * - Initiates missing searched element in the provided array by reference.
+     * - Sets and/or retrieves expected element
+     * - Instantiates missing searched element in the provided array by reference.
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] &$usedModules
      * @param string $packageName

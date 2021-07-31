@@ -15,7 +15,7 @@ class SprykerXmlReflector
     /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
      */
-    protected $config;
+    protected ComposerConstrainerConfig $config;
 
     /**
      * @todo Determin organisation properly
