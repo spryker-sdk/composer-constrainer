@@ -7,6 +7,7 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock;
 
+use Generated\Shared\Transfer\ComposerConstraintTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerLockReader implements ComposerLockReaderInterface
@@ -30,5 +31,34 @@ class ComposerLockReader implements ComposerLockReaderInterface
     public function read(): array
     {
         return json_decode(file_get_contents($this->config->getProjectRootPath() . 'composer.lock'), true);
+    }
+
+    /**
+     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     */
+    public function getConstraints(): array
+    {
+        $composerConstraints = [];
+        $composerArray = $this->read();
+
+        foreach (['packages', 'packages-dev'] as $type) {
+            if (!isset($composerArray[$type])) {
+                continue;
+            }
+
+            foreach ($composerArray[$type] as $package) {
+                $composerConstraintTransfer = new ComposerConstraintTransfer();
+                $composerConstraintTransfer
+                    ->setName($package['name'])
+                    ->setVersion($package['version'])
+                    ->setIsDev($type === 'packages-dev');
+
+                $composerConstraints[$package['name']] = $composerConstraintTransfer;
+            }
+        }
+
+        ksort($composerConstraints);
+
+        return $composerConstraints;
     }
 }

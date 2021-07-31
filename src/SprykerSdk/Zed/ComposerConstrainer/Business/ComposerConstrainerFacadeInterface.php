@@ -21,7 +21,9 @@ interface ComposerConstrainerFacadeInterface
     /**
      * @api
      *
-     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
+     * @param bool $isStrict
+     *
+     * @return ComposerConstraintCollectionTransfer
      */
-    public function validateConstraints($verboseRun = false): ComposerConstraintCollectionTransfer;
+    public function validateConstraints($isStrict = false): ComposerConstraintCollectionTransfer;
 }

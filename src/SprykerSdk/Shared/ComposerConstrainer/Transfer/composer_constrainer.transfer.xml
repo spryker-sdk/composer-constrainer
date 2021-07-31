@@ -7,9 +7,9 @@
         <property name="organization" type="string"/>
         <property name="module" type="string"/>
         <property name="packageName" type="string"/>
-        <property name="isCustomised" type="bool"/>
+        <property name="isCustomized" type="bool"/>
         <property name="isConfigured" type="bool"/>
-        <property name="customisedLineCount" type="int"/>
+        <property name="customizedLineCount" type="int"/>
         <property name="constraintReasons" type="string[]" singular="constraintReason" strict="true" />
     </transfer>
 
@@ -31,16 +31,14 @@
     </transfer>
 
     <transfer name="ComposerConstraintModuleInfo">
-        <property name="isCustomised" type="bool"/>
+        <property name="isCustomized" type="bool"/>
         <property name="isConfigured" type="bool"/>
-        <property name="customisedLogicLineCount" type="int"/>
-
-        <property name="expectedConstraintLock" type="string"/>
-        <property name="jsonConstraintLock" type="string"/>
-        <property name="jsonVersion" type="string"/>
-        <property name="lockedVersion" type="string"/>
-
+        <property name="customizedLineCount" type="int"/>
         <property name="constraintReasons" type="string[]" singular="constraintReason" strict="true" />
+        <property name="expectedConstraintLock" type="string"/>
+        <property name="definedConstraintLock" type="string"/>
+        <property name="definedVersion" type="string"/>
+        <property name="lockedVersion" type="string"/>
     </transfer>
 
     <transfer name="ConstraintMessage">

@@ -32,14 +32,17 @@ class ComposerConstrainerFacade extends AbstractFacade implements ComposerConstr
      *
      * @api
      *
-     * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
+     * @param bool $isStrict
+     *
+     * @return ComposerConstraintCollectionTransfer
      */
-    public function validateConstraints($verboseRun = false): ComposerConstraintCollectionTransfer
+    public function validateConstraints($isStrict = false): ComposerConstraintCollectionTransfer
     {
-        if ($verboseRun === false) {
+        // Deprecated: Will be replaced by strict validation only
+        if ($isStrict === false) {
             return $this->getFactory()->createConstraintValidator()->validateConstraints();
         }
 
-        return $this->getFactory()->createVerboseConstraintValidator()->validateConstraints();
+        return $this->getFactory()->createStrictConstraintValidator()->validateConstraints();
     }
 }

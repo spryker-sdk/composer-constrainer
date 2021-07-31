@@ -13,4 +13,9 @@ interface ComposerJsonReaderInterface
      * @return array
      */
     public function read(): array;
+
+    /**
+     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     */
+    public function getConstraints(): array;
 }

@@ -37,4 +37,14 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     {
         return $this->get(ComposerConstrainerConstants::CORE_NAMESPACES);
     }
+
+    /**
+     * @return string[]
+     */
+    public function getStrictValidationIgnoredPackages(): array
+    {
+        return [
+            "spryker/kernel$", # kernel needs completley different evaluation
+        ];
+    }
 }

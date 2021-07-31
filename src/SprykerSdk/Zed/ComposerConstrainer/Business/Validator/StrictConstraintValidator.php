@@ -15,15 +15,21 @@ use Generated\Shared\Transfer\UsedModuleTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
-class VerboseConstraintValidator implements ConstraintValidatorInterface
+class StrictConstraintValidator implements ConstraintValidatorInterface
 {
+    /**
+     * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
+     */
+    protected $config;
+
     /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
      */
-    protected $verboseFinder;
+    protected $strictFinder;
 
     /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface
@@ -35,23 +41,20 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
      */
     protected $composerLockReader;
 
-    protected $projectOnlyPackageNamePatterns = [
-
-        "spryker/kernel$", # kernel has completley different customisation rules
-
-    ];
-
     /**
+     * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface $verboseFinder
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface $composerJsonReader
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface $composerLockReader
      */
     public function __construct(
-        FinderInterface $verboseFinder,
+        ComposerConstrainerConfig $config,
+        FinderInterface $strictFinder,
         ComposerJsonReaderInterface $composerJsonReader,
         ComposerLockReaderInterface $composerLockReader
     ) {
-        $this->verboseFinder = $verboseFinder;
+        $this->config = $config;
+        $this->strictFinder = $strictFinder;
         $this->composerJsonReader = $composerJsonReader;
         $this->composerLockReader = $composerLockReader;
     }
@@ -63,27 +66,26 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
     {
         $composerConstraintCollectionTransfer = new ComposerConstraintCollectionTransfer();
 
-        $usedModuleCollectionTransfer = $this->verboseFinder->find();
+        $usedModuleCollectionTransfer = $this->strictFinder->find();
         if ($usedModuleCollectionTransfer->getUsedModules()->count() === 0) {
             return $composerConstraintCollectionTransfer;
         }
 
-        $composerJsonConstraints = $this->getComposerJsonConstraints();
-        $composerLockConstraints = $this->getComposerLockConstraints();
+        $composerDefinedConstraints = $this->composerJsonReader->getConstraints();
+        $composerLockConstraints = $this->composerLockReader->getConstraints();
 
         $composerConstraintTransfers = [];
-        /** @var \Generated\Shared\Transfer\UsedModuleTransfer $usedModuleTransfer */
         foreach ($usedModuleCollectionTransfer->getUsedModules() as $usedModuleTransfer) {
             $usedModulePackageName = $usedModuleTransfer->getPackageName();
 
             $usedModuleInfo = $this->createModuleInfoTransfer(
-                $usedModuleTransfer->getIsCustomised(),
+                $usedModuleTransfer->getIsCustomized(),
                 $usedModuleTransfer->getIsConfigured(),
-                (int)$usedModuleTransfer->getCustomisedLineCount(),
+                (int)$usedModuleTransfer->getCustomizedLineCount(),
                 $usedModuleTransfer->getConstraintReasons()
             );
 
-            $usedModuleInfo = $this->setJsonModuleInfo($usedModuleInfo, $composerJsonConstraints[$usedModulePackageName] ?? null);
+            $usedModuleInfo = $this->setDefinedModuleInfo($usedModuleInfo, $composerDefinedConstraints[$usedModulePackageName] ?? null);
             $usedModuleInfo = $this->setLockModuleInfo($usedModuleInfo, $composerLockConstraints[$usedModulePackageName] ?? null);
 
             $usedModuleInfo = $this->setExpectation($usedModuleInfo);
@@ -93,36 +95,56 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
                 ->setModuleInfo($usedModuleInfo);
         }
 
-        $composerConstraintTransfers = $this->removeCorrectModules($composerConstraintTransfers);
+        $composerConstraintTransfers = $this->removeCorrectPackages($composerConstraintTransfers);
 
         ksort($composerConstraintTransfers);
 
         return $composerConstraintCollectionTransfer->setComposerConstraints(new \ArrayObject($composerConstraintTransfers));
     }
 
-    protected function createModuleInfoTransfer(bool $isCustomised, bool $isConfigured, int $customizedLineCount, array $reasons) : ComposerConstraintModuleInfoTransfer
+    /**
+     * @param bool $isCustomized
+     * @param bool $isConfigured
+     * @param int $customizedLineCount
+     * @param string[] $reasons
+     *
+     * @return ComposerConstraintModuleInfoTransfer
+     */
+    protected function createModuleInfoTransfer(bool $isCustomized, bool $isConfigured, int $customizedLineCount, array $reasons) : ComposerConstraintModuleInfoTransfer
     {
         return (new ComposerConstraintModuleInfoTransfer())
-            ->setIsCustomised($isCustomised)
+            ->setIsCustomized($isCustomized)
             ->setIsConfigured($isConfigured)
-            ->setCustomisedLogicLineCount($customizedLineCount)
-            ->setJsonConstraintLock("")
-            ->setJsonVersion("")
+            ->setCustomizedLineCount($customizedLineCount)
+            ->setDefinedConstraintLock("")
+            ->setDefinedVersion("")
             ->setLockedVersion("")
             ->setConstraintReasons($reasons);
     }
 
-    protected function setJsonModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ComposerConstraintTransfer $jsonConstraint = null): ComposerConstraintModuleInfoTransfer
+    /**
+     * @param ComposerConstraintModuleInfoTransfer $usedModuleInfo
+     * @param ComposerConstraintTransfer|null $definedConstraint
+     *
+     * @return ComposerConstraintModuleInfoTransfer
+     */
+    protected function setDefinedModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ComposerConstraintTransfer $definedConstraint = null): ComposerConstraintModuleInfoTransfer
     {
-        if ($jsonConstraint === null) {
+        if ($definedConstraint === null) {
             return $usedModuleInfo;
         }
 
         return $usedModuleInfo
-            ->setJsonConstraintLock($this->extractConstraintLock($jsonConstraint->getVersion()))
-            ->setJsonVersion(str_replace(['^', '~'], '', $jsonConstraint->getVersion()));
+            ->setDefinedConstraintLock($this->extractConstraintLock($definedConstraint->getVersion()))
+            ->setDefinedVersion(str_replace(['^', '~'], '', $definedConstraint->getVersion()));
     }
 
+    /**
+     * @param ComposerConstraintModuleInfoTransfer $usedModuleInfo
+     * @param ComposerConstraintTransfer|null $lockConstraint
+     *
+     * @return ComposerConstraintModuleInfoTransfer
+     */
     protected function setLockModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ComposerConstraintTransfer $lockConstraint = null): ComposerConstraintModuleInfoTransfer
     {
         if ($lockConstraint === null) {
@@ -133,29 +155,38 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
+     * Specification
+     * - Any core module that is customised, needs to be locked as ~
+     * - Any core module that is used, needs to be locked as ^
+     *
      * @param ComposerConstraintModuleInfoTransfer $moduleInfo
      *
      * @return ComposerConstraintModuleInfoTransfer
      */
     protected function setExpectation(ComposerConstraintModuleInfoTransfer $usedModuleInfo): ComposerConstraintModuleInfoTransfer
     {
-        return $usedModuleInfo->setExpectedConstraintLock($usedModuleInfo->getIsCustomised() ? "~" : "^");
+        return $usedModuleInfo->setExpectedConstraintLock($usedModuleInfo->getIsCustomized() ? "~" : "^");
     }
 
     /**
+     * Specification
+     * - Ignored packages are removed.
+     * - Line count MUST be zero to be considered well configured.
+     * - Expected and defined constraint lock need to match to be considered will configured.
+     *
      * @param ComposerConstraintTransfer[] $composerConstraintTransfers
      *
      * @return ComposerConstraintTransfer[]
      */
-    protected function removeCorrectModules(array $composerConstraintTransfers): array
+    protected function removeCorrectPackages(array $composerConstraintTransfers): array
     {
-        $projectOnlyPackageNamePattern = '#(' . implode('|', $this->projectOnlyPackageNamePatterns). ')#';
+        $ignoredPackages = '#(' . implode('|', $this->config->getStrictValidationIgnoredPackages()). ')#';
         return array_filter($composerConstraintTransfers, function(ComposerConstraintTransfer $composerConstraintTransfer) use ($projectOnlyPackageNamePattern): bool {
-            $isExpectedMatchesActual = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getJsonConstraintLock();
-            $noCustomisedLineCouunt = $composerConstraintTransfer->getModuleInfo()->getCustomisedLogicLineCount() === 0;
-            $isProjectOnlyModule = (bool)preg_match($projectOnlyPackageNamePattern, $composerConstraintTransfer->getName());
+            $isIgnoredPackage = (bool)preg_match($ignoredPackages, $composerConstraintTransfer->getName());
+            $isExpectedMatchesDefined = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
+            $noCustomizedLineCount = $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
 
-            return $isExpectedMatchesActual && $noCustomisedLineCouunt || $isProjectOnlyModule ? false : true;
+            return $isIgnoredPackage || $isExpectedMatchesDefined && $noCustomizedLineCount ? false : true;
         });
     }
 
@@ -174,63 +205,5 @@ class VerboseConstraintValidator implements ConstraintValidatorInterface
         preg_match_all('#^(?<constraint>[\~\^])#', (string)$version, $match);
 
         return count($match['constraint']) < 1 ? "" : $match['constraint'][0];
-    }
-
-    /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
-     */
-    protected function getComposerLockConstraints(): array
-    {
-        $composerConstraints = [];
-        $composerArray = $this->composerLockReader->read();
-
-        foreach (['packages', 'packages-dev'] as $type) {
-            if (!isset($composerArray[$type])) {
-                continue;
-            }
-
-            foreach ($composerArray[$type] as $package) {
-                $composerConstraintTransfer = new ComposerConstraintTransfer();
-                $composerConstraintTransfer
-                    ->setName($package['name'])
-                    ->setVersion($package['version'])
-                    ->setIsDev($type === 'packages-dev');
-
-                $composerConstraints[$package['name']] = $composerConstraintTransfer;
-            }
-        }
-
-        ksort($composerConstraints);
-
-        return $composerConstraints;
-    }
-
-    /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
-     */
-    protected function getComposerJsonConstraints(): array
-    {
-        $composerConstraints = [];
-        $composerArray = $this->composerJsonReader->read();
-
-        foreach (['require', 'require-dev'] as $type) {
-            if (!isset($composerArray[$type])) {
-                continue;
-            }
-
-            foreach ($composerArray[$type] as $name => $version) {
-                $composerConstraintTransfer = new ComposerConstraintTransfer();
-                $composerConstraintTransfer
-                    ->setName($name)
-                    ->setVersion($version)
-                    ->setIsDev($type === 'require-dev');
-
-                $composerConstraints[$name] = $composerConstraintTransfer;
-            }
-        }
-
-        ksort($composerConstraints);
-
-        return $composerConstraints;
     }
 }

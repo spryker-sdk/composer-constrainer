@@ -13,11 +13,15 @@ use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflector\ClassReflector;
 use Roave\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
 use Roave\BetterReflection\SourceLocator\Type\StringSourceLocator;
+use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector;
+use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerReflectionHelper;
+use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerXmlReflector;
+use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerYamlReflector;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
-class VerboseFinder implements FinderInterface
+class StrictFinder implements FinderInterface
 {
     /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
@@ -70,14 +74,17 @@ class VerboseFinder implements FinderInterface
         foreach ($this->createFinder() as $splFileInfo) {
             switch($splFileInfo->getExtension()) {
                 case "php":
-                    $usedModules = $this->checkPhpCustomisation($usedModules, $splFileInfo);
-                    $usedModules = $this->checkPhpDependencies($usedModules, $splFileInfo);
+                    $sprykerClassReflector = new SprykerClassReflector($this->config, $splFileInfo);
+                    $usedModules = $this->checkPhpCustomization($usedModules, $splFileInfo);
+                    $usedModules = $this->checkPhpDependencies($usedModules, $sprykerClassReflector);
                     break;
                 case "xml":
-                    $usedModules = $this->addXmlUsedModules($usedModules, $splFileInfo);
+                    $sprykerXmlReflector = new SprykerXmlReflector($this->config, $splFileInfo);
+                    $usedModules = $this->addXmlUsedModules($usedModules, $sprykerXmlReflector);
                     break;
                 case "yaml":
-                    $usedModules = $this->addYamlUsedModules($usedModules, $splFileInfo);
+                    $sprykerYamlReflector = new SprykerYamlReflector($this->config, $splFileInfo);
+                    $usedModules = $this->addYamlUsedModules($usedModules, $sprykerYamlReflector);
                     break;
                 case "twig":
                     $usedModules = $this->addTwigUsedModules($usedModules, $splFileInfo);
@@ -96,7 +103,7 @@ class VerboseFinder implements FinderInterface
         $finder = new Finder();
         $finder
             ->files()
-            ->in( 'src/Pyz/')
+            ->in( 'src/Pyz/') // TODO needs to come from config
             ->exclude(['Generated', 'Orm'])
             ->name([ '*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml', '*validation.yaml']);
 
@@ -105,66 +112,65 @@ class VerboseFinder implements FinderInterface
 
     /**
      * Specification:
-     * - Validation changes are customisiation
-     * - Validation files are located in Spryker and SprykerEco namespace
-     * - Validation changes CAN NOT be transformed to pluggable so line count is irrelevant
+     * - Validation changes are customiziation
+     * - Validation changes CAN NOT be transformed to pluggable so no impact on line count
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param SplFileInfo $splFileInfo
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
-    protected function addYamlUsedModules(array $usedModules, SplFileInfo $splFileInfo): array
+    protected function addYamlUsedModules(array $usedModules, SprykerYamlReflector $sprykerYamlReflector): array
     {
-        // TODO Selector between Spryker and SprykerEco
-        $packageName = $this->relativeFilePathToPackageName('Spryker', $splFileInfo->getRelativePathname());
-        if (!isset($usedModules[$packageName])) {
-            [$organisation, $module] = $this->packageNameToNamespace($packageName);
-            $usedModules[$packageName] = $this->initUsedModuleTransfer($packageName, $organisation, $module);
-        }
+        $usedModuleTransfer = $this->setrieveUsedModule(
+            $usedModules,
+            $sprykerYamlReflector->getPackageName(),
+            $sprykerYamlReflector->getOrganisation(),
+            $sprykerYamlReflector->getModuleName()
+        );
 
-        $usedModules[$packageName]->setIsCustomised(true);
-        $usedModules[$packageName]->addConstraintReason('Customised: validation.yaml defined');
+        $usedModuleTransfer
+            ->setIsCustomized(true)
+            ->addConstraintReason('Customized: validation.yaml defined');
 
         return $usedModules;
     }
 
     /**
      * Specification:
-     * - Transfer definitions are NOT considered customisation or configuration or dependency
-     * - Navigation changes are customisiation
-     * - Navigation files are located in Spryker and SprykerEco namespace
-     * - Navigation changes CAN NOT be transformed to pluggable so line count is irrelevant
+     * - Transfer definitions are NOT considered customization or configuration or dependency
+     * - Navigation changes are customiziation
+     * - Navigation changes CAN NOT be transformed to pluggable so no impact on line count
      * - Schema changes are dependency toward the module's major version
-     * - Schema files are located in Spryker and SprykerEco namespace
-     * - Schema changes CAN NOT be transformed to pluggable so line count is irrelevant
+     * - Schema changes CAN NOT be transformed to pluggable so no impact on line count
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param SplFileInfo $splFileInfo
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
-    protected function addXmlUsedModules(array $usedModules, SplFileInfo $splFileInfo): array
+    protected function addXmlUsedModules(array $usedModules, SprykerXmlReflector $sprykerXmlReflector): array
     {
-        if (preg_match('/transfer\.xml/', $splFileInfo->getFilename())) {
+        if ($sprykerXmlReflector->getIsTransfer()) {
             return $usedModules;
         }
 
-        // TODO Selector between Spryker and SprykerEco
-        $packageName = $this->relativeFilePathToPackageName('Spryker', $splFileInfo->getRelativePathname());
-        if (!isset($usedModules[$packageName])) {
-            [$organisation, $module] = $this->packageNameToNamespace($packageName);
-            $usedModules[$packageName] = $this->initUsedModuleTransfer($packageName, $organisation, $module);
-        }
+        $usedModuleTransfer = $this->setrieveUsedModule(
+            $usedModules,
+            $sprykerXmlReflector->getPackageName(),
+            $sprykerXmlReflector->getOrganisation(),
+            $sprykerXmlReflector->getModuleName()
+        );
 
-        if (preg_match('/navigation\.xml/', $splFileInfo->getFilename())) {
-            $usedModules[$packageName]->setIsCustomised(true);
-            $usedModules[$packageName]->addConstraintReason('Customised: navigation.xml defined');
+        if ($sprykerXmlReflector->getIsNavigation()) {
+            $usedModuleTransfer
+                ->setIsCustomized(true)
+                ->addConstraintReason('Customized: navigation.xml defined');
 
             return $usedModules;
         }
 
-        $usedModules[$packageName]->addConstraintReason('Dependency: schema.xml');
+        $usedModuleTransfer->addConstraintReason('Dependency: schema.xml');
 
         return $usedModules;
     }
@@ -185,21 +191,21 @@ class VerboseFinder implements FinderInterface
     /**
      * Specification
      * - Config and dependency provider class extension: public entity overriding is configuration
-     * - Config and dependency provider class extension: entity addition or call to a protected/private entity is customisation
+     * - Config and dependency provider class extension: entity addition or call to a protected/private entity is customization
      * - External API class extension: public entity overriding is depenency toward the module's major version
-     * - External API class extension: entity addition or call to a protected/private entity is customisation
-     * - Class extension: class extension is customisation
-     * - For trail version all customisation lines are added to line count except Factory changes and adding public API public entity
+     * - External API class extension: entity addition or call to a protected/private entity is customization
+     * - Class extension: class extension is customization
+     * - For trail version all customization lines are added to line count except Factory changes and adding public API public entity
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
-    protected function checkPhpCustomisation(array $usedModules, SplFileInfo $splFileInfo): array
+    protected function checkPhpCustomization(array $usedModules, SplFileInfo $splFileInfo): array
     {
-        // TODO creating new class that is not extended from core is also customisation if there is such core module
-        // TODO calling protected/private entity in an extended external API class is customisation
+        // TODO creating new class that is not extended from core is also customization if there is such core module
+        // TODO calling protected/private entity in an extended external API class is customization
         // TODO adding constants & properties on top of method checks
 
         $content = $splFileInfo->getContents();
@@ -228,25 +234,25 @@ class VerboseFinder implements FinderInterface
             return $usedModules;
         }
 
-        $parentPackageName = $this->namespaceToPackageName($parentOrganisation, $parentModule);
+        $parentPackageName = SprykerReflectionHelper::namespaceToPackageName($parentOrganisation, $parentModule);
 
         if (!$isCurrentExternalApiClass) {
             if (!isset($usedModules[$parentPackageName])) {
                 $usedModules[$parentPackageName] = $this->initUsedModuleTransfer($parentPackageName, $parentOrganisation, $parentModule);
             }
-            $usedModules[$parentPackageName]->setIsCustomised(true);
+            $usedModules[$parentPackageName]->setIsCustomized(true);
             foreach ($currentClassReflection->getMethods() as $method) {
                 if ($method->getDeclaringClass()->getNamespaceName() !== $currentClassReflection->getNamespaceName()) { // only interested in project methods
                     continue;
                 }
 
                 if ($isFactory) {
-                    $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()');
+                    $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()');
                 } else {
-                    $customisedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
-                    $customisedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
-                    $usedModules[$parentPackageName]->setCustomisedLineCount($usedModules[$parentPackageName]->getCustomisedLineCount() + $customisedLineCount);
-                    $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customisedLineCount);
+                    $customizedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
+                    $customizedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
+                    $usedModules[$parentPackageName]->setCustomizedLineCount($usedModules[$parentPackageName]->getCustomizedLineCount() + $customizedLineCount);
+                    $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customizedLineCount);
                 }
             }
 
@@ -284,15 +290,15 @@ class VerboseFinder implements FinderInterface
                 continue;
             }
 
-            $usedModules[$parentPackageName]->setIsCustomised(true);
+            $usedModules[$parentPackageName]->setIsCustomized(true);
 
             if ($isPublic) {
-                $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()');
+                $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()');
             } else {
-                $customisedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
-                $customisedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
-                $usedModules[$parentPackageName]->setCustomisedLineCount($usedModules[$parentPackageName]->getCustomisedLineCount() + $customisedLineCount);
-                $usedModules[$parentPackageName]->addConstraintReason('Customised: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customisedLineCount);
+                $customizedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
+                $customizedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
+                $usedModules[$parentPackageName]->setCustomizedLineCount($usedModules[$parentPackageName]->getCustomizedLineCount() + $customizedLineCount);
+                $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customizedLineCount);
             }
         }
 
@@ -309,85 +315,66 @@ class VerboseFinder implements FinderInterface
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
-    protected function checkPhpDependencies(array $usedModules, SplFileInfo $splFileInfo): array
+    protected function checkPhpDependencies(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
     {
         // TODO Another core module: forcing module dependency with "@module" is dependency toward that module's major version
 
-        $content = $splFileInfo->getContents();
-        $pattern = sprintf('#\nuse +(%s)\\\\\\w+\\\\(\\w+)\\\\#',
-            implode('|', $this->config->getCoreNamespaces())
-        );
-        preg_match_all($pattern, $content, $match);
+        foreach($sprykerClassReflector->getUsedCorePackageNames() as $usedCorePackageName) {
+            [$usedOrganisation, $usedModuleName] = SprykerReflectionHelper::packageNameToNamespace($usedCorePackageName);
+            $usedModuleTransfer = $this->setrieveUsedModule(
+                $usedModules,
+                $usedCorePackageName,
+                $usedOrganisation,
+                $usedModuleName,
+            );
 
-        foreach($match[1] as $key => $organisation) {
-            $module = $match[2][$key];
-
-            $packageName = $this->namespaceToPackageName($organisation, $module);
-            if (!isset($usedModules[$packageName])) {
-                $usedModules[$packageName] = $this->initUsedModuleTransfer($packageName, $organisation, $module);
-            }
-
-            $usedModules[$packageName]->addConstraintReason('Dependency: incoming from ' . $splFileInfo->getFilename());
+            $usedModuleTransfer->addConstraintReason('Dependency: incoming from ' . $sprykerClassReflector->getFileName());
         }
 
         return $usedModules;
     }
 
-    /**
-     * @example (SprykerEco, Zed/ExampleModuleName/anyfile.xml) => spryker-eco/example-module-name
-     *
-     * @return string
-     */
-    protected function relativeFilePathToPackageName(string $organisation, string $relativeFilepath): string
-    {
-        $transformer = function(string $camelCase):string {
-            return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
-        };
-
-        preg_match_all('#^[^/]*/(?<module>[^/]*)/#', $relativeFilepath, $match);
-
-        return $transformer($organisation) . '/' . $transformer($match['module'][0]);
-    }
 
     /**
-     * @example (SprykerEco, ExampleModuleName) => spryker-eco/example-module-name
+     * Specification:
+     * - Initiates missing searched element in the provided array by reference.
      *
+     * @param UsedModuleTransfer[] &$usedModules
+     * @param string $packageName
      * @param string $organisation
      * @param string $moduleName
      *
-     * @return string
+     * @return UsedModuleTransfer
      */
-    protected function namespaceToPackageName(string $organisation, string $moduleName): string
+    protected function setrieveUsedModule(array &$usedModules, string $packageName, string $organisation, string $moduleName): UsedModuleTransfer
     {
-        $transformer = function(string $camelCase):string {
-            return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
-        };
+        if (!isset($usedModules[$packageName])) {
+            $usedModules[$packageName] = (new UsedModuleTransfer())
+                ->setIsConfigured(false)
+                ->setIsCustomized(false)
+                ->setCustomizedLineCount(0)
+                ->setModule($moduleName)
+                ->setOrganization($organisation)
+                ->setPackageName($packageName)
+                ->setConstraintReasons([]);
+        }
 
-        return $transformer($organisation) . '/' . $transformer($moduleName);
+        return $usedModules[$packageName];
     }
 
     /**
-     * @example spryker-eco/example-module-name => [SprykerEco, ExampleModuleName]
-     *
      * @param string $packageName
+     * @param string $organisation
+     * @param string $module
      *
-     * @return string[]
+     * @return UsedModuleTransfer
      */
-    protected function packageNameToNamespace(string $packageName): array
-    {
-        $transformer = function(string $dashed):string {
-            return str_replace(' ', '', ucfirst(str_replace('-', ' ', $dashed)));
-        };
-
-        return array_map($transformer, explode('/', $packageName));
-    }
-
     protected function initUsedModuleTransfer(string $packageName, string $organisation, string $module): UsedModuleTransfer
     {
         return (new UsedModuleTransfer())
             ->setIsConfigured(false)
-            ->setIsCustomised(false)
-            ->setCustomisedLineCount(0)
+            ->setIsCustomized(false)
+            ->setCustomizedLineCount(0)
             ->setModule($module)
             ->setOrganization($organisation)
             ->setPackageName($packageName)
