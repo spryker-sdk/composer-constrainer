@@ -43,19 +43,17 @@ class SprykerReflectionHelper
     }
 
     /**
-     * @example (SprykerEco, Zed/ExampleModuleName/anyfile.xml) => spryker-eco/example-module-name
+     * @example (SprykerEco, Pyz/Zed/ExampleModuleName/anyfile.xml) => spryker-eco/example-module-name
      *
      * @return string
      */
     public static function relativeFilePathToPackageName(string $organisation, string $relativeFilepath): string
     {
-        // TODO less relative is needed
-
         $transformer = function (string $camelCase): string {
             return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
         };
 
-        preg_match_all('#^[^/]*/(?<module>[^/]*)/#', $relativeFilepath, $match);
+        preg_match_all('#^[^/]*/[^/]*/(?<module>[^/]*)/#', $relativeFilepath, $match);
 
         return $transformer($organisation) . '/' . $transformer($match['module'][0]);
     }

@@ -79,8 +79,9 @@ class StrictFinder implements FinderInterface
         $finder = new Finder();
         $finder
             ->files()
-            ->in('src/Pyz/') // TODO needs to come from config
+            ->in($this->config->getSourceDirectory())
             ->exclude(['Generated', 'Orm'])
+            ->notName(['CodeBucketConfig.php'])
             ->name([ '*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml', '*validation.yaml']);
 
         return $finder;
@@ -159,8 +160,6 @@ class StrictFinder implements FinderInterface
      */
     protected function addTwigUsedModules(array $usedModules, SplFileInfo $splFileInfo): array
     {
-        // TODO
-
         return $usedModules;
     }
 
@@ -177,9 +176,6 @@ class StrictFinder implements FinderInterface
      */
     protected function checkPhpNonPublicApiCustomization(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
     {
-        // TODO calling protected/private entity in an extended external API class is customization
-        // TODO adding constants & properties on top of method checks
-
         if ($sprykerClassReflector->getIsPublicApi()) {
             return $usedModules;
         }
@@ -282,6 +278,12 @@ class StrictFinder implements FinderInterface
         return $usedModules;
     }
 
+    /**
+     * @param \ReflectionMethod $method
+     * @param bool $isClassInterface
+     *
+     * @return int
+     */
     protected function getMethodBodySize(ReflectionMethod $method, bool $isClassInterface): int
     {
         $startLine = $method->getStartLine();
@@ -303,8 +305,6 @@ class StrictFinder implements FinderInterface
      */
     protected function checkPhpDependencies(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
     {
-        // TODO Another core module: forcing module dependency with "@module" is dependency toward that module's major version
-
         foreach ($sprykerClassReflector->getUsedCorePackageNames() as $usedCorePackageName) {
             [$usedOrganisation, $usedModuleName] = SprykerReflectionHelper::packageNameToNamespace($usedCorePackageName);
             $usedModuleTransfer = $this->setrieveUsedModule(
@@ -346,24 +346,5 @@ class StrictFinder implements FinderInterface
         }
 
         return $usedModules[$packageName];
-    }
-
-    /**
-     * @param string $packageName
-     * @param string $organisation
-     * @param string $module
-     *
-     * @return \Generated\Shared\Transfer\UsedModuleTransfer
-     */
-    protected function initUsedModuleTransfer(string $packageName, string $organisation, string $module): UsedModuleTransfer
-    {
-        return (new UsedModuleTransfer())
-            ->setIsConfigured(false)
-            ->setIsCustomized(false)
-            ->setCustomizedLineCount(0)
-            ->setModule($module)
-            ->setOrganization($organisation)
-            ->setPackageName($packageName)
-            ->setConstraintReasons([]);
     }
 }
