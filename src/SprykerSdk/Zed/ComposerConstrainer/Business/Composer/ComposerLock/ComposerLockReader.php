@@ -70,7 +70,7 @@ class ComposerLockReader implements ComposerLockReaderInterface
     }
 
     /**
-     * @param ComposerConstraintTransfer $composerConstraintTransfer
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer $composerConstraintTransfer
      * @param array $packageDefinedConstraints
      * @param bool $isDev
      *

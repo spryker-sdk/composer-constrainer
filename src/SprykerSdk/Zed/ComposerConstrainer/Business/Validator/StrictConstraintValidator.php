@@ -216,16 +216,16 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * Specification
      * - Features MUST be locked by ~ or ^ or by exact version
      *
-     * @param ComposerConstraintTransfer[] $composerDefinedConstraints
-     * @param ComposerConstraintTransfer[] $composerLockedConstraints
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerDefinedConstraints
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerLockedConstraints
      *
-     * @return ComposerConstraintTransfer[]
+     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
      */
-    protected function getFeatureConstraints(array $composerDefinedConstraints, array $composerLockedConstraints):array
+    protected function getFeatureConstraints(array $composerDefinedConstraints, array $composerLockedConstraints): array
     {
-        /** @var ComposerConstraintTransfer[] $features */
+        /** @var \Generated\Shared\Transfer\ComposerConstraintTransfer[] $features */
         $features = [];
-        foreach($composerDefinedConstraints as $composerDefinedConstraint) {
+        foreach ($composerDefinedConstraints as $composerDefinedConstraint) {
             if (!preg_match('#^spryker-feature/#', $composerDefinedConstraint->getName())) {
                 continue;
             }
@@ -238,12 +238,12 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
         }
 
         $mergedInheritedConstraints = [];
-        foreach($features as $featureName => $featureDefinedComposerConstraintTransfer) {
+        foreach ($features as $featureName => $featureDefinedComposerConstraintTransfer) {
             if (!isset($composerLockedConstraints[$featureName])) {
                 continue;
             }
 
-            foreach($composerLockedConstraints[$featureName]->getDefinedConstraints() as $inheritedComposerConstraintTransfer) {
+            foreach ($composerLockedConstraints[$featureName]->getDefinedConstraints() as $inheritedComposerConstraintTransfer) {
                 if (!preg_match('#^spryker#', $inheritedComposerConstraintTransfer->getName())) {
                     continue;
                 }
