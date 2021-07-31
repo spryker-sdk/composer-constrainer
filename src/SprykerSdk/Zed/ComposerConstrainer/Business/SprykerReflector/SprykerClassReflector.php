@@ -1,17 +1,28 @@
 <?php
 
+/**
+ * Copyright © 2016-present Spryker Systems GmbH. All rights reserved.
+ * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ */
+
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector;
 
+use ReflectionClass;
 use Symfony\Component\Finder\SplFileInfo;
 
-class SprykerClassReflector extends \ReflectionClass
+class SprykerClassReflector extends ReflectionClass
 {
     protected $config;
 
-    protected string $namespace; // NOT including class name
+    protected string $namespace;
+
+ // NOT including class name
     protected string $moduleName;
+
     protected string $fileName;
+
     protected string $fileContent;
+
     protected string $className;
 
     protected ?array $usedCorePackageNames = null;
@@ -47,7 +58,7 @@ class SprykerClassReflector extends \ReflectionClass
         preg_match_all($pattern, $this->fileContent, $match);
 
         $this->usedCorePackageNames = [];
-        foreach($match[1] as $key => $organisation) {
+        foreach ($match[1] as $key => $organisation) {
             $moduleName = $match[2][$key];
 
             $this->usedCorePackageNames[] = SprykerReflectionHelper::namespaceToPackageName($organisation, $moduleName);
@@ -57,6 +68,4 @@ class SprykerClassReflector extends \ReflectionClass
 
         return $this->usedCorePackageNames;
     }
-
-
 }

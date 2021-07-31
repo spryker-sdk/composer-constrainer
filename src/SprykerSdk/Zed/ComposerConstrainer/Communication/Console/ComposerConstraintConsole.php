@@ -8,7 +8,6 @@
 namespace SprykerSdk\Zed\ComposerConstrainer\Communication\Console;
 
 use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
-use Generated\Shared\Transfer\ComposerConstraintTransfer;
 use Spryker\Zed\Kernel\Communication\Console\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;

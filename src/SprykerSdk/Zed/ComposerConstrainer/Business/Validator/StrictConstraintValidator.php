@@ -7,17 +7,14 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Validator;
 
+use ArrayObject;
 use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 use Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer;
 use Generated\Shared\Transfer\ComposerConstraintTransfer;
-use Generated\Shared\Transfer\ConstraintMessageTransfer;
-use Generated\Shared\Transfer\UsedModuleTransfer;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 
 class StrictConstraintValidator implements ConstraintValidatorInterface
 {
@@ -99,7 +96,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
 
         ksort($composerConstraintTransfers);
 
-        return $composerConstraintCollectionTransfer->setComposerConstraints(new \ArrayObject($composerConstraintTransfers));
+        return $composerConstraintCollectionTransfer->setComposerConstraints(new ArrayObject($composerConstraintTransfers));
     }
 
     /**
@@ -108,9 +105,9 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * @param int $customizedLineCount
      * @param string[] $reasons
      *
-     * @return ComposerConstraintModuleInfoTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
-    protected function createModuleInfoTransfer(bool $isCustomized, bool $isConfigured, int $customizedLineCount, array $reasons) : ComposerConstraintModuleInfoTransfer
+    protected function createModuleInfoTransfer(bool $isCustomized, bool $isConfigured, int $customizedLineCount, array $reasons): ComposerConstraintModuleInfoTransfer
     {
         return (new ComposerConstraintModuleInfoTransfer())
             ->setIsCustomized($isCustomized)
@@ -123,12 +120,12 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @param ComposerConstraintModuleInfoTransfer $usedModuleInfo
-     * @param ComposerConstraintTransfer|null $definedConstraint
+     * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $usedModuleInfo
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer|null $definedConstraint
      *
-     * @return ComposerConstraintModuleInfoTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
-    protected function setDefinedModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ComposerConstraintTransfer $definedConstraint = null): ComposerConstraintModuleInfoTransfer
+    protected function setDefinedModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ?ComposerConstraintTransfer $definedConstraint = null): ComposerConstraintModuleInfoTransfer
     {
         if ($definedConstraint === null) {
             return $usedModuleInfo;
@@ -140,12 +137,12 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @param ComposerConstraintModuleInfoTransfer $usedModuleInfo
-     * @param ComposerConstraintTransfer|null $lockConstraint
+     * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $usedModuleInfo
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer|null $lockConstraint
      *
-     * @return ComposerConstraintModuleInfoTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
-    protected function setLockModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ComposerConstraintTransfer $lockConstraint = null): ComposerConstraintModuleInfoTransfer
+    protected function setLockModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ?ComposerConstraintTransfer $lockConstraint = null): ComposerConstraintModuleInfoTransfer
     {
         if ($lockConstraint === null) {
             return $usedModuleInfo;
@@ -159,9 +156,9 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * - Any core module that is customised, needs to be locked as ~
      * - Any core module that is used, needs to be locked as ^
      *
-     * @param ComposerConstraintModuleInfoTransfer $moduleInfo
+     * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $moduleInfo
      *
-     * @return ComposerConstraintModuleInfoTransfer
+     * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
     protected function setExpectation(ComposerConstraintModuleInfoTransfer $usedModuleInfo): ComposerConstraintModuleInfoTransfer
     {
@@ -174,14 +171,15 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * - Line count MUST be zero to be considered well configured.
      * - Expected and defined constraint lock need to match to be considered will configured.
      *
-     * @param ComposerConstraintTransfer[] $composerConstraintTransfers
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerConstraintTransfers
      *
-     * @return ComposerConstraintTransfer[]
+     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
      */
     protected function removeCorrectPackages(array $composerConstraintTransfers): array
     {
-        $ignoredPackages = '#(' . implode('|', $this->config->getStrictValidationIgnoredPackages()). ')#';
-        return array_filter($composerConstraintTransfers, function(ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages): bool {
+        $ignoredPackages = '#(' . implode('|', $this->config->getStrictValidationIgnoredPackages()) . ')#';
+
+        return array_filter($composerConstraintTransfers, function (ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages): bool {
             $isIgnoredPackage = (bool)preg_match($ignoredPackages, $composerConstraintTransfer->getName());
             $isExpectedMatchesDefined = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
             $noCustomizedLineCount = $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;

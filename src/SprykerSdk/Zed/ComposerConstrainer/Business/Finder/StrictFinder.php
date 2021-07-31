@@ -7,12 +7,11 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder;
 
+use ArrayObject;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
-use Roave\BetterReflection\BetterReflection;
-use Roave\BetterReflection\Reflector\ClassReflector;
-use Roave\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
-use Roave\BetterReflection\SourceLocator\Type\StringSourceLocator;
+use ReflectionClass;
+use ReflectionMethod;
 use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector;
 use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerReflectionHelper;
 use SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerXmlReflector;
@@ -70,9 +69,9 @@ class StrictFinder implements FinderInterface
             return $usedModuleCollectionTransfer;
         }
 
-        $usedModules =[];
+        $usedModules = [];
         foreach ($this->createFinder() as $splFileInfo) {
-            switch($splFileInfo->getExtension()) {
+            switch ($splFileInfo->getExtension()) {
                 case "php":
                     $sprykerClassReflector = new SprykerClassReflector($this->config, $splFileInfo);
                     $usedModules = $this->checkPhpCustomization($usedModules, $splFileInfo);
@@ -92,7 +91,7 @@ class StrictFinder implements FinderInterface
             }
         }
 
-        return $usedModuleCollectionTransfer->setUsedModules(new \ArrayObject($usedModules));
+        return $usedModuleCollectionTransfer->setUsedModules(new ArrayObject($usedModules));
     }
 
     /**
@@ -103,7 +102,7 @@ class StrictFinder implements FinderInterface
         $finder = new Finder();
         $finder
             ->files()
-            ->in( 'src/Pyz/') // TODO needs to come from config
+            ->in('src/Pyz/') // TODO needs to come from config
             ->exclude(['Generated', 'Orm'])
             ->name([ '*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml', '*validation.yaml']);
 
@@ -116,7 +115,7 @@ class StrictFinder implements FinderInterface
      * - Validation changes CAN NOT be transformed to pluggable so no impact on line count
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
-     * @param SplFileInfo $splFileInfo
+     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
@@ -145,7 +144,7 @@ class StrictFinder implements FinderInterface
      * - Schema changes CAN NOT be transformed to pluggable so no impact on line count
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
-     * @param SplFileInfo $splFileInfo
+     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
@@ -177,7 +176,7 @@ class StrictFinder implements FinderInterface
 
     /**
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
-     * @param SplFileInfo $splFileInfo
+     * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
      *
      * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
      */
@@ -217,10 +216,10 @@ class StrictFinder implements FinderInterface
         preg_match_all('#\n(class|abstract class|interface) +(\\w+)#', $content, $match);
         $currentClassName = $match[2][0];
 
-        $currentClassReflection = new \ReflectionClass($currentNamespace . '\\' . $currentClassName);
+        $currentClassReflection = new ReflectionClass($currentNamespace . '\\' . $currentClassName);
 
-        $isCurrentExternalApiClass = preg_match('#(' .implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)). ')#', $currentClassReflection->getFileName());
-        $isCurrentConfigurationClass = preg_match('#(' .implode('|', $this->configurationClassSuffixes). ')#', $currentClassReflection->getFileName());
+        $isCurrentExternalApiClass = preg_match('#(' . implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)) . ')#', $currentClassReflection->getFileName());
+        $isCurrentConfigurationClass = preg_match('#(' . implode('|', $this->configurationClassSuffixes) . ')#', $currentClassReflection->getFileName());
         $isFactory = preg_match('#Factory.php#', $currentClassReflection->getFileName());
 
         $parentNamespace = $currentClassReflection->getParentClass() ? $currentClassReflection->getParentClass()->getNamespaceName() : "";
@@ -252,26 +251,26 @@ class StrictFinder implements FinderInterface
                     $customizedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
                     $customizedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
                     $usedModules[$parentPackageName]->setCustomizedLineCount($usedModules[$parentPackageName]->getCustomizedLineCount() + $customizedLineCount);
-                    $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customizedLineCount);
+                    $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' . ' - ' . $customizedLineCount);
                 }
             }
 
             return $usedModules;
         }
 
-        $parentClassReflection = new \ReflectionClass($parentNamespace . '\\' . $parentClassName);
+        $parentClassReflection = new ReflectionClass($parentNamespace . '\\' . $parentClassName);
         $parentMethods = [];
-        foreach($parentClassReflection->getMethods() as $method) {
+        foreach ($parentClassReflection->getMethods() as $method) {
             $parentMethods[$method->getShortName()] = $method->getShortName();
         }
 
-        foreach($currentClassReflection->getMethods() as $method) {
+        foreach ($currentClassReflection->getMethods() as $method) {
             if ($method->getDeclaringClass()->getNamespaceName() !== $currentClassReflection->getNamespaceName()) { // only interested in project methods
                 continue;
             }
 
-            $isPublic = ($method->getModifiers() & \ReflectionMethod::IS_PUBLIC) > 0;
-            $isProtected = ($method->getModifiers() & (\ReflectionMethod::IS_PROTECTED + \ReflectionMethod::IS_PRIVATE)) > 0;
+            $isPublic = ($method->getModifiers() & ReflectionMethod::IS_PUBLIC) > 0;
+            $isProtected = ($method->getModifiers() & (ReflectionMethod::IS_PROTECTED + ReflectionMethod::IS_PRIVATE)) > 0;
             $isPublicMethodOverriden = $isPublic && array_key_exists($method->getShortName(), $parentMethods);
 
             if (!isset($usedModules[$parentPackageName])) {
@@ -298,7 +297,7 @@ class StrictFinder implements FinderInterface
                 $customizedLineCount = ($method->getEndLine() ?: $method->getStartLine()) - $method->getStartLine();
                 $customizedLineCount -= ($method->isAbstract() || $currentClassReflection->isInterface()) ? 0 : 2;
                 $usedModules[$parentPackageName]->setCustomizedLineCount($usedModules[$parentPackageName]->getCustomizedLineCount() + $customizedLineCount);
-                $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' .  ' - '  . $customizedLineCount);
+                $usedModules[$parentPackageName]->addConstraintReason('Customized: ' . $currentClassName . '::' . $method->getShortName() . '()' . ' - ' . $customizedLineCount);
             }
         }
 
@@ -319,7 +318,7 @@ class StrictFinder implements FinderInterface
     {
         // TODO Another core module: forcing module dependency with "@module" is dependency toward that module's major version
 
-        foreach($sprykerClassReflector->getUsedCorePackageNames() as $usedCorePackageName) {
+        foreach ($sprykerClassReflector->getUsedCorePackageNames() as $usedCorePackageName) {
             [$usedOrganisation, $usedModuleName] = SprykerReflectionHelper::packageNameToNamespace($usedCorePackageName);
             $usedModuleTransfer = $this->setrieveUsedModule(
                 $usedModules,
@@ -334,17 +333,16 @@ class StrictFinder implements FinderInterface
         return $usedModules;
     }
 
-
     /**
      * Specification:
      * - Initiates missing searched element in the provided array by reference.
      *
-     * @param UsedModuleTransfer[] &$usedModules
+     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] &$usedModules
      * @param string $packageName
      * @param string $organisation
      * @param string $moduleName
      *
-     * @return UsedModuleTransfer
+     * @return \Generated\Shared\Transfer\UsedModuleTransfer
      */
     protected function setrieveUsedModule(array &$usedModules, string $packageName, string $organisation, string $moduleName): UsedModuleTransfer
     {
@@ -367,7 +365,7 @@ class StrictFinder implements FinderInterface
      * @param string $organisation
      * @param string $module
      *
-     * @return UsedModuleTransfer
+     * @return \Generated\Shared\Transfer\UsedModuleTransfer
      */
     protected function initUsedModuleTransfer(string $packageName, string $organisation, string $module): UsedModuleTransfer
     {

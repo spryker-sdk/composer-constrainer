@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Copyright © 2016-present Spryker Systems GmbH. All rights reserved.
+ * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
+ */
+
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector;
 
 class SprykerReflectionHelper
@@ -13,7 +18,7 @@ class SprykerReflectionHelper
      */
     public static function packageNameToNamespace(string $packageName): array
     {
-        $transformer = function(string $dashed):string {
+        $transformer = function (string $dashed): string {
             return str_replace(' ', '', ucfirst(str_replace('-', ' ', $dashed)));
         };
 
@@ -30,7 +35,7 @@ class SprykerReflectionHelper
      */
     public static function namespaceToPackageName(string $organisation, string $moduleName): string
     {
-        $transformer = function(string $camelCase):string {
+        $transformer = function (string $camelCase): string {
             return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
         };
 
@@ -46,7 +51,7 @@ class SprykerReflectionHelper
     {
         // TODO less relative is needed
 
-        $transformer = function(string $camelCase):string {
+        $transformer = function (string $camelCase): string {
             return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
         };
 
