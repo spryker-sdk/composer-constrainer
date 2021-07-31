@@ -54,11 +54,37 @@ class ComposerLockReader implements ComposerLockReaderInterface
                     ->setIsDev($type === 'packages-dev');
 
                 $composerConstraints[$package['name']] = $composerConstraintTransfer;
+
+                if (isset($package['require'])) {
+                    $this->addDefinedConstraints($composerConstraintTransfer, $package['require'], false);
+                }
+                if (isset($package['require-dev'])) {
+                    $this->addDefinedConstraints($composerConstraintTransfer, $package['require-dev'], true);
+                }
             }
         }
 
         ksort($composerConstraints);
 
         return $composerConstraints;
+    }
+
+    /**
+     * @param ComposerConstraintTransfer $composerConstraintTransfer
+     * @param array $packageDefinedConstraints
+     * @param bool $isDev
+     *
+     * @return void
+     */
+    protected function addDefinedConstraints(ComposerConstraintTransfer $composerConstraintTransfer, array $packageDefinedConstraints, bool $isDev): void
+    {
+        foreach ($packageDefinedConstraints as $name => $version) {
+            $composerConstraintTransfer->addDefinedConstraint(
+                (new ComposerConstraintTransfer())
+                    ->setName($name)
+                    ->setVersion($version)
+                    ->setIsDev($isDev)
+            );
+        }
     }
 }

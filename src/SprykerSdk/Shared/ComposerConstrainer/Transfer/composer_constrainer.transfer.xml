@@ -28,6 +28,7 @@
         <property name="expectedVersion" type="string"/>
         <property name="moduleInfo" type="ComposerConstraintModuleInfo"/>
         <property name="messages" type="ConstraintMessage[]" singular="message"/>
+        <property name="definedConstraints" type="ComposerConstraint[]" singular="definedConstraint" strict="true" />
     </transfer>
 
     <transfer name="ComposerConstraintModuleInfo">
