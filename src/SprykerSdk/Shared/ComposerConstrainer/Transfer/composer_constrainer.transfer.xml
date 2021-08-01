@@ -34,12 +34,14 @@
     <transfer name="ComposerConstraintModuleInfo">
         <property name="isCustomized" type="bool"/>
         <property name="isConfigured" type="bool"/>
+        <property name="isDev" type="bool"/>
         <property name="customizedLineCount" type="int"/>
         <property name="constraintReasons" type="string[]" singular="constraintReason" strict="true" />
         <property name="expectedConstraintLock" type="string"/>
         <property name="definedConstraintLock" type="string"/>
         <property name="definedVersion" type="string"/>
         <property name="lockedVersion" type="string"/>
+        <property name="expectedVersion" type="string"/>
     </transfer>
 
     <transfer name="ConstraintMessage">

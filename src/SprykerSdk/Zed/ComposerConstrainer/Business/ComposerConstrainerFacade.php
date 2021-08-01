@@ -22,9 +22,14 @@ class ComposerConstrainerFacade extends AbstractFacade implements ComposerConstr
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateConstraints(): ComposerConstraintCollectionTransfer
+    public function updateConstraints(bool $isStrict = false): ComposerConstraintCollectionTransfer
     {
-        return $this->getFactory()->createConstraintUpdater()->updateConstraints();
+        // Deprecated: Will be replaced by strict validation only
+        if ($isStrict === false) {
+            return $this->getFactory()->createConstraintUpdater()->updateConstraints();
+        }
+
+        return $this->getFactory()->createStrictConstraintUpdater()->updateConstraints();
     }
 
     /**

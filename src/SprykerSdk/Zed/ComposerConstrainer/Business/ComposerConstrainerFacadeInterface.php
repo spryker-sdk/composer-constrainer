@@ -16,7 +16,7 @@ interface ComposerConstrainerFacadeInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateConstraints(): ComposerConstraintCollectionTransfer;
+    public function updateConstraints(bool $isStrict = false): ComposerConstraintCollectionTransfer;
 
     /**
      * @api

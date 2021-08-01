@@ -47,7 +47,7 @@ class ComposerConstraintConsole extends Console
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if ($input->getOption(static::OPTION_STRICT_RUN)) {
-            return $this->runStrictValidation(
+            return $this->runStrictMode(
                 (bool)$input->getOption(static::OPTION_DRY_RUN),
                 (bool)$input->getOption(static::OPTION_VERBOSE_RUN)
             );
@@ -86,9 +86,13 @@ class ComposerConstraintConsole extends Console
      *
      * @return int
      */
-    protected function runStrictValidation(bool $isDryRun, bool $isVerbose): int
+    protected function runStrictMode(bool $isDryRun, bool $isVerbose): int
     {
-        $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints(true);
+        if ($isDryRun) {
+            $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints(true);
+        } else {
+            $composerConstraintCollectionTransfer = $this->getFacade()->updateConstraints(true);
+        }
 
         if ($composerConstraintCollectionTransfer->getComposerConstraints()->count() === 0) {
             $this->output->writeln('<fg=green>No constraint issues found.</>');
@@ -110,7 +114,7 @@ class ComposerConstraintConsole extends Console
      */
     protected function outputStrictValidationFindings(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer, bool $isVerbose): void
     {
-        $lineStructure = '%-70s | %10s %10s | %10s | %8s | %8s | %10s | %10s | %s';
+        $lineStructure = '%-70s | %10s %10s | %10s | %13s | %13s | %10s | %s';
         $this->output->writeln(
             sprintf(
                 $lineStructure,
@@ -120,7 +124,6 @@ class ComposerConstraintConsole extends Console
                 'Line count',
                 'Expected',
                 'Actual',
-                'Defined',
                 'Locked',
                 'Reasons'
             )
@@ -133,9 +136,8 @@ class ComposerConstraintConsole extends Console
                     $composerConstraintTransfer->getModuleInfo()->getIsCustomized() ? 'Yes' : '',
                     $composerConstraintTransfer->getModuleInfo()->getIsConfigured() ? 'Yes' : '',
                     $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() ?: 0,
-                    $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock(),
-                    $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock(),
-                    $composerConstraintTransfer->getModuleInfo()->getDefinedVersion(),
+                    $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() . $composerConstraintTransfer->getModuleInfo()->getExpectedVersion(),
+                    $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock() . $composerConstraintTransfer->getModuleInfo()->getDefinedVersion(),
                     $composerConstraintTransfer->getModuleInfo()->getLockedVersion(),
                     $isVerbose ? '{"reasons:": ["' . implode('","', array_unique($composerConstraintTransfer->getModuleInfo()->getConstraintReasons())) . '"]}' : ''
                 )

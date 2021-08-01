@@ -133,10 +133,12 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
         }
 
         $version = $definedConstraint ? $definedConstraint->getVersion() : $featureConstraint->getVersion();
+        $isDev = $definedConstraint ? $definedConstraint->getIsDev() : $featureConstraint->getIsDev();
 
         return $usedModuleInfo
             ->setDefinedConstraintLock($this->extractConstraintLock($version))
-            ->setDefinedVersion(str_replace(['^', '~'], '', $version));
+            ->setDefinedVersion(str_replace(['^', '~'], '', $version))
+            ->setIsDev($isDev);
     }
 
     /**
@@ -156,8 +158,10 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
 
     /**
      * Specification
-     * - Any core module that is customised, needs to be locked as ~
-     * - Any core module that is used, needs to be locked as ^
+     * - Used modules have either "public API" (^) or customized (~) lock
+     * - Defined constraint lock is either missing or major (^), minor (~) or patch ("")
+     * - If defined constraint is missing then module usage constraint drives the expection
+     * - If defined constraint is present then the smaller lock is the expectation
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $moduleInfo
      *
@@ -165,14 +169,28 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      */
     protected function setExpectation(ComposerConstraintModuleInfoTransfer $usedModuleInfo): ComposerConstraintModuleInfoTransfer
     {
-        return $usedModuleInfo->setExpectedConstraintLock($usedModuleInfo->getIsCustomized() ? "~" : "^");
+        $moduleUsageConstraintLock = $usedModuleInfo->getIsCustomized() ? "~" : "^";
+        $definedConstraintLock = $usedModuleInfo->getDefinedConstraintLock();
+        $hasDefinedVersion = !empty($usedModuleInfo->getDefinedVersion());
+
+        $expectedConstraintLock = $moduleUsageConstraintLock;
+        if ($hasDefinedVersion) {
+            $expectedConstraintLock = $definedConstraintLock;
+            if ($definedConstraintLock === "^" && $moduleUsageConstraintLock === "~") {
+                $expectedConstraintLock = "~";
+            }
+        }
+
+        return $usedModuleInfo
+            ->setExpectedConstraintLock($expectedConstraintLock)
+            ->setExpectedVersion($usedModuleInfo->getDefinedVersion() ?: $usedModuleInfo->getLockedVersion());
     }
 
     /**
      * Specification
      * - Ignored packages are removed.
      * - Line count MUST be zero to be considered well configured.
-     * - Expected and defined constraint lock need to match to be considered will configured or defined needs to be more restrictive.
+     * - Expected and defined constraint lock need to match to be considered will configured.
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerConstraintTransfers
      *
@@ -183,15 +201,11 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
         $ignoredPackages = '#(' . implode('|', $this->config->getStrictValidationIgnoredPackages()) . ')#';
 
         return array_filter($composerConstraintTransfers, function (ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages): bool {
-            $expected = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock();
-            $defined = $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
-
-            $isMoreRestrictiveDefined = $expected === "^" && in_array($defined, ['~', ''], true);
             $isIgnoredPackage = (bool)preg_match($ignoredPackages, $composerConstraintTransfer->getName());
-            $isExpectedMatchesDefined = $expected === $defined;
+            $isExpectedMatchesDefined = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
             $noCustomizedLineCount = $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
 
-            return $isIgnoredPackage || ($isExpectedMatchesDefined || $isMoreRestrictiveDefined) && $noCustomizedLineCount ? false : true;
+            return $isIgnoredPackage || $isExpectedMatchesDefined && $noCustomizedLineCount ? false : true;
         });
     }
 
@@ -215,6 +229,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     /**
      * Specification
      * - Features MUST be locked by ~ or ^ or by exact version
+     * - Retrieves the module locks by featuers based on the existing defined constraint list
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerDefinedConstraints
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerLockedConstraints

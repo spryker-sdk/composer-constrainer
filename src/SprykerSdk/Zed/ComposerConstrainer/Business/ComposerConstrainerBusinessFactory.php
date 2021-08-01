@@ -20,6 +20,7 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\StrictFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\StrictConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\StrictConstraintValidator;
@@ -36,6 +37,18 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return new ConstraintUpdater(
             $this->createConstraintValidator(),
+            $this->createComposerJsonReader(),
+            $this->createComposerJsonWriter()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface
+     */
+    public function createStrictConstraintUpdater(): ConstraintUpdaterInterface
+    {
+        return new StrictConstraintUpdater(
+            $this->createStrictConstraintValidator(),
             $this->createComposerJsonReader(),
             $this->createComposerJsonWriter()
         );
