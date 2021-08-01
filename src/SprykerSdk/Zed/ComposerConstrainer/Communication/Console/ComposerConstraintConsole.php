@@ -24,6 +24,8 @@ class ComposerConstraintConsole extends Console
     public const OPTION_STRICT_RUN = 'strict';
     public const OPTION_STRICT_RUN_SHORT = 's';
     public const OPTION_VERBOSE_RUN = 'verbose';
+    public const OPTION_OUTPUT_FORMAT = 'output-format';
+    public const OPTION_OUTPUT_FORMAT_SHORT = 'o';
 
     /**
      * @return void
@@ -36,6 +38,7 @@ class ComposerConstraintConsole extends Console
 
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
         $this->addOption(static::OPTION_STRICT_RUN, static::OPTION_STRICT_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints on a strict manner.');
+        $this->addOption(static::OPTION_OUTPUT_FORMAT, static::OPTION_OUTPUT_FORMAT_SHORT, InputOption::VALUE_OPTIONAL, 'Use this option with "csv" value in strict validation to print report in comma separated, import ready format.');
     }
 
     /**
@@ -49,7 +52,8 @@ class ComposerConstraintConsole extends Console
         if ($input->getOption(static::OPTION_STRICT_RUN)) {
             return $this->runStrictMode(
                 (bool)$input->getOption(static::OPTION_DRY_RUN),
-                (bool)$input->getOption(static::OPTION_VERBOSE_RUN)
+                (bool)$input->getOption(static::OPTION_VERBOSE_RUN),
+                $input->getOption(static::OPTION_OUTPUT_FORMAT),
             );
         }
 
@@ -83,10 +87,11 @@ class ComposerConstraintConsole extends Console
     /**
      * @param bool $isStrict
      * @param bool $isVerbose
+     * @param string|null $format
      *
      * @return int
      */
-    protected function runStrictMode(bool $isDryRun, bool $isVerbose): int
+    protected function runStrictMode(bool $isDryRun, bool $isVerbose, ?string $format = null): int
     {
         if ($isDryRun) {
             $composerConstraintCollectionTransfer = $this->getFacade()->validateConstraints(true);
@@ -100,7 +105,7 @@ class ComposerConstraintConsole extends Console
             return static::CODE_SUCCESS;
         }
 
-        $this->outputStrictValidationFindings($composerConstraintCollectionTransfer, $isVerbose);
+        $this->outputStrictValidationFindings($composerConstraintCollectionTransfer, $isVerbose, $format);
 
         $this->output->writeln(sprintf('<fg=magenta>%s constraint issues found.</>', $composerConstraintCollectionTransfer->getComposerConstraints()->count()));
 
@@ -108,13 +113,19 @@ class ComposerConstraintConsole extends Console
     }
 
     /**
-     * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
+     * @param ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
+     * @param bool $isVerbose
+     * @param string|null $format
      *
      * @return void
      */
-    protected function outputStrictValidationFindings(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer, bool $isVerbose): void
+    protected function outputStrictValidationFindings(ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer, bool $isVerbose, ?string $format = null): void
     {
-        $lineStructure = '%-70s | %10s %10s | %10s | %13s | %13s | %10s | %s';
+        $lineStructure = '%-70s | %10s | %10s | %10s | %13s | %13s | %10s | %s';
+        if ($format === "csv") {
+            $lineStructure = preg_replace(['/\|/', '/[0-9 \-]/'], [',', ''], $lineStructure);
+        }
+
         $this->output->writeln(
             sprintf(
                 $lineStructure,
@@ -129,6 +140,9 @@ class ComposerConstraintConsole extends Console
             )
         );
         foreach ($composerConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
+            $reasons = !$isVerbose ? '' :  '{"reasons:": ["' . implode('","', array_unique($composerConstraintTransfer->getModuleInfo()->getConstraintReasons())) . '"]}';
+            $reasons = $format !== "csv" ? $reasons : '"' . str_replace('"', '""', $reasons) . '"';
+
             $this->output->writeln(
                 sprintf(
                     $lineStructure,
@@ -139,7 +153,7 @@ class ComposerConstraintConsole extends Console
                     $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() . $composerConstraintTransfer->getModuleInfo()->getExpectedVersion(),
                     $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock() . $composerConstraintTransfer->getModuleInfo()->getDefinedVersion(),
                     $composerConstraintTransfer->getModuleInfo()->getLockedVersion(),
-                    $isVerbose ? '{"reasons:": ["' . implode('","', array_unique($composerConstraintTransfer->getModuleInfo()->getConstraintReasons())) . '"]}' : ''
+                    $reasons
                 )
             );
         }
