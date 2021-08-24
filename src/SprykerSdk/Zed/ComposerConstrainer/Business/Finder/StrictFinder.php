@@ -48,22 +48,26 @@ class StrictFinder implements FinderInterface
         $usedModules = [];
         foreach ($this->createFinder() as $splFileInfo) {
             switch ($splFileInfo->getExtension()) {
-                case "php":
+                case 'php':
                     $sprykerClassReflector = new SprykerClassReflector($this->config, $splFileInfo);
                     $usedModules = $this->checkPhpPublicApiCustomization($usedModules, $sprykerClassReflector);
                     $usedModules = $this->checkPhpNonPublicApiCustomization($usedModules, $sprykerClassReflector);
                     $usedModules = $this->checkPhpDependencies($usedModules, $sprykerClassReflector);
+
                     break;
-                case "xml":
+                case 'xml':
                     $sprykerXmlReflector = new SprykerXmlReflector($this->config, $splFileInfo);
                     $usedModules = $this->addXmlUsedModules($usedModules, $sprykerXmlReflector);
+
                     break;
-                case "yaml":
+                case 'yaml':
                     $sprykerYamlReflector = new SprykerYamlReflector($this->config, $splFileInfo);
                     $usedModules = $this->addYamlUsedModules($usedModules, $sprykerYamlReflector);
+
                     break;
-                case "twig":
+                case 'twig':
                     $usedModules = $this->addTwigUsedModules($usedModules, $splFileInfo);
+
                     break;
             }
         }
@@ -80,7 +84,7 @@ class StrictFinder implements FinderInterface
         $finder
             ->files()
             ->in($this->config->getSourceDirectory())
-            ->exclude(['Generated', 'Orm'])
+            ->exclude($this->config->getExcludedNamespaces())
             ->notName(['CodeBucketConfig.php'])
             ->name([ '*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml', '*validation.yaml']);
 
@@ -274,6 +278,7 @@ class StrictFinder implements FinderInterface
 
             if ($isPublic) {
                 $usedModuleTransfer->addConstraintReason('Customized: ' . $sprykerClassReflector->getClassName() . '::' . $method->getShortName() . '()');
+
                 continue;
             }
 

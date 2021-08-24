@@ -13,6 +13,8 @@ use SprykerSdk\Shared\ComposerConstrainer\ComposerConstrainerConstants;
 class ComposerConstrainerConfig extends AbstractBundleConfig
 {
     /**
+     * @api
+     *
      * @return string
      */
     public function getSourceDirectory(): string
@@ -21,6 +23,8 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     }
 
     /**
+     * @api
+     *
      * @codeCoverageIgnore Makes use of constant we only have in project context.
      *
      * @return string
@@ -31,6 +35,8 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     }
 
     /**
+     * @api
+     *
      * @return string[]
      */
     public function getCoreNamespaces(): array
@@ -39,12 +45,47 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     }
 
     /**
+     * @api
+     *
      * @return string[]
      */
     public function getStrictValidationIgnoredPackages(): array
     {
         return [
-            "spryker/kernel$", # kernel needs completley different evaluation
+            'spryker/kernel$', # kernel needs different evaluation
         ];
+    }
+
+    /**
+     * @api
+     *
+     * @return string[]
+     */
+    public function getProjectNamespaces(): array
+    {
+        return $this->get(ComposerConstrainerConstants::PROJECT_NAMESPACES);
+    }
+
+    /**
+     * @api
+     *
+     * @return string[]
+     */
+    public function getExcludedNamespaces(): array
+    {
+        return [
+            'Generated',
+            'Orm',
+        ];
+    }
+
+    /**
+     * @api
+     *
+     * @return string
+     */
+    public function getVendorDirectory(): string
+    {
+        return $this->getProjectRootPath() . 'vendor/';
     }
 }

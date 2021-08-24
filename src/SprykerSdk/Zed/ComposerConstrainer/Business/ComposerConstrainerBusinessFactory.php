@@ -18,6 +18,7 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinder\Exte
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\Finder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\StrictFinder;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedForeignModuleFinder\UsedForeignModuleFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\StrictConstraintUpdater;
@@ -55,6 +56,18 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface
+     */
+    public function createForeignConstraintUpdater(): ConstraintUpdaterInterface
+    {
+        return new ConstraintUpdater(
+            $this->createForeignConstraintValidator(),
+            $this->createComposerJsonReader(),
+            $this->createComposerJsonWriter()
+        );
+    }
+
+    /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface
      */
     public function createConstraintValidator(): ConstraintValidatorInterface
@@ -80,12 +93,34 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface
+     */
+    public function createForeignConstraintValidator(): ConstraintValidatorInterface
+    {
+        return new ConstraintValidator(
+            $this->createForeignModuleFinder(),
+            $this->createComposerJsonReader(),
+            $this->createComposerLockReader()
+        );
+    }
+
+    /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
      */
     public function createUsedModuleFinder(): FinderInterface
     {
         return new Finder(
             $this->getFinderStack()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
+     */
+    public function createForeignModuleFinder(): FinderInterface
+    {
+        return new Finder(
+            $this->getUsedForeignFinderStack()
         );
     }
 
@@ -100,12 +135,33 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[]
+     */
+    public function getUsedForeignFinderStack(): array
+    {
+        return [
+            $this->createUsedForeignModuleFinder(),
+        ];
+    }
+
+    /**
      * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
      */
     public function createExtendedModuleFinder(): FinderInterface
     {
         return new ExtendedModuleFinder(
             $this->getConfig()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
+     */
+    public function createUsedForeignModuleFinder(): FinderInterface
+    {
+        return new UsedForeignModuleFinder(
+            $this->getConfig(),
+            $this->createComposerJsonReader()
         );
     }
 

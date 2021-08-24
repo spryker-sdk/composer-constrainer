@@ -134,15 +134,11 @@ class SprykerClassReflector
     /**
      * @var array|null
      */
-    protected $usedCorePackageNamesBuffer = null;
+    protected $usedCorePackageNamesBuffer;
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
-     *
-     * @throws \ReflectionException
-     *
-     * @return void
      */
     public function __construct(ComposerConstrainerConfig $config, SplFileInfo $splFileInfo)
     {
@@ -165,12 +161,12 @@ class SprykerClassReflector
         $this->reflectionClass = new ReflectionClass($this->namespace . '\\' . $this->className);
         $this->isInterface = $this->reflectionClass->isInterface();
 
-        $this->parentClassName = $this->reflectionClass->getParentClass() ? $this->reflectionClass->getParentClass()->getShortName() : "";
-        $this->parentNamespace = $this->reflectionClass->getParentClass() ? $this->reflectionClass->getParentClass()->getNamespaceName() : "";
+        $this->parentClassName = $this->reflectionClass->getParentClass() ? $this->reflectionClass->getParentClass()->getShortName() : '';
+        $this->parentNamespace = $this->reflectionClass->getParentClass() ? $this->reflectionClass->getParentClass()->getNamespaceName() : '';
         preg_match_all('#(\\w+)\\\\\\w+\\\\(\\w+)#', $this->parentNamespace, $match);
-        $this->parentOrganisation = count($match[1]) > 0 ? $match[1][0] : "";
-        $this->parentModuleName = count($match[2]) > 0 ? $match[2][0] : "";
-        $this->parentPackageName = $this->parentOrganisation === "" ? "" : SprykerReflectionHelper::namespaceToPackageName($this->parentOrganisation, $this->parentModuleName);
+        $this->parentOrganisation = count($match[1]) > 0 ? $match[1][0] : '';
+        $this->parentModuleName = count($match[2]) > 0 ? $match[2][0] : '';
+        $this->parentPackageName = $this->parentOrganisation === '' ? '' : SprykerReflectionHelper::namespaceToPackageName($this->parentOrganisation, $this->parentModuleName);
         $this->isParentCore = $this->parentModuleName && in_array($this->parentOrganisation, $this->config->getCoreNamespaces(), true);
     }
 

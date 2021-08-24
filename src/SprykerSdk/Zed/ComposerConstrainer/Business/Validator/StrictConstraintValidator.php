@@ -108,15 +108,19 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
-    protected function createModuleInfoTransfer(bool $isCustomized, bool $isConfigured, int $customizedLineCount, array $reasons): ComposerConstraintModuleInfoTransfer
-    {
+    protected function createModuleInfoTransfer(
+        bool $isCustomized,
+        bool $isConfigured,
+        int $customizedLineCount,
+        array $reasons
+    ): ComposerConstraintModuleInfoTransfer {
         return (new ComposerConstraintModuleInfoTransfer())
             ->setIsCustomized($isCustomized)
             ->setIsConfigured($isConfigured)
             ->setCustomizedLineCount($customizedLineCount)
-            ->setDefinedConstraintLock("")
-            ->setDefinedVersion("")
-            ->setLockedVersion("")
+            ->setDefinedConstraintLock('')
+            ->setDefinedVersion('')
+            ->setLockedVersion('')
             ->setConstraintReasons($reasons);
     }
 
@@ -130,8 +134,11 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
-    protected function setDefinedModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ?ComposerConstraintTransfer $definedConstraint = null, ?ComposerConstraintTransfer $featureConstraint = null): ComposerConstraintModuleInfoTransfer
-    {
+    protected function setDefinedModuleInfo(
+        ComposerConstraintModuleInfoTransfer $usedModuleInfo,
+        ?ComposerConstraintTransfer $definedConstraint = null,
+        ?ComposerConstraintTransfer $featureConstraint = null
+    ): ComposerConstraintModuleInfoTransfer {
         if ($definedConstraint === null && $featureConstraint === null) {
             return $usedModuleInfo;
         }
@@ -154,8 +161,10 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
-    protected function setLockModuleInfo(ComposerConstraintModuleInfoTransfer $usedModuleInfo, ?ComposerConstraintTransfer $lockConstraint = null): ComposerConstraintModuleInfoTransfer
-    {
+    protected function setLockModuleInfo(
+        ComposerConstraintModuleInfoTransfer $usedModuleInfo,
+        ?ComposerConstraintTransfer $lockConstraint = null
+    ): ComposerConstraintModuleInfoTransfer {
         if ($lockConstraint === null) {
             return $usedModuleInfo;
         }
@@ -176,15 +185,15 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      */
     protected function setExpectation(ComposerConstraintModuleInfoTransfer $usedModuleInfo): ComposerConstraintModuleInfoTransfer
     {
-        $moduleUsageConstraintLock = $usedModuleInfo->getIsCustomized() ? "~" : "^";
+        $moduleUsageConstraintLock = $usedModuleInfo->getIsCustomized() ? '~' : '^';
         $definedConstraintLock = $usedModuleInfo->getDefinedConstraintLock();
         $hasDefinedVersion = !empty($usedModuleInfo->getDefinedVersion());
 
         $expectedConstraintLock = $moduleUsageConstraintLock;
         if ($hasDefinedVersion) {
             $expectedConstraintLock = $definedConstraintLock;
-            if ($definedConstraintLock === "^" && $moduleUsageConstraintLock === "~") {
-                $expectedConstraintLock = "~";
+            if ($definedConstraintLock === '^' && $moduleUsageConstraintLock === '~') {
+                $expectedConstraintLock = '~';
             }
         }
 
@@ -230,7 +239,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     {
         preg_match_all('#^(?<constraint>[\~\^])#', (string)$version, $match);
 
-        return count($match['constraint']) < 1 ? "" : $match['constraint'][0];
+        return count($match['constraint']) < 1 ? '' : $match['constraint'][0];
     }
 
     /**
