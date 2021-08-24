@@ -37,7 +37,7 @@ class ComposerConstraintConsole extends Console
             ->setDescription('Updates composer constraints in projects. When a module is extended on project level, this command will change ^ to ~ in the project\'s composer.json. This will make sure that a composer update will only pull patch versions of it for better backwards compatibility.');
 
         $this->addOption(static::OPTION_DRY_RUN, static::OPTION_DRY_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints.');
-        $this->addOption(static::OPTION_STRICT_RUN, static::OPTION_STRICT_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints on a strict manner.');
+        $this->addOption(static::OPTION_STRICT_RUN, static::OPTION_STRICT_RUN_SHORT, InputOption::VALUE_NONE, 'Use this option to validate your projects\' constraints using strict manner.');
         $this->addOption(static::OPTION_OUTPUT_FORMAT, static::OPTION_OUTPUT_FORMAT_SHORT, InputOption::VALUE_OPTIONAL, 'Use this option with "csv" value in strict validation to print report in comma separated, import ready format.');
     }
 
@@ -85,7 +85,7 @@ class ComposerConstraintConsole extends Console
     }
 
     /**
-     * @param bool $isStrict
+     * @param bool $isDryRun
      * @param bool $isVerbose
      * @param string|null $format
      *
@@ -123,7 +123,8 @@ class ComposerConstraintConsole extends Console
     {
         $lineStructure = '%-70s | %10s | %10s | %10s | %13s | %13s | %10s | %s';
         if ($format === "csv") {
-            $lineStructure = preg_replace(['/\|/', '/[0-9 \-]/'], [',', ''], $lineStructure);
+            $lineStructure = preg_replace('/\|/', ',', $lineStructure);
+            $lineStructure = preg_replace('/[0-9 \-]/', '', $lineStructure);
         }
 
         $this->output->writeln(
@@ -139,9 +140,10 @@ class ComposerConstraintConsole extends Console
                 'Reasons'
             )
         );
+
         foreach ($composerConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
-            $reasons = !$isVerbose ? '' :  '{"reasons:": ["' . implode('","', array_unique($composerConstraintTransfer->getModuleInfo()->getConstraintReasons())) . '"]}';
-            $reasons = $format !== "csv" ? $reasons : '"' . str_replace('"', '""', $reasons) . '"';
+            $reasons = $isVerbose ? '{"reasons:": ["' . implode('","', array_unique($composerConstraintTransfer->getModuleInfo()->getConstraintReasons())) . '"]}' : '';
+            $reasons = $format === "csv" ? '"' . str_replace('"', '""', $reasons) . '"' : $reasons;
 
             $this->output->writeln(
                 sprintf(
