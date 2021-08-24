@@ -40,7 +40,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface $verboseFinder
+     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface $strictFinder
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface $composerJsonReader
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface $composerLockReader
      */
@@ -70,7 +70,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
 
         $composerDefinedConstraints = $this->composerJsonReader->getConstraints();
         $composerLockConstraints = $this->composerLockReader->getConstraints();
-        $featureConstraints = $this->getFeatureConstraints($composerDefinedConstraints, $composerLockConstraints);
+        $composerLockFeatureInheritedConstraints = $this->getComposerLockFeatureInheritedConstraints($composerDefinedConstraints, $composerLockConstraints);
 
         $composerConstraintTransfers = [];
         foreach ($usedModuleCollectionTransfer->getUsedModules() as $usedModuleTransfer) {
@@ -83,7 +83,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
                 $usedModuleTransfer->getConstraintReasons()
             );
 
-            $usedModuleInfo = $this->setDefinedModuleInfo($usedModuleInfo, $composerDefinedConstraints[$usedModulePackageName] ?? null, $featureConstraints[$usedModulePackageName] ?? null);
+            $usedModuleInfo = $this->setDefinedModuleInfo($usedModuleInfo, $composerDefinedConstraints[$usedModulePackageName] ?? null, $composerLockFeatureInheritedConstraints[$usedModulePackageName] ?? null);
             $usedModuleInfo = $this->setLockModuleInfo($usedModuleInfo, $composerLockConstraints[$usedModulePackageName] ?? null);
 
             $usedModuleInfo = $this->setExpectation($usedModuleInfo);
@@ -121,6 +121,10 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
+     * Specification:
+     * - Calculates what lock and version are defined in composer.json for a given module.
+     * - Uses feature inherited lock and version from composer.lock in case module is NOT defined in composer.json.
+     *
      * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $usedModuleInfo
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer|null $definedConstraint
      *
@@ -142,6 +146,9 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
+     * Specification:
+     * - Calculates what version is defined in composer.lock for a given module.
+     *
      * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $usedModuleInfo
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer|null $lockConstraint
      *
@@ -160,7 +167,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * Specification
      * - Used modules have either "public API" (^) or customized (~) lock
      * - Defined constraint lock is either missing or major (^), minor (~) or patch ("")
-     * - If defined constraint is missing then module usage constraint drives the expection
+     * - If defined constraint is missing then module usage constraint drives the expectation
      * - If defined constraint is present then the smaller lock is the expectation
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $moduleInfo
@@ -189,7 +196,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     /**
      * Specification
      * - Ignored packages are removed.
-     * - Line count MUST be zero to be considered well configured.
+     * - Line count MUST be zero to be considered properly developed.
      * - Expected and defined constraint lock need to match to be considered will configured.
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerConstraintTransfers
@@ -202,10 +209,10 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
 
         return array_filter($composerConstraintTransfers, function (ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages): bool {
             $isIgnoredPackage = (bool)preg_match($ignoredPackages, $composerConstraintTransfer->getName());
-            $isExpectedMatchesDefined = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
+            $isExpectedLockMatchesDefinedLock = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
             $noCustomizedLineCount = $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
 
-            return $isIgnoredPackage || $isExpectedMatchesDefined && $noCustomizedLineCount ? false : true;
+            return $isIgnoredPackage || $isExpectedLockMatchesDefinedLock && $noCustomizedLineCount ? false : true;
         });
     }
 
@@ -228,18 +235,18 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
 
     /**
      * Specification
-     * - Features MUST be locked by ~ or ^ or by exact version
-     * - Retrieves the module locks by featuers based on the existing defined constraint list
+     * - Features MUST be locked by ~ or ^ or by exact version therefore anything else is ignored.
+     * - Retrieves the Spryker constraint locks by features based on the existing defined constraint list.
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerDefinedConstraints
-     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerLockedConstraints
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerLockConstraints
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
      */
-    protected function getFeatureConstraints(array $composerDefinedConstraints, array $composerLockedConstraints): array
+    protected function getComposerLockFeatureInheritedConstraints(array $composerDefinedConstraints, array $composerLockConstraints): array
     {
-        /** @var \Generated\Shared\Transfer\ComposerConstraintTransfer[] $features */
-        $features = [];
+        /** @var string[] $composerDefinedFeatureNames */
+        $composerDefinedFeatureNames = [];
         foreach ($composerDefinedConstraints as $composerDefinedConstraint) {
             if (!preg_match('#^spryker-feature/#', $composerDefinedConstraint->getName())) {
                 continue;
@@ -249,24 +256,24 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
                 continue;
             }
 
-            $features[$composerDefinedConstraint->getName()] = $composerDefinedConstraint;
+            $composerDefinedFeatureNames[] = $composerDefinedConstraint->getName();
         }
 
-        $mergedInheritedConstraints = [];
-        foreach ($features as $featureName => $featureDefinedComposerConstraintTransfer) {
-            if (!isset($composerLockedConstraints[$featureName])) {
+        $mergedComposerLockFeatureInheritedConstraints = [];
+        foreach ($composerDefinedFeatureNames as $composerDefinedFeatureName) {
+            if (!isset($composerLockConstraints[$composerDefinedFeatureName])) {
                 continue;
             }
 
-            foreach ($composerLockedConstraints[$featureName]->getDefinedConstraints() as $inheritedComposerConstraintTransfer) {
-                if (!preg_match('#^spryker#', $inheritedComposerConstraintTransfer->getName())) {
+            foreach ($composerLockConstraints[$composerDefinedFeatureName]->getDefinedConstraints() as $composerLockedFeatureInheritedConstraintTransfer) {
+                if (!preg_match('#^spryker#', $composerLockedFeatureInheritedConstraintTransfer->getName())) {
                     continue;
                 }
 
-                $mergedInheritedConstraints[$inheritedComposerConstraintTransfer->getName()] = $inheritedComposerConstraintTransfer;
+                $mergedComposerLockFeatureInheritedConstraints[$composerLockedFeatureInheritedConstraintTransfer->getName()] = $composerLockedFeatureInheritedConstraintTransfer;
             }
         }
 
-        return $mergedInheritedConstraints;
+        return $mergedComposerLockFeatureInheritedConstraints;
     }
 }

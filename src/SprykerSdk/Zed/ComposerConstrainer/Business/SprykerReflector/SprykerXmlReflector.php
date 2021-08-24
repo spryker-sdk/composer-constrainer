@@ -62,6 +62,8 @@ class SprykerXmlReflector
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     *
+     * @return void
      */
     public function __construct(ComposerConstrainerConfig $config, SplFileInfo $splFileInfo)
     {

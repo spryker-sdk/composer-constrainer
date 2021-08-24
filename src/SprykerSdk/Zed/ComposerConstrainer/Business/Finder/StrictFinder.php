@@ -89,8 +89,8 @@ class StrictFinder implements FinderInterface
 
     /**
      * Specification:
-     * - Validation changes are customiziation
-     * - Validation changes CAN NOT be transformed to pluggable so no impact on line count
+     * - Validation.yaml changes are customiziation
+     * - Validation.yaml changes CAN NOT be transformed to pluggable so no impact on line count
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerYamlReflector $sprykerYamlReflector
@@ -153,6 +153,8 @@ class StrictFinder implements FinderInterface
     }
 
     /**
+     * @todo Twig rules need to be defined
+     *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
      *
@@ -165,8 +167,9 @@ class StrictFinder implements FinderInterface
 
     /**
      * Specification
-     * - Only core class extensions are evaluted for customisation
-     * - Class extension is customization
+     * - Only core class extensions are evaluated for customization
+     * - Only non public API classes are evaluated for customization
+     * - All class extension is customization
      * - All customization lines are added to line count except Factory
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
@@ -210,14 +213,18 @@ class StrictFinder implements FinderInterface
 
     /**
      * Specification
-     * - ?? New Facade with interface only?
-     * - Only core class extensions are evaluted for customisation. ?? New Facade with interface only?
+     * - Only core class extensions are evaluated for customization.
+     * - Only public API classes are evaluated for customization
      * - Config and dependency provider class extension: public entity overriding is configuration
      * - Config and dependency provider class extension: entity addition or call to a protected/private entity is customization
-     * - External API class extension: public entity overriding is depenency toward the module's major version
+     * - External API class extension: public entity overriding is dependency toward the module's major version
      * - External API class extension: entity addition or call to a protected/private entity is customization
      * - Class extension: class extension is customization
-     * - For trail version all customization lines are added to line count except Factory changes and adding public API public entity
+     * - For trail version all customization lines are added to line count except adding public API public entity
+     *
+     * @todo Facade without core extension but core interface needs to be also considered
+     * @todo Implement evaluation also for constants and properties (according in description)
+     * @todo Implement evaluation for called method access modifier (according in description)
      *
      * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector $sprykerClassReflector
@@ -279,6 +286,11 @@ class StrictFinder implements FinderInterface
     }
 
     /**
+     * Specification:
+     * - Calculates body line count.
+     * - Abstract and interface methods have EndLine = null
+     * - Regular methods have to be compensated with -2 according to StartLine and EndLine concept.
+     *
      * @param \ReflectionMethod $method
      * @param bool $isClassInterface
      *

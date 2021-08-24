@@ -175,6 +175,11 @@ class SprykerClassReflector
     }
 
     /**
+     * Specification:
+     * - Checks all "use" in the current class file for Core namespace usages.
+     *
+     * @example [spryker/example-used-core-package-name]
+     *
      * @return string[]
      */
     public function getUsedCorePackageNames(): array
@@ -207,6 +212,9 @@ class SprykerClassReflector
     }
 
     /**
+     * Specification:
+     * - Retrieves the methods that are defined in the current class file and NOT exist in the parent class.
+     *
      * @return \ReflectionMethod[]
      */
     public function getNewMethods(): array
@@ -217,6 +225,9 @@ class SprykerClassReflector
     }
 
     /**
+     * Specification:
+     * - Retrieves the methods that exist in the parent class (including inherited methods).
+     *
      * @return \ReflectionMethod[]
      */
     public function getParentMethods(): array
