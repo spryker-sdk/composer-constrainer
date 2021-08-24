@@ -17,12 +17,12 @@ class SprykerClassReflector
     /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
      */
-    protected ComposerConstrainerConfig $config;
+    protected $config;
 
     /**
      * @var string[]
      */
-    protected array $publicApiClassSuffixes = [
+    protected $publicApiClassSuffixes = [
         'Service\.php',
         'Client\.php',
         'Facade\.php',
@@ -35,7 +35,7 @@ class SprykerClassReflector
     /**
      * @var string[]
      */
-    protected array $publicApiInterfaceSuffixes = [
+    protected $publicApiInterfaceSuffixes = [
         'ServiceInterface\.php',
         'ClientInterface\.php',
         'FacadeInterface\.php',
@@ -46,7 +46,7 @@ class SprykerClassReflector
     /**
      * @var string[]
      */
-    protected array $configurationClassSuffixes = [
+    protected $configurationClassSuffixes = [
         'Config\.php',
         'DependencyProvider\.php',
     ];
@@ -54,91 +54,95 @@ class SprykerClassReflector
     /**
      * @var bool
      */
-    protected bool $isPublicApi;
+    protected $isPublicApi;
 
     /**
      * @var bool
      */
-    protected bool $isConfiguration;
+    protected $isConfiguration;
 
     /**
      * @var bool
      */
-    protected bool $isFactory;
+    protected $isFactory;
 
     /**
      * @var bool
      */
-    protected bool $isInterface;
+    protected $isInterface;
 
     /**
      * @var string
      */
-    protected string $namespace;
+    protected $namespace;
 
     /**
      * @var string
      */
-    protected string $moduleName;
+    protected $moduleName;
 
     /**
      * @var string
      */
-    protected string $fileName;
+    protected $fileName;
 
     /**
      * @var string
      */
-    protected string $fileContent;
+    protected $fileContent;
 
     /**
      * @var string
      */
-    protected string $className;
+    protected $className;
 
     /**
      * @var \ReflectionClass
      */
-    protected \ReflectionClass $reflectionClass;
+    protected $reflectionClass;
 
     /**
      * @var bool
      */
-    protected bool $isParentCore;
+    protected $isParentCore;
 
     /**
      * @var string
      */
-    protected string $parentNamespace;
+    protected $parentNamespace;
 
     /**
      * @var string
      */
-    protected string $parentOrganisation;
+    protected $parentOrganisation;
 
     /**
      * @var string
      */
-    protected string $parentModuleName;
+    protected $parentModuleName;
 
     /**
      * @var string
      */
-    protected string $parentClassName;
+    protected $parentClassName;
 
     /**
      * @var string
      */
-    protected string $parentPackageName;
+    protected $parentPackageName;
 
     /**
      * @var array|null
      */
-    protected ?array $usedCorePackageNames = null;
+    protected $usedCorePackageNamesBuffer = null;
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
+     *
+     * @throws \ReflectionException
+     *
+     * @return void
      */
     public function __construct(ComposerConstrainerConfig $config, SplFileInfo $splFileInfo)
     {
@@ -175,23 +179,23 @@ class SprykerClassReflector
      */
     public function getUsedCorePackageNames(): array
     {
-        if ($this->usedCorePackageNames !== null) {
-            return $this->usedCorePackageNames;
+        if ($this->usedCorePackageNamesBuffer !== null) {
+            return $this->usedCorePackageNamesBuffer;
         }
 
         $pattern = sprintf('#\nuse +(%s)\\\\\\w+\\\\(\\w+)\\\\#', implode('|', $this->config->getCoreNamespaces()));
         preg_match_all($pattern, $this->fileContent, $match);
 
-        $this->usedCorePackageNames = [];
+        $this->usedCorePackageNamesBuffer = [];
         foreach ($match[1] as $key => $organisation) {
             $moduleName = $match[2][$key];
 
-            $this->usedCorePackageNames[] = SprykerReflectionHelper::namespaceToPackageName($organisation, $moduleName);
+            $this->usedCorePackageNamesBuffer[] = SprykerReflectionHelper::namespaceToPackageName($organisation, $moduleName);
         }
 
-        $this->usedCorePackageNames = array_unique($this->usedCorePackageNames);
+        $this->usedCorePackageNamesBuffer = array_unique($this->usedCorePackageNamesBuffer);
 
-        return $this->usedCorePackageNames;
+        return $this->usedCorePackageNamesBuffer;
     }
 
     /**

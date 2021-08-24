@@ -15,34 +15,34 @@ class SprykerYamlReflector
     /**
      * @var \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig
      */
-    protected ComposerConstrainerConfig $config;
+    protected $config;
 
     /**
      * @todo Determin organisation properly
      *
      * @var string
      */
-    protected string $organisation = 'Spryker';
+    protected $organisation = 'Spryker';
 
     /**
      * @var string
      */
-    protected string $packageName;
+    protected $packageName;
 
     /**
      * @var string
      */
-    protected string $moduleName;
+    protected $moduleName;
 
     /**
      * @var string
      */
-    protected string $fileName;
+    protected $fileName;
 
     /**
      * @var string
      */
-    protected string $fileContent;
+    protected $fileContent;
 
     /**
      * @param \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig $config
