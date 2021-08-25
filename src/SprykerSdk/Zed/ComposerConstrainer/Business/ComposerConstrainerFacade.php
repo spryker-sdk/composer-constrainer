@@ -20,6 +20,8 @@ class ComposerConstrainerFacade extends AbstractFacade implements ComposerConstr
      *
      * @api
      *
+     * @param bool $isStrict
+     *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
     public function updateConstraints(bool $isStrict = false): ComposerConstraintCollectionTransfer
