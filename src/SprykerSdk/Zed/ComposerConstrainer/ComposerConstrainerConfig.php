@@ -52,7 +52,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     public function getStrictValidationIgnoredPackages(): array
     {
         return [
-            'spryker/kernel$', # kernel needs different evaluation
+            'spryker/kernel', # kernel needs different evaluation
         ];
     }
 
