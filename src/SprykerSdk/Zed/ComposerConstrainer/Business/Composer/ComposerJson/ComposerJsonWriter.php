@@ -53,7 +53,7 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
      *
      * @throws \RuntimeException
      *
-     * @return void
+     * @return int
      */
     protected function autoDetectIndentation(string $composerJsonFileName): int
     {
