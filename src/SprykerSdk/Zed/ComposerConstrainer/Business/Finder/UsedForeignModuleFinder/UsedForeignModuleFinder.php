@@ -129,7 +129,7 @@ class UsedForeignModuleFinder implements FinderInterface
     /**
      * @param string $className
      *
-     * @return \Spryker\Shared\Kernel\Transfer\AbstractTransfer\UsedModuleTransfer|null
+     * @return \Generated\Shared\Transfer\UsedModuleTransfer|null
      */
     protected function getUsedModuleByClassName(string $className): ?UsedModuleTransfer
     {
