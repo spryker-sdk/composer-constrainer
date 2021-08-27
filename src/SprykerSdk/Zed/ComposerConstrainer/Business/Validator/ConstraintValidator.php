@@ -98,6 +98,10 @@ class ConstraintValidator implements ConstraintValidatorInterface
         array $composerConstraints,
         ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
     ): ComposerConstraintCollectionTransfer {
+        if (empty($composerConstraints[$composerName])) {
+            return $composerConstraintCollectionTransfer;
+        }
+
         $composerConstraintTransfer = $composerConstraints[$composerName];
 
         $expectedVersion = sprintf('~%s', $composerConstraintTransfer->getVersion());
