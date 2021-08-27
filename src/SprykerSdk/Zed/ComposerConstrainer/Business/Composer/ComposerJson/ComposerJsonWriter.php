@@ -31,9 +31,8 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
      */
     public function write(array $composerJsonArray): bool
     {
-        $encodedJson4Spaces = json_encode($composerJsonArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-        $encodedJson2Spaces = preg_replace('/^(  +?)\\1(?=[^ ])/m', '$1', $encodedJson4Spaces) . "\n";
+        $encodedJson = json_encode($composerJsonArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-        return (bool)file_put_contents($this->config->getProjectRootPath() . 'composer.json', $encodedJson2Spaces);
+        return (bool)file_put_contents($this->config->getProjectRootPath() . 'composer.json', $encodedJson);
     }
 }
