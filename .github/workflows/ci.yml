@@ -55,6 +55,9 @@ jobs:
       - name: CodeStyle checks
         run: composer cs-check
 
+      - name: PHPStan checks
+        run: composer stan
+
   prefer-lowest:
     runs-on: ubuntu-18.04
     strategy:
