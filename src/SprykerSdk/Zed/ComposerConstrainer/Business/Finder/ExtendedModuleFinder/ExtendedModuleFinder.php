@@ -10,10 +10,10 @@ namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinde
 use Closure;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
+use PHPStan\BetterReflection\BetterReflection;
+use PHPStan\BetterReflection\Reflector\ClassReflector;
+use PHPStan\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
 use ReflectionClass;
-use Roave\BetterReflection\BetterReflection;
-use Roave\BetterReflection\Reflector\ClassReflector;
-use Roave\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 use Symfony\Component\Finder\Finder;
