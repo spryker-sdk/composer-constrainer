@@ -22,7 +22,6 @@ suites:
                 - \SprykerTest\Shared\Testify\Helper\LocatorHelper:
                       coreNamespaces:
                           - Spryker
-                          - SprykerShop
                           - SprykerSdk
                 - \SprykerTest\Shared\Transfer\Helper\TransferGenerateHelper:
                       isolated: true
@@ -40,7 +39,6 @@ suites:
                 - \SprykerTest\Shared\Testify\Helper\ConfigHelper
                 - \SprykerTest\Shared\Testify\Helper\LocatorHelper:
                       coreNamespaces:
-                          - SprykerShop
                           - Spryker
                           - SprykerSdk
                 - \SprykerTest\Shared\Transfer\Helper\TransferGenerateHelper:
