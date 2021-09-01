@@ -11,4 +11,3 @@ parameters:
     checkMissingIterableValueType: false
 
     ignoreErrors:
-        - '#Method Generated\\Shared\\Transfer\\.+Transfer::.+\(\) should return array but return statement is missing#'

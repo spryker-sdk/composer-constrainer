@@ -1,3 +1,3 @@
 <?php
 
-define('APPLICATION_ROOT_DIR', sys_get_temp_dir());
+define('APPLICATION_ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR);
