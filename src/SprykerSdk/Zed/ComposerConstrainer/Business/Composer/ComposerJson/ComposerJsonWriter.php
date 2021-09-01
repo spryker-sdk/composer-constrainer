@@ -31,6 +31,8 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
     /**
      * @param array $composerJsonArray
      *
+     * @throws \RuntimeException
+     *
      * @return bool
      */
     public function write(array $composerJsonArray): bool
