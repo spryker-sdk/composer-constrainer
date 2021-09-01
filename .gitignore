@@ -31,8 +31,7 @@ src/*/Zed/*/Persistence/Propel/Base/*
 src/*/Zed/*/Persistence/Propel/Map/*
 
 # tests
-tests/app/src/Spryker/Generated/
-tests/app/src/Spryker/Shared/
+tests/app/
 tests/**/_generated/
 tests/_output/*
 !tests/_output/.gitkeep
