@@ -7,6 +7,7 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson;
 
+use Ergebnis\Json\Printer\Printer;
 use RuntimeException;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
@@ -42,7 +43,12 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
             $indentation = $this->autoDetectIndentation($composerJsonFileName);
         }
         if ($indentation !== static::INDENTATION_DEFAULT) {
-            $encodedJson = preg_replace('/^(    +?)\\1(?=[^' . str_repeat(' ', $indentation) . '])/m', '$1', $encodedJson) . "\n";
+            if (!class_exists(Printer::class)) {
+                throw new RuntimeException(
+                    sprintf('Non default 4 space indentation requires package `%s` installed.', 'ergebnis/json-printer')
+                );
+            }
+            $encodedJson = (new Printer())->print($encodedJson, str_repeat(' ', $indentation));
         }
 
         return (bool)file_put_contents($composerJsonFileName, $encodedJson);
@@ -62,7 +68,7 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
             throw new RuntimeException('Cannot read file ' . $composerJsonFileName);
         }
 
-        preg_match('/^(.+)"name":/', $content, $matches);
+        preg_match('/^(.+)(".+":)/m', $content, $matches);
         if (!$matches) {
             return static::INDENTATION_DEFAULT;
         }
