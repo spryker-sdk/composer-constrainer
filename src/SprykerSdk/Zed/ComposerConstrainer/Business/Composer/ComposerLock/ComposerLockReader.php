@@ -7,6 +7,7 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock;
 
+use RuntimeException;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerLockReader implements ComposerLockReaderInterface
@@ -25,10 +26,22 @@ class ComposerLockReader implements ComposerLockReaderInterface
     }
 
     /**
+     * @throws \RuntimeException
+     *
      * @return array
      */
     public function read(): array
     {
-        return json_decode(file_get_contents($this->config->getProjectRootPath() . 'composer.lock'), true);
+        $path = $this->config->getProjectRootPath() . 'composer.lock';
+        if (!file_exists($path)) {
+            return [];
+        }
+
+        $content = file_get_contents($path);
+        if ($content === false) {
+            throw new RuntimeException('Cannot read content: ' . $path);
+        }
+
+        return json_decode($content, true);
     }
 }
