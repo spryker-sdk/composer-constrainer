@@ -31,13 +31,11 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
     /**
      * @param array $composerJsonArray
      *
-     * @throws \RuntimeException
-     *
      * @return bool
      */
     public function write(array $composerJsonArray): bool
     {
-        $encodedJson = json_encode($composerJsonArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $encodedJson = json_encode($composerJsonArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
 
         $indentation = static::INDENTATION_DEFAULT;
         $composerJsonFileName = $this->config->getProjectRootPath() . 'composer.json';
@@ -45,12 +43,7 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
             $indentation = $this->autoDetectIndentation($composerJsonFileName);
         }
         if ($indentation !== static::INDENTATION_DEFAULT) {
-            if (!class_exists(Printer::class)) {
-                throw new RuntimeException(
-                    sprintf('Non default 4 space indentation requires package `%s` installed.', 'ergebnis/json-printer')
-                );
-            }
-            $encodedJson = (new Printer())->print($encodedJson, str_repeat(' ', $indentation));
+            $encodedJson = $this->adjustIndentation($encodedJson, $indentation);
         }
 
         return (bool)file_put_contents($composerJsonFileName, $encodedJson);
@@ -76,5 +69,24 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
         }
 
         return strlen($matches[1]);
+    }
+
+    /**
+     * @param string $encodedJson
+     * @param int $indentation
+     *
+     * @throws \RuntimeException
+     *
+     * @return string
+     */
+    protected function adjustIndentation(string $encodedJson, int $indentation): string
+    {
+        if (!class_exists(Printer::class)) {
+            throw new RuntimeException(
+                sprintf('Non default 4 space indentation requires package `%s` installed.', 'ergebnis/json-printer')
+            );
+        }
+
+        return (new Printer())->print($encodedJson, str_repeat(' ', $indentation)) . PHP_EOL;
     }
 }

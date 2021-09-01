@@ -51,7 +51,7 @@ class ComposerJsonWriterTest extends Unit
 
         $path = dirname(__DIR__, 6) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR;
         $file = $path . 'composer4space.json';
-        $this->assertStringEqualsFile($file, $content . PHP_EOL);
+        $this->assertStringEqualsFile($file, $content);
     }
 
     /**
@@ -82,7 +82,7 @@ class ComposerJsonWriterTest extends Unit
 
         $content = file_get_contents($root . 'composer.json');
 
-        $this->assertStringEqualsFile($file, $content . PHP_EOL);
+        $this->assertStringEqualsFile($file, $content);
     }
 
     /**
