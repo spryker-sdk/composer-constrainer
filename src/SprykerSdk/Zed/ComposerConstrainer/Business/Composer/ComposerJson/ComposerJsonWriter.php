@@ -7,6 +7,7 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson;
 
+use Ergebnis\Json\Printer\Printer;
 use RuntimeException;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
@@ -34,7 +35,7 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
      */
     public function write(array $composerJsonArray): bool
     {
-        $encodedJson = json_encode($composerJsonArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $encodedJson = json_encode($composerJsonArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
 
         $indentation = static::INDENTATION_DEFAULT;
         $composerJsonFileName = $this->config->getProjectRootPath() . 'composer.json';
@@ -42,7 +43,7 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
             $indentation = $this->autoDetectIndentation($composerJsonFileName);
         }
         if ($indentation !== static::INDENTATION_DEFAULT) {
-            $encodedJson = preg_replace('/^(    +?)\\1(?=[^' . str_repeat(' ', $indentation) . '])/m', '$1', $encodedJson) . "\n";
+            $encodedJson = $this->adjustIndentation($encodedJson, $indentation);
         }
 
         return (bool)file_put_contents($composerJsonFileName, $encodedJson);
@@ -62,11 +63,30 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
             throw new RuntimeException('Cannot read file ' . $composerJsonFileName);
         }
 
-        preg_match('/^(.+)"name":/', $content, $matches);
+        preg_match('/^(.+)(".+":)/m', $content, $matches);
         if (!$matches) {
             return static::INDENTATION_DEFAULT;
         }
 
         return strlen($matches[1]);
+    }
+
+    /**
+     * @param string $encodedJson
+     * @param int $indentation
+     *
+     * @throws \RuntimeException
+     *
+     * @return string
+     */
+    protected function adjustIndentation(string $encodedJson, int $indentation): string
+    {
+        if (!class_exists(Printer::class)) {
+            throw new RuntimeException(
+                sprintf('Non default 4 space indentation requires package `%s` installed.', 'ergebnis/json-printer')
+            );
+        }
+
+        return (new Printer())->print($encodedJson, str_repeat(' ', $indentation)) . PHP_EOL;
     }
 }
