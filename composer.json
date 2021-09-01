@@ -25,7 +25,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Generated\\": "tests/app/src/Spryker/Generated/",
+            "Generated\\": "tests/app/src/Generated/",
             "SprykerSdkTest\\": "tests/SprykerSdkTest/"
         }
     },

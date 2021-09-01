@@ -46,17 +46,4 @@ $stores['DE'] = [
     'storesWithSharedPersistence' => ['AT'],
 ];
 
-$stores['AT'] = [
-        'storesWithSharedPersistence' => ['DE'],
-    ] + $stores['DE'];
-
-$stores['US'] = [
-        'queuePools' => [
-            'synchronizationPool' => [
-                'US-connection',
-            ],
-        ],
-        'storesWithSharedPersistence' => [],
-    ] + $stores['DE'];
-
 return $stores;
