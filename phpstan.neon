@@ -1,5 +1,5 @@
 parameters:
-    level: 1
+    level: 8
     paths:
         - src/
     excludes_analyse:
@@ -11,4 +11,3 @@ parameters:
     checkMissingIterableValueType: false
 
     ignoreErrors:
-        - '#Method Generated\\Shared\\Transfer\\.+Transfer::.+\(\) should return array but return statement is missing#'
