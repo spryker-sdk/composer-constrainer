@@ -2,5 +2,13 @@ parameters:
     level: 1
     paths:
         - src/
+    excludes_analyse:
+
+    bootstrapFiles:
+        - tests/bootstrap.php
+
+    treatPhpDocTypesAsCertain: false
+    checkMissingIterableValueType: false
 
     ignoreErrors:
+        - '#Method Generated\\Shared\\Transfer\\.+Transfer::.+\(\) should return array but return statement is missing#'
