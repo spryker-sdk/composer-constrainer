@@ -11,6 +11,7 @@ use Closure;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
 use ReflectionClass;
+use RuntimeException;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
@@ -102,6 +103,9 @@ class UsedForeignModuleFinder implements FinderInterface
         foreach ($this->getUsedClassNamesInFile($fileContent) as $usedClassName) {
             if (!$this->isExcludedClass($usedClassName) && $this->isVendorClass($usedClassName)) {
                 $usedModuleTransfer = $this->getUsedModuleByClassName($usedClassName);
+                if (!$usedModuleTransfer) {
+                    continue;
+                }
                 $usedModuleCollectionTransfer->addUsedModule($usedModuleTransfer);
             }
         }
@@ -127,9 +131,11 @@ class UsedForeignModuleFinder implements FinderInterface
     }
 
     /**
+     * @phpstan-param class-string $className
+     *
      * @param string $className
      *
-     * @return \Spryker\Shared\Kernel\Transfer\AbstractTransfer\UsedModuleTransfer|null
+     * @return \Generated\Shared\Transfer\UsedModuleTransfer|null
      */
     protected function getUsedModuleByClassName(string $className): ?UsedModuleTransfer
     {
@@ -162,6 +168,8 @@ class UsedForeignModuleFinder implements FinderInterface
     }
 
     /**
+     * @phpstan-param class-string $className
+     *
      * @param string $className
      *
      * @return bool
@@ -175,16 +183,27 @@ class UsedForeignModuleFinder implements FinderInterface
     }
 
     /**
+     * @phpstan-param class-string $className
+     *
      * @param string $className
+     *
+     * @throws \RuntimeException
      *
      * @return string
      */
     protected function getClassFileNameByClassName(string $className): string
     {
-        return (new ReflectionClass($className))->getFileName();
+        $fileName = (new ReflectionClass($className))->getFileName();
+        if ($fileName === false) {
+            throw new RuntimeException('Cannot parse file name from ' . $className);
+        }
+
+        return $fileName;
     }
 
     /**
+     * @phpstan-return class-string[]
+     *
      * @param string $fileContent
      *
      * @return string[]
@@ -195,7 +214,9 @@ class UsedForeignModuleFinder implements FinderInterface
         $usedClasses = [];
         if (preg_match_all($pattern, $fileContent, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $usedClasses[] = explode(' ', $match[1])[0];
+                /** @phpstan-var class-string $class */
+                $class = explode(' ', $match[1])[0];
+                $usedClasses[] = $class;
             }
         }
 

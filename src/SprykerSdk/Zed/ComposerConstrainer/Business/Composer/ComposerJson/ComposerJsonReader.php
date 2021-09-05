@@ -8,6 +8,7 @@
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson;
 
 use Generated\Shared\Transfer\ComposerConstraintTransfer;
+use RuntimeException;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerJsonReader implements ComposerJsonReaderInterface
@@ -38,16 +39,23 @@ class ComposerJsonReader implements ComposerJsonReaderInterface
     /**
      * @param string $filePath
      *
+     * @throws \RuntimeException
+     *
      * @return array
      */
     public function readFromFilePath(string $filePath): array
     {
-        $composerJsonFileName = $filePath . static::COMPOSER_JSON_FILENAME;
-        if (!file_exists($composerJsonFileName)) {
+        $path = $filePath . static::COMPOSER_JSON_FILENAME;
+        if (!file_exists($path)) {
             return [];
         }
 
-        return json_decode(file_get_contents($composerJsonFileName), true);
+        $content = file_get_contents($path);
+        if ($content === false) {
+            throw new RuntimeException('Cannot read content: ' . $path);
+        }
+
+        return json_decode($content, true);
     }
 
     /**
