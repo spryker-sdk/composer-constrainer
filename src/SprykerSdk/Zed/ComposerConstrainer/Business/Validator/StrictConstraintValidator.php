@@ -179,7 +179,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * - If defined constraint is missing then module usage constraint drives the expectation
      * - If defined constraint is present then the smaller lock is the expectation
      *
-     * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $moduleInfo
+     * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $usedModuleInfo
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */

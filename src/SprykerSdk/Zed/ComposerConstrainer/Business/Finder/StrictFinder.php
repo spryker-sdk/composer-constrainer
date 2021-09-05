@@ -342,7 +342,7 @@ class StrictFinder implements FinderInterface
      * - Sets and/or retrieves expected element
      * - Instantiates missing searched element in the provided array by reference.
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] &$usedModules
+     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
      * @param string $packageName
      * @param string $organisation
      * @param string $moduleName
