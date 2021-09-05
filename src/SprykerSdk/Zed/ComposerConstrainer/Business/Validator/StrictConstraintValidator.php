@@ -205,7 +205,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     /**
      * Specification
      * - Ignored packages are removed.
-     * - Line count MUST be zero to be considered properly developed.
+     * - Line count MUST be zero to be considered properly developed except if it is disabled in configuration.
      * - Expected and defined constraint lock need to match to be considered will configured.
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerConstraintTransfers
@@ -215,11 +215,12 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     protected function removeCorrectPackages(array $composerConstraintTransfers): array
     {
         $ignoredPackages = '#(' . implode('|', $this->config->getStrictValidationIgnoredPackages()) . ')#';
+        $isIgnoreLineCount = $this->config->getIsIgnoreLineCount();
 
-        return array_filter($composerConstraintTransfers, function (ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages): bool {
+        return array_filter($composerConstraintTransfers, function (ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages, $isIgnoreLineCount): bool {
             $isIgnoredPackage = (bool)preg_match($ignoredPackages, $composerConstraintTransfer->getName());
             $isExpectedLockMatchesDefinedLock = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
-            $noCustomizedLineCount = $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
+            $noCustomizedLineCount = $isIgnoreLineCount || $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
 
             return $isIgnoredPackage || $isExpectedLockMatchesDefinedLock && $noCustomizedLineCount ? false : true;
         });
