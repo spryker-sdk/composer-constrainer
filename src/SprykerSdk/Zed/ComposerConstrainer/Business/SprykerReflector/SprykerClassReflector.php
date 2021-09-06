@@ -154,9 +154,9 @@ class SprykerClassReflector
         $this->className = $match[2][0];
         $this->fileName = $splFileInfo->getFilename();
 
-        $this->isPublicApi = preg_match('#(' . implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)) . ')#', $this->fileName);
-        $this->isConfiguration = preg_match('#(' . implode('|', $this->configurationClassSuffixes) . ')#', $this->fileName);
-        $this->isFactory = preg_match('#Factory\.php#', $this->fileName);
+        $this->isPublicApi = (bool)preg_match('#(' . implode('|', array_merge($this->publicApiClassSuffixes, $this->publicApiInterfaceSuffixes)) . ')#', $this->fileName);
+        $this->isConfiguration = (bool)preg_match('#(' . implode('|', $this->configurationClassSuffixes) . ')#', $this->fileName);
+        $this->isFactory = (bool)preg_match('#Factory\.php#', $this->fileName);
 
         $this->reflectionClass = new ReflectionClass($this->namespace . '\\' . $this->className);
         $this->isInterface = $this->reflectionClass->isInterface();

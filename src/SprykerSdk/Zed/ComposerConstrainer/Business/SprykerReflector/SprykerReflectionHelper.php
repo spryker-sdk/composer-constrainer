@@ -36,7 +36,7 @@ class SprykerReflectionHelper
     public static function namespaceToPackageName(string $organisation, string $moduleName): string
     {
         $transformer = function (string $camelCase): string {
-            return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
+            return strtolower((string)preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
         };
 
         return $transformer($organisation) . '/' . $transformer($moduleName);
@@ -50,7 +50,7 @@ class SprykerReflectionHelper
     public static function relativeFilePathToPackageName(string $organisation, string $relativeFilepath): string
     {
         $transformer = function (string $camelCase): string {
-            return strtolower(preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
+            return strtolower((string)preg_replace('%([A-Z])([a-z])%', '-\1\2', lcfirst($camelCase)));
         };
 
         preg_match_all('#^[^/]*/[^/]*/(?<module>[^/]*)/#', $relativeFilepath, $match);
