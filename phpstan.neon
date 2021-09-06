@@ -11,3 +11,5 @@ parameters:
     checkMissingIterableValueType: false
 
     ignoreErrors:
+        - '#Property SprykerSdk\\Zed\\ComposerConstrainer\\Business\\SprykerReflector\\SprykerClassReflector::\$reflectionClass with generic class ReflectionClass does not specify its types: T#'
+        - '#Parameter \#1 \$argument of class ReflectionClass constructor expects class-string<T of object>\|T of object, string given.#'

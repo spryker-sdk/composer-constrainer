@@ -101,16 +101,16 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @param bool $isCustomized
-     * @param bool $isConfigured
+     * @param bool|null $isCustomized
+     * @param bool|null $isConfigured
      * @param int $customizedLineCount
      * @param string[] $reasons
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
     protected function createModuleInfoTransfer(
-        bool $isCustomized,
-        bool $isConfigured,
+        ?bool $isCustomized,
+        ?bool $isConfigured,
         int $customizedLineCount,
         array $reasons
     ): ComposerConstraintModuleInfoTransfer {
@@ -143,8 +143,8 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
             return $usedModuleInfo;
         }
 
-        $version = $definedConstraint ? $definedConstraint->getVersion() : $featureConstraint->getVersion();
-        $isDev = $definedConstraint ? $definedConstraint->getIsDev() : $featureConstraint->getIsDev();
+        $version = (string)($definedConstraint ? $definedConstraint->getVersion() : $featureConstraint->getVersion());
+        $isDev = (bool)($definedConstraint ? $definedConstraint->getIsDev() : $featureConstraint->getIsDev());
 
         return $usedModuleInfo
             ->setDefinedConstraintLock($this->extractConstraintLock($version))
@@ -218,7 +218,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
         $isIgnoreLineCount = $this->config->getIsIgnoreLineCount();
 
         return array_filter($composerConstraintTransfers, function (ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages, $isIgnoreLineCount): bool {
-            $isIgnoredPackage = (bool)preg_match($ignoredPackages, $composerConstraintTransfer->getName());
+            $isIgnoredPackage = (bool)preg_match($ignoredPackages, (string)$composerConstraintTransfer->getName());
             $isExpectedLockMatchesDefinedLock = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
             $noCustomizedLineCount = $isIgnoreLineCount || $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
 
@@ -258,11 +258,11 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
         /** @var string[] $composerDefinedFeatureNames */
         $composerDefinedFeatureNames = [];
         foreach ($composerDefinedConstraints as $composerDefinedConstraint) {
-            if (!preg_match('#^spryker-feature/#', $composerDefinedConstraint->getName())) {
+            if (!preg_match('#^spryker-feature/#', (string)$composerDefinedConstraint->getName())) {
                 continue;
             }
 
-            if (!preg_match('#^[~^]?[0-9]#', $composerDefinedConstraint->getVersion())) {
+            if (!preg_match('#^[~^]?[0-9]#', (string)$composerDefinedConstraint->getVersion())) {
                 continue;
             }
 
@@ -276,7 +276,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
             }
 
             foreach ($composerLockConstraints[$composerDefinedFeatureName]->getDefinedConstraints() as $composerLockedFeatureInheritedConstraintTransfer) {
-                if (!preg_match('#^spryker#', $composerLockedFeatureInheritedConstraintTransfer->getName())) {
+                if (!preg_match('#^spryker#', (string)$composerLockedFeatureInheritedConstraintTransfer->getName())) {
                     continue;
                 }
 

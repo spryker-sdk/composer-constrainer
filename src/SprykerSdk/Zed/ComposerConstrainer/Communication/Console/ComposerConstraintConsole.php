@@ -8,6 +8,7 @@
 namespace SprykerSdk\Zed\ComposerConstrainer\Communication\Console;
 
 use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
+use Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer;
 use Spryker\Zed\Kernel\Communication\Console\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -135,8 +136,8 @@ class ComposerConstraintConsole extends Console
     ): void {
         $lineStructure = '%-70s | %10s | %10s | %10s | %13s | %13s | %10s | %s';
         if ($format === 'csv') {
-            $lineStructure = preg_replace('/\|/', ',', $lineStructure);
-            $lineStructure = preg_replace('/[0-9 \-]/', '', $lineStructure);
+            $lineStructure = (string)preg_replace('/\|/', ',', $lineStructure);
+            $lineStructure = (string)preg_replace('/[0-9 \-]/', '', $lineStructure);
         }
 
         $this->output->writeln(
