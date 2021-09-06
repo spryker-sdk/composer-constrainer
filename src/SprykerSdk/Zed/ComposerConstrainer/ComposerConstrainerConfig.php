@@ -48,6 +48,8 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
      * Specification:
      * - When true, customization line count will be ignored as an issue that needs to be fixed.
      *
+     * @api
+     *
      * @return bool
      */
     public function getIsIgnoreLineCount(): bool

@@ -8,7 +8,6 @@
 namespace SprykerSdk\Zed\ComposerConstrainer\Communication\Console;
 
 use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
-use Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer;
 use Spryker\Zed\Kernel\Communication\Console\Console;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -155,19 +154,20 @@ class ComposerConstraintConsole extends Console
         );
 
         foreach ($composerConstraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
-            $reasons = $isVerbose ? '{"reasons:": ["' . implode('","', array_unique($composerConstraintTransfer->getModuleInfo()->getConstraintReasons())) . '"]}' : '';
+            $moduleInfoTransfer = $composerConstraintTransfer->getModuleInfoOrFail();
+            $reasons = $isVerbose ? '{"reasons:": ["' . implode('","', array_unique($moduleInfoTransfer->getConstraintReasons())) . '"]}' : '';
             $reasons = $format === 'csv' ? '"' . str_replace('"', '""', $reasons) . '"' : $reasons;
 
             $this->output->writeln(
                 sprintf(
                     $lineStructure,
                     $composerConstraintTransfer->getName(),
-                    $composerConstraintTransfer->getModuleInfo()->getIsCustomized() ? 'Yes' : '',
-                    $composerConstraintTransfer->getModuleInfo()->getIsConfigured() ? 'Yes' : '',
-                    $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() ?: 0,
-                    $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() . $composerConstraintTransfer->getModuleInfo()->getExpectedVersion(),
-                    $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock() . $composerConstraintTransfer->getModuleInfo()->getDefinedVersion(),
-                    $composerConstraintTransfer->getModuleInfo()->getLockedVersion(),
+                    $moduleInfoTransfer->getIsCustomized() ? 'Yes' : '',
+                    $moduleInfoTransfer->getIsConfigured() ? 'Yes' : '',
+                    $moduleInfoTransfer->getCustomizedLineCount() ?: 0,
+                    $moduleInfoTransfer->getExpectedConstraintLock() . $moduleInfoTransfer->getExpectedVersion(),
+                    $moduleInfoTransfer->getDefinedConstraintLock() . $moduleInfoTransfer->getDefinedVersion(),
+                    $moduleInfoTransfer->getLockedVersion(),
                     $reasons
                 )
             );

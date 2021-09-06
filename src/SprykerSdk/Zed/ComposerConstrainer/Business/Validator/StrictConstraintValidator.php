@@ -143,8 +143,14 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
             return $usedModuleInfo;
         }
 
-        $version = (string)($definedConstraint ? $definedConstraint->getVersion() : $featureConstraint->getVersion());
-        $isDev = (bool)($definedConstraint ? $definedConstraint->getIsDev() : $featureConstraint->getIsDev());
+        $constraint = $definedConstraint;
+        if ($constraint === null) {
+            /** @var \Generated\Shared\Transfer\ComposerConstraintTransfer $constraint */
+            $constraint = $featureConstraint;
+        }
+
+        $version = (string)$constraint->getVersion();
+        $isDev = (bool)$constraint->getIsDev();
 
         return $usedModuleInfo
             ->setDefinedConstraintLock($this->extractConstraintLock($version))
@@ -219,8 +225,8 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
 
         return array_filter($composerConstraintTransfers, function (ComposerConstraintTransfer $composerConstraintTransfer) use ($ignoredPackages, $isIgnoreLineCount): bool {
             $isIgnoredPackage = (bool)preg_match($ignoredPackages, (string)$composerConstraintTransfer->getName());
-            $isExpectedLockMatchesDefinedLock = $composerConstraintTransfer->getModuleInfo()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfo()->getDefinedConstraintLock();
-            $noCustomizedLineCount = $isIgnoreLineCount || $composerConstraintTransfer->getModuleInfo()->getCustomizedLineCount() === 0;
+            $isExpectedLockMatchesDefinedLock = $composerConstraintTransfer->getModuleInfoOrFail()->getExpectedConstraintLock() === $composerConstraintTransfer->getModuleInfoOrFail()->getDefinedConstraintLock();
+            $noCustomizedLineCount = $isIgnoreLineCount || $composerConstraintTransfer->getModuleInfoOrFail()->getCustomizedLineCount() === 0;
 
             return $isIgnoredPackage || $isExpectedLockMatchesDefinedLock && $noCustomizedLineCount ? false : true;
         });

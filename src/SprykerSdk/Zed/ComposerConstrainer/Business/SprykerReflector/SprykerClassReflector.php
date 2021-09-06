@@ -161,8 +161,8 @@ class SprykerClassReflector
         $this->reflectionClass = new ReflectionClass($this->namespace . '\\' . $this->className);
         $this->isInterface = $this->reflectionClass->isInterface();
 
-        $this->parentClassName = $this->reflectionClass->getParentClass() ? $this->reflectionClass->getParentClass()->getShortName() : '';
-        $this->parentNamespace = $this->reflectionClass->getParentClass() ? $this->reflectionClass->getParentClass()->getNamespaceName() : '';
+        $this->parentClassName = ($this->reflectionClass->getParentClass() !== false) ? $this->reflectionClass->getParentClass()->getShortName() : '';
+        $this->parentNamespace = ($this->reflectionClass->getParentClass() !== false) ? $this->reflectionClass->getParentClass()->getNamespaceName() : '';
         preg_match_all('#(\\w+)\\\\\\w+\\\\(\\w+)#', $this->parentNamespace, $match);
         $this->parentOrganisation = count($match[1]) > 0 ? $match[1][0] : '';
         $this->parentModuleName = count($match[2]) > 0 ? $match[2][0] : '';
@@ -228,12 +228,7 @@ class SprykerClassReflector
      */
     public function getParentMethods(): array
     {
-        $parentClass = $this->reflectionClass->getParentClass();
-        if ($parentClass === false) {
-            return [];
-        }
-
-        return $this->reflectionClass->getParentClass()->getMethods();
+        return ($this->reflectionClass->getParentClass() !== false) ? $this->reflectionClass->getParentClass()->getMethods() : [];
     }
 
     /**

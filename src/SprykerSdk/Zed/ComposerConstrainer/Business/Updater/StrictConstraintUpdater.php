@@ -57,10 +57,10 @@ class StrictConstraintUpdater implements ConstraintUpdaterInterface
 
         $composerJsonArray = $this->composerJsonReader->read();
         foreach ($constraintCollectionTransfer->getComposerConstraints() as $composerConstraintTransfer) {
-            $moduleInfoTransfer = $composerConstraintTransfer->getModuleInfo();
+            $moduleInfoTransfer = $composerConstraintTransfer->getModuleInfoOrFail();
             $requireType = $moduleInfoTransfer->getIsDev() ? 'require-dev' : 'require';
 
-            $composerJsonArray[$requireType][$composerConstraintTransfer->getName()] = $moduleInfoTransfer->getExpectedConstraintLock() . $moduleInfoTransfer->getExpectedVersion();
+            $composerJsonArray[$requireType][$composerConstraintTransfer->getNameOrFail()] = $moduleInfoTransfer->getExpectedConstraintLock() . $moduleInfoTransfer->getExpectedVersion();
         }
 
         $this->composerJsonWriter->write($composerJsonArray);
