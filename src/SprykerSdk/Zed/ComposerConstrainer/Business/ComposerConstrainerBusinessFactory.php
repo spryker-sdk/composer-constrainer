@@ -86,10 +86,18 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return new StrictConstraintValidator(
             $this->getConfig(),
-            new StrictFinder($this->getConfig()),
+            $this->createStrictFinder(),
             $this->createComposerJsonReader(),
             $this->createComposerLockReader()
         );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
+     */
+    public function createStrictFinder(): FinderInterface
+    {
+        return new StrictFinder($this->getConfig());
     }
 
     /**

@@ -45,6 +45,9 @@ class SprykerReflectionHelper
     /**
      * @example (SprykerEco, Pyz/Zed/ExampleModuleName/anyfile.xml) => spryker-eco/example-module-name
      *
+     * @param string $organisation
+     * @param string $relativeFilepath
+     *
      * @return string
      */
     public static function relativeFilePathToPackageName(string $organisation, string $relativeFilepath): string

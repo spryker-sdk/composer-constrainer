@@ -131,6 +131,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      *
      * @param \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer $usedModuleInfo
      * @param \Generated\Shared\Transfer\ComposerConstraintTransfer|null $definedConstraint
+     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer|null $featureConstraint
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
