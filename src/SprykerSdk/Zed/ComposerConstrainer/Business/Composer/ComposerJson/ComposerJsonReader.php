@@ -7,6 +7,7 @@
 
 namespace SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson;
 
+use Generated\Shared\Transfer\ComposerConstraintTransfer;
 use RuntimeException;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
@@ -55,5 +56,34 @@ class ComposerJsonReader implements ComposerJsonReaderInterface
         }
 
         return json_decode($content, true);
+    }
+
+    /**
+     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     */
+    public function getConstraints(): array
+    {
+        $composerConstraints = [];
+        $composerArray = $this->read();
+
+        foreach (['require', 'require-dev'] as $type) {
+            if (!isset($composerArray[$type])) {
+                continue;
+            }
+
+            foreach ($composerArray[$type] as $name => $version) {
+                $composerConstraintTransfer = new ComposerConstraintTransfer();
+                $composerConstraintTransfer
+                    ->setName($name)
+                    ->setVersion($version)
+                    ->setIsDev($type === 'require-dev');
+
+                $composerConstraints[$name] = $composerConstraintTransfer;
+            }
+        }
+
+        ksort($composerConstraints);
+
+        return $composerConstraints;
     }
 }

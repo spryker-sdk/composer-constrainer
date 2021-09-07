@@ -45,6 +45,31 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     }
 
     /**
+     * Specification:
+     * - When true, customization line count will be ignored as an issue that needs to be fixed.
+     *
+     * @api
+     *
+     * @return bool
+     */
+    public function getIsIgnoreLineCount(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @api
+     *
+     * @return string[]
+     */
+    public function getStrictValidationIgnoredPackages(): array
+    {
+        return [
+            'spryker/kernel', # kernel needs different evaluation
+        ];
+    }
+
+    /**
      * @api
      *
      * @return string[]

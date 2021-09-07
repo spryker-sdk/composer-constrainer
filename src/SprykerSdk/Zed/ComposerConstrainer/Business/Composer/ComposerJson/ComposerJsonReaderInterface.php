@@ -15,6 +15,11 @@ interface ComposerJsonReaderInterface
     public function read(): array;
 
     /**
+     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     */
+    public function getConstraints(): array;
+
+    /**
      * @param string $filePath
      *
      * @return array

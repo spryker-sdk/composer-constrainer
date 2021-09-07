@@ -1,5 +1,12 @@
 {
+    "include": {
+        "spryker/transfer": "Required for get*OrFail()."
+    },
+    "exclude": {
+        "spryker/testify": "Only needed for require-dev."
+    },
     "include-dev": {
+        "spryker/testify": "False positive validation issue.",
         "codeception/module-asserts": "A Codeception module containing various assertions.",
         "ergebnis/json-printer": "Optional, since this covers a non standard case for projects."
     }

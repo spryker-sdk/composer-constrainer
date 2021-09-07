@@ -17,9 +17,11 @@ interface ComposerConstrainerFacadeInterface
      *
      * @api
      *
+     * @param bool $isStrict
+     *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function updateConstraints(): ComposerConstraintCollectionTransfer;
+    public function updateConstraints(bool $isStrict = false): ComposerConstraintCollectionTransfer;
 
     /**
      * Specification:
@@ -27,9 +29,11 @@ interface ComposerConstrainerFacadeInterface
      *
      * @api
      *
+     * @param bool $isStrict
+     *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
      */
-    public function validateConstraints(): ComposerConstraintCollectionTransfer;
+    public function validateConstraints(bool $isStrict = false): ComposerConstraintCollectionTransfer;
 
     /**
      * Specification:

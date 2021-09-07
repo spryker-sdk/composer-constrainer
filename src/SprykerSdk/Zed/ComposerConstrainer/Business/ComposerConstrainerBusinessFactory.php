@@ -17,11 +17,14 @@ use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLo
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinder\ExtendedModuleFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\Finder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\StrictFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\UsedForeignModuleFinder\UsedForeignModuleFinder;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Updater\StrictConstraintUpdater;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidator;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface;
+use SprykerSdk\Zed\ComposerConstrainer\Business\Validator\StrictConstraintValidator;
 
 /**
  * @method \SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig getConfig()
@@ -35,6 +38,18 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return new ConstraintUpdater(
             $this->createConstraintValidator(),
+            $this->createComposerJsonReader(),
+            $this->createComposerJsonWriter()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Updater\ConstraintUpdaterInterface
+     */
+    public function createStrictConstraintUpdater(): ConstraintUpdaterInterface
+    {
+        return new StrictConstraintUpdater(
+            $this->createStrictConstraintValidator(),
             $this->createComposerJsonReader(),
             $this->createComposerJsonWriter()
         );
@@ -62,6 +77,27 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
             $this->createComposerJsonReader(),
             $this->createComposerLockReader()
         );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Validator\ConstraintValidatorInterface
+     */
+    public function createStrictConstraintValidator(): ConstraintValidatorInterface
+    {
+        return new StrictConstraintValidator(
+            $this->getConfig(),
+            $this->createStrictFinder(),
+            $this->createComposerJsonReader(),
+            $this->createComposerLockReader()
+        );
+    }
+
+    /**
+     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface
+     */
+    public function createStrictFinder(): FinderInterface
+    {
+        return new StrictFinder($this->getConfig());
     }
 
     /**
