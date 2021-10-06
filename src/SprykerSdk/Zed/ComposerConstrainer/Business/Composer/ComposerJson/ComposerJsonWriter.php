@@ -13,6 +13,9 @@ use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerJsonWriter implements ComposerJsonWriterInterface
 {
+    /**
+     * @var int
+     */
     protected const INDENTATION_DEFAULT = 4;
 
     /**

@@ -13,6 +13,9 @@ use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerJsonReader implements ComposerJsonReaderInterface
 {
+    /**
+     * @var string
+     */
     protected const COMPOSER_JSON_FILENAME = 'composer.json';
 
     /**

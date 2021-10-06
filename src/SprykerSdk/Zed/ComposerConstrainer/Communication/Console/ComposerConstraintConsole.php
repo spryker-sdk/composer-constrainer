@@ -18,15 +18,45 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ComposerConstraintConsole extends Console
 {
+    /**
+     * @var string
+     */
     public const COMMAND_NAME = 'code:constraint:modules';
+    /**
+     * @var string
+     */
     public const OPTION_DRY_RUN = 'dry-run';
+    /**
+     * @var string
+     */
     public const OPTION_DRY_RUN_SHORT = 'd';
+    /**
+     * @var string
+     */
     public const OPTION_STRICT_RUN = 'strict';
+    /**
+     * @var string
+     */
     public const OPTION_STRICT_RUN_SHORT = 's';
+    /**
+     * @var string
+     */
     public const OPTION_VERBOSE_RUN = 'verbose';
+    /**
+     * @var string
+     */
     public const OPTION_OUTPUT_FORMAT = 'output-format';
+    /**
+     * @var string
+     */
     public const OPTION_OUTPUT_FORMAT_SHORT = 'o';
+    /**
+     * @var string
+     */
     public const OPTION_WITH_FOREIGN = 'with-foreign';
+    /**
+     * @var string
+     */
     public const OPTION_WITH_FOREIGN_SHORT = 'w';
 
     /**
