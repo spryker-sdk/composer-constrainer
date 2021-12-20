@@ -114,7 +114,7 @@ class ExtendedModuleFinder implements FinderInterface
     /**
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
      *
-     * @return string[]
+     * @return array<string>
      */
     protected function getExtendedClassesInFile(SplFileInfo $splFileInfo): array
     {

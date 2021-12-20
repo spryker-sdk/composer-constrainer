@@ -14,7 +14,7 @@ class SprykerReflectionHelper
      *
      * @param string $packageName
      *
-     * @return string[]
+     * @return array<string>
      */
     public static function packageNameToNamespace(string $packageName): array
     {

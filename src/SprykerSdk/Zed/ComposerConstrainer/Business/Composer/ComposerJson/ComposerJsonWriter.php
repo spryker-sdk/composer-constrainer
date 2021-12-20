@@ -13,6 +13,9 @@ use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerJsonWriter implements ComposerJsonWriterInterface
 {
+    /**
+     * @var int
+     */
     protected const INDENTATION_DEFAULT = 4;
 
     /**
@@ -83,7 +86,7 @@ class ComposerJsonWriter implements ComposerJsonWriterInterface
     {
         if (!class_exists(Printer::class)) {
             throw new RuntimeException(
-                sprintf('Non default 4 space indentation requires package `%s` installed.', 'ergebnis/json-printer')
+                sprintf('Non default 4 space indentation requires package `%s` installed.', 'ergebnis/json-printer'),
             );
         }
 

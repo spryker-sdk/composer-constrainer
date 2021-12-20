@@ -20,7 +20,7 @@ class SprykerClassReflector
     protected $config;
 
     /**
-     * @var string[]
+     * @var array<string>
      */
     protected $publicApiClassSuffixes = [
         'Service\.php',
@@ -33,7 +33,7 @@ class SprykerClassReflector
     ];
 
     /**
-     * @var string[]
+     * @var array<string>
      */
     protected $publicApiInterfaceSuffixes = [
         'ServiceInterface\.php',
@@ -44,7 +44,7 @@ class SprykerClassReflector
     ];
 
     /**
-     * @var string[]
+     * @var array<string>
      */
     protected $configurationClassSuffixes = [
         'Config\.php',
@@ -176,7 +176,7 @@ class SprykerClassReflector
      *
      * @example [spryker/example-used-core-package-name]
      *
-     * @return string[]
+     * @return array<string>
      */
     public function getUsedCorePackageNames(): array
     {
@@ -211,7 +211,7 @@ class SprykerClassReflector
      * Specification:
      * - Retrieves the methods that are defined in the current class file and NOT exist in the parent class.
      *
-     * @return \ReflectionMethod[]
+     * @return array<\ReflectionMethod>
      */
     public function getNewMethods(): array
     {
@@ -224,7 +224,7 @@ class SprykerClassReflector
      * Specification:
      * - Retrieves the methods that exist in the parent class (including inherited methods).
      *
-     * @return \ReflectionMethod[]
+     * @return array<\ReflectionMethod>
      */
     public function getParentMethods(): array
     {

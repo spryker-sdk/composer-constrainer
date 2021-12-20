@@ -37,7 +37,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     /**
      * @api
      *
-     * @return string[]
+     * @return array<string>
      */
     public function getCoreNamespaces(): array
     {
@@ -60,7 +60,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     /**
      * @api
      *
-     * @return string[]
+     * @return array<string>
      */
     public function getStrictValidationIgnoredPackages(): array
     {
@@ -72,7 +72,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     /**
      * @api
      *
-     * @return string[]
+     * @return array<string>
      */
     public function getProjectNamespaces(): array
     {
@@ -82,7 +82,7 @@ class ComposerConstrainerConfig extends AbstractBundleConfig
     /**
      * @api
      *
-     * @return string[]
+     * @return array<string>
      */
     public function getExcludedNamespaces(): array
     {

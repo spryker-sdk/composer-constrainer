@@ -47,7 +47,7 @@ class ComposerLockReader implements ComposerLockReaderInterface
     }
 
     /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     * @return array<\Generated\Shared\Transfer\ComposerConstraintTransfer>
      */
     public function getConstraints(): array
     {
@@ -96,7 +96,7 @@ class ComposerLockReader implements ComposerLockReaderInterface
                 (new ComposerConstraintTransfer())
                     ->setName($name)
                     ->setVersion($version)
-                    ->setIsDev($isDev)
+                    ->setIsDev($isDev),
             );
         }
     }

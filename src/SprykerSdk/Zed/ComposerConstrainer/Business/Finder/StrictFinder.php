@@ -86,7 +86,7 @@ class StrictFinder implements FinderInterface
             ->in($this->config->getSourceDirectory())
             ->exclude($this->config->getExcludedNamespaces())
             ->notName(['CodeBucketConfig.php'])
-            ->name([ '*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml', '*validation.yaml']);
+            ->name(['*.php', '*transfer.xml', '*schema.xml', '*.twig', '*navigation.xml', '*validation.yaml']);
 
         return $finder;
     }
@@ -96,10 +96,10 @@ class StrictFinder implements FinderInterface
      * - Validation.yaml changes are customiziation
      * - Validation.yaml changes CAN NOT be transformed to pluggable so no impact on line count
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param array<\Generated\Shared\Transfer\UsedModuleTransfer> $usedModules
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerYamlReflector $sprykerYamlReflector
      *
-     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     * @return array<\Generated\Shared\Transfer\UsedModuleTransfer>
      */
     protected function addYamlUsedModules(array $usedModules, SprykerYamlReflector $sprykerYamlReflector): array
     {
@@ -107,7 +107,7 @@ class StrictFinder implements FinderInterface
             $usedModules,
             $sprykerYamlReflector->getPackageName(),
             $sprykerYamlReflector->getOrganisation(),
-            $sprykerYamlReflector->getModuleName()
+            $sprykerYamlReflector->getModuleName(),
         );
 
         $usedModuleTransfer
@@ -125,10 +125,10 @@ class StrictFinder implements FinderInterface
      * - Schema changes are dependency toward the module's major version
      * - Schema changes CAN NOT be transformed to pluggable so no impact on line count
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param array<\Generated\Shared\Transfer\UsedModuleTransfer> $usedModules
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerXmlReflector $sprykerXmlReflector
      *
-     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     * @return array<\Generated\Shared\Transfer\UsedModuleTransfer>
      */
     protected function addXmlUsedModules(array $usedModules, SprykerXmlReflector $sprykerXmlReflector): array
     {
@@ -140,7 +140,7 @@ class StrictFinder implements FinderInterface
             $usedModules,
             $sprykerXmlReflector->getPackageName(),
             $sprykerXmlReflector->getOrganisation(),
-            $sprykerXmlReflector->getModuleName()
+            $sprykerXmlReflector->getModuleName(),
         );
 
         if ($sprykerXmlReflector->getIsNavigation()) {
@@ -159,10 +159,10 @@ class StrictFinder implements FinderInterface
     /**
      * @todo Twig rules need to be defined
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param array<\Generated\Shared\Transfer\UsedModuleTransfer> $usedModules
      * @param \Symfony\Component\Finder\SplFileInfo $splFileInfo
      *
-     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     * @return array<\Generated\Shared\Transfer\UsedModuleTransfer>
      */
     protected function addTwigUsedModules(array $usedModules, SplFileInfo $splFileInfo): array
     {
@@ -176,10 +176,10 @@ class StrictFinder implements FinderInterface
      * - All class extension is customization
      * - All customization lines are added to line count except Factory
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param array<\Generated\Shared\Transfer\UsedModuleTransfer> $usedModules
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector $sprykerClassReflector
      *
-     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     * @return array<\Generated\Shared\Transfer\UsedModuleTransfer>
      */
     protected function checkPhpNonPublicApiCustomization(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
     {
@@ -195,7 +195,7 @@ class StrictFinder implements FinderInterface
             $usedModules,
             $sprykerClassReflector->getParentPackageName(),
             $sprykerClassReflector->getParentOrganisation(),
-            $sprykerClassReflector->getParentModuleName()
+            $sprykerClassReflector->getParentModuleName(),
         );
 
         $usedModuleTransfer->setIsCustomized(true);
@@ -230,10 +230,10 @@ class StrictFinder implements FinderInterface
      * @todo Implement evaluation also for constants and properties (according in description)
      * @todo Implement evaluation for called method access modifier (according in description)
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param array<\Generated\Shared\Transfer\UsedModuleTransfer> $usedModules
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector $sprykerClassReflector
      *
-     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     * @return array<\Generated\Shared\Transfer\UsedModuleTransfer>
      */
     protected function checkPhpPublicApiCustomization(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
     {
@@ -260,7 +260,7 @@ class StrictFinder implements FinderInterface
                 $usedModules,
                 $sprykerClassReflector->getParentPackageName(),
                 $sprykerClassReflector->getParentOrganisation(),
-                $sprykerClassReflector->getParentModuleName()
+                $sprykerClassReflector->getParentModuleName(),
             );
 
             if ($isPublicMethodOverriden) {
@@ -315,10 +315,10 @@ class StrictFinder implements FinderInterface
      * - Another core module: using another core module's external API is dependency toward that module's major version
      * - Another core module: using another core module's non-external API is prohibited
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param array<\Generated\Shared\Transfer\UsedModuleTransfer> $usedModules
      * @param \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerClassReflector $sprykerClassReflector
      *
-     * @return \Generated\Shared\Transfer\UsedModuleTransfer[]
+     * @return array<\Generated\Shared\Transfer\UsedModuleTransfer>
      */
     protected function checkPhpDependencies(array $usedModules, SprykerClassReflector $sprykerClassReflector): array
     {
@@ -342,7 +342,7 @@ class StrictFinder implements FinderInterface
      * - Sets and/or retrieves expected element
      * - Instantiates missing searched element in the provided array by reference.
      *
-     * @param \Generated\Shared\Transfer\UsedModuleTransfer[] $usedModules
+     * @param array<\Generated\Shared\Transfer\UsedModuleTransfer> $usedModules
      * @param string $packageName
      * @param string $organisation
      * @param string $moduleName

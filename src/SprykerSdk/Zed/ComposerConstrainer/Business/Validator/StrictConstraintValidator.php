@@ -80,7 +80,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
                 $usedModuleTransfer->getIsCustomized(),
                 $usedModuleTransfer->getIsConfigured(),
                 (int)$usedModuleTransfer->getCustomizedLineCount(),
-                $usedModuleTransfer->getConstraintReasons()
+                $usedModuleTransfer->getConstraintReasons(),
             );
 
             $usedModuleInfo = $this->setDefinedModuleInfo($usedModuleInfo, $composerDefinedConstraints[$usedModulePackageName] ?? null, $composerLockFeatureInheritedConstraints[$usedModulePackageName] ?? null);
@@ -104,7 +104,7 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * @param bool|null $isCustomized
      * @param bool|null $isConfigured
      * @param int $customizedLineCount
-     * @param string[] $reasons
+     * @param array<string> $reasons
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintModuleInfoTransfer
      */
@@ -215,9 +215,9 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * - Line count MUST be zero to be considered properly developed except if it is disabled in configuration.
      * - Expected and defined constraint lock need to match to be considered will configured.
      *
-     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerConstraintTransfers
+     * @param array<\Generated\Shared\Transfer\ComposerConstraintTransfer> $composerConstraintTransfers
      *
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     * @return array<\Generated\Shared\Transfer\ComposerConstraintTransfer>
      */
     protected function removeCorrectPackages(array $composerConstraintTransfers): array
     {
@@ -255,14 +255,14 @@ class StrictConstraintValidator implements ConstraintValidatorInterface
      * - Features MUST be locked by ~ or ^ or by exact version therefore anything else is ignored.
      * - Retrieves the Spryker constraint locks by features based on the existing defined constraint list.
      *
-     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerDefinedConstraints
-     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerLockConstraints
+     * @param array<\Generated\Shared\Transfer\ComposerConstraintTransfer> $composerDefinedConstraints
+     * @param array<\Generated\Shared\Transfer\ComposerConstraintTransfer> $composerLockConstraints
      *
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     * @return array<\Generated\Shared\Transfer\ComposerConstraintTransfer>
      */
     protected function getComposerLockFeatureInheritedConstraints(array $composerDefinedConstraints, array $composerLockConstraints): array
     {
-        /** @var string[] $composerDefinedFeatureNames */
+        /** @var array<string> $composerDefinedFeatureNames */
         $composerDefinedFeatureNames = [];
         foreach ($composerDefinedConstraints as $composerDefinedConstraint) {
             if (!preg_match('#^spryker-feature/#', (string)$composerDefinedConstraint->getName())) {

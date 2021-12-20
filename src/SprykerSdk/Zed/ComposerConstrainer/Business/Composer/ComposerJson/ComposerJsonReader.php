@@ -13,6 +13,9 @@ use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
 
 class ComposerJsonReader implements ComposerJsonReaderInterface
 {
+    /**
+     * @var string
+     */
     protected const COMPOSER_JSON_FILENAME = 'composer.json';
 
     /**
@@ -59,7 +62,7 @@ class ComposerJsonReader implements ComposerJsonReaderInterface
     }
 
     /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     * @return array<\Generated\Shared\Transfer\ComposerConstraintTransfer>
      */
     public function getConstraints(): array
     {
