@@ -19,6 +19,8 @@ interface ComposerConstrainerConstants
      * @uses \Spryker\Shared\Kernel\KernelConstants::CORE_NAMESPACES
      *
      * @api
+     *
+     * @var string
      */
     public const CORE_NAMESPACES = 'CORE_NAMESPACES';
 
@@ -29,6 +31,8 @@ interface ComposerConstrainerConstants
      * @uses \Spryker\Shared\Kernel\KernelConstants::PROJECT_NAMESPACES
      *
      * @api
+     *
+     * @var string
      */
     public const PROJECT_NAMESPACES = 'PROJECT_NAMESPACES';
 }

@@ -39,7 +39,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ConstraintUpdater(
             $this->createConstraintValidator(),
             $this->createComposerJsonReader(),
-            $this->createComposerJsonWriter()
+            $this->createComposerJsonWriter(),
         );
     }
 
@@ -51,7 +51,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new StrictConstraintUpdater(
             $this->createStrictConstraintValidator(),
             $this->createComposerJsonReader(),
-            $this->createComposerJsonWriter()
+            $this->createComposerJsonWriter(),
         );
     }
 
@@ -63,7 +63,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ConstraintUpdater(
             $this->createForeignConstraintValidator(),
             $this->createComposerJsonReader(),
-            $this->createComposerJsonWriter()
+            $this->createComposerJsonWriter(),
         );
     }
 
@@ -75,7 +75,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ConstraintValidator(
             $this->createUsedModuleFinder(),
             $this->createComposerJsonReader(),
-            $this->createComposerLockReader()
+            $this->createComposerLockReader(),
         );
     }
 
@@ -88,7 +88,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
             $this->getConfig(),
             $this->createStrictFinder(),
             $this->createComposerJsonReader(),
-            $this->createComposerLockReader()
+            $this->createComposerLockReader(),
         );
     }
 
@@ -108,7 +108,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
         return new ConstraintValidator(
             $this->createForeignModuleFinder(),
             $this->createComposerJsonReader(),
-            $this->createComposerLockReader()
+            $this->createComposerLockReader(),
         );
     }
 
@@ -118,7 +118,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createUsedModuleFinder(): FinderInterface
     {
         return new Finder(
-            $this->getFinderStack()
+            $this->getFinderStack(),
         );
     }
 
@@ -128,12 +128,12 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createForeignModuleFinder(): FinderInterface
     {
         return new Finder(
-            $this->getUsedForeignFinderStack()
+            $this->getUsedForeignFinderStack(),
         );
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[]
+     * @return array<\SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface>
      */
     public function getFinderStack(): array
     {
@@ -143,7 +143,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     }
 
     /**
-     * @return \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[]
+     * @return array<\SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface>
      */
     public function getUsedForeignFinderStack(): array
     {
@@ -158,7 +158,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createExtendedModuleFinder(): FinderInterface
     {
         return new ExtendedModuleFinder(
-            $this->getConfig()
+            $this->getConfig(),
         );
     }
 
@@ -169,7 +169,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     {
         return new UsedForeignModuleFinder(
             $this->getConfig(),
-            $this->createComposerJsonReader()
+            $this->createComposerJsonReader(),
         );
     }
 
@@ -179,7 +179,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createComposerJsonReader(): ComposerJsonReaderInterface
     {
         return new ComposerJsonReader(
-            $this->getConfig()
+            $this->getConfig(),
         );
     }
 
@@ -189,7 +189,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createComposerLockReader(): ComposerLockReaderInterface
     {
         return new ComposerLockReader(
-            $this->getConfig()
+            $this->getConfig(),
         );
     }
 
@@ -199,7 +199,7 @@ class ComposerConstrainerBusinessFactory extends AbstractBusinessFactory
     public function createComposerJsonWriter(): ComposerJsonWriterInterface
     {
         return new ComposerJsonWriter(
-            $this->getConfig()
+            $this->getConfig(),
         );
     }
 }

@@ -123,7 +123,7 @@ class UsedForeignModuleFinder implements FinderInterface
         $namespaces = array_merge(
             $this->config->getCoreNamespaces(),
             $this->config->getExcludedNamespaces(),
-            $this->config->getProjectNamespaces()
+            $this->config->getProjectNamespaces(),
         );
         $pattern = sprintf('/(%s)\\\\/', implode('|', $namespaces));
 
@@ -202,11 +202,11 @@ class UsedForeignModuleFinder implements FinderInterface
     }
 
     /**
-     * @phpstan-return class-string[]
+     * @phpstan-return array<class-string>
      *
      * @param string $fileContent
      *
-     * @return string[]
+     * @return array<string>
      */
     protected function getUsedClassNamesInFile(string $fileContent): array
     {

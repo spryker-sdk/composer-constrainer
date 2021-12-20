@@ -15,7 +15,7 @@ interface ComposerLockReaderInterface
     public function read(): array;
 
     /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     * @return array<\Generated\Shared\Transfer\ComposerConstraintTransfer>
      */
     public function getConstraints(): array;
 }

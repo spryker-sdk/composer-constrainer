@@ -88,7 +88,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
 
     /**
      * @param string $composerName
-     * @param \Generated\Shared\Transfer\ComposerConstraintTransfer[] $composerConstraints
+     * @param array<\Generated\Shared\Transfer\ComposerConstraintTransfer> $composerConstraints
      * @param \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer $composerConstraintCollectionTransfer
      *
      * @return \Generated\Shared\Transfer\ComposerConstraintCollectionTransfer
@@ -111,7 +111,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
         $constraintMessageTransfer->setMessage(sprintf(
             '"%s" expected in version "%s" to be locked down in your composer.json',
             $composerName,
-            $expectedVersion
+            $expectedVersion,
         ));
 
         $composerConstraintTransfer->addMessage($constraintMessageTransfer);
@@ -121,7 +121,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      */
     protected function getUsedModulesAsComposerName(): array
     {
@@ -139,7 +139,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     * @return array<\Generated\Shared\Transfer\ComposerConstraintTransfer>
      */
     protected function getComposerLockConstraints(): array
     {
@@ -168,7 +168,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @return \Generated\Shared\Transfer\ComposerConstraintTransfer[]
+     * @return array<\Generated\Shared\Transfer\ComposerConstraintTransfer>
      */
     protected function getComposerJsonConstraints(): array
     {
@@ -206,7 +206,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
         return sprintf(
             '%s/%s',
             $this->getFilterChain()->filter($usedModuleTransfer->getOrganization()),
-            $this->getFilterChain()->filter($usedModuleTransfer->getModule())
+            $this->getFilterChain()->filter($usedModuleTransfer->getModule()),
         );
     }
 

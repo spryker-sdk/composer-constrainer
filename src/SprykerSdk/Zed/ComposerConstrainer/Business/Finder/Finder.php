@@ -12,12 +12,12 @@ use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 class Finder implements FinderInterface
 {
     /**
-     * @var \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[]
+     * @var array<\SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface>
      */
     protected $finders;
 
     /**
-     * @param \SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface[] $finders
+     * @param array<\SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface> $finders
      */
     public function __construct(array $finders)
     {
