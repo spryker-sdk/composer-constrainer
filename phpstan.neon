@@ -2,8 +2,6 @@ parameters:
     level: 8
     paths:
         - src/
-    excludes_analyse:
-
     bootstrapFiles:
         - tests/bootstrap.php
 
