@@ -304,7 +304,7 @@ class StrictFinder implements FinderInterface
     protected function getMethodBodySize(ReflectionMethod $method, bool $isClassInterface): int
     {
         $startLine = $method->getStartLine();
-        $endLine = $method->getEndLine() ?? $method->getStartLine();
+        $endLine = $method->getEndLine() ?: $method->getStartLine();
         $compensation = ($method->isAbstract() || $isClassInterface) ? 0 : 2;
 
         return $endLine - $startLine - $compensation;

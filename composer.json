@@ -5,7 +5,7 @@
     "license": "proprietary",
     "require": {
         "ondrejmirtes/better-reflection": "^4.3.0",
-        "php": ">=7.3",
+        "php": ">=7.4",
         "spryker/kernel": "^3.33.0",
         "spryker/laminas": "^1.0.0",
         "spryker/symfony": "^3.2.2",
@@ -14,7 +14,7 @@
     "require-dev": {
         "codeception/module-asserts": "^1.3",
         "ergebnis/json-printer": "^3.1",
-        "phpstan/phpstan": "^0.12.0",
+        "phpstan/phpstan": "^1.2.0",
         "spryker/code-sniffer": "*",
         "spryker/console": "*",
         "spryker/testify": "^3.15.0"

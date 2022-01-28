@@ -141,7 +141,7 @@ class UsedForeignModuleFinder implements FinderInterface
     {
         $classFilename = $this->getClassFileNameByClassName($className);
         $composerJsonData = $this->getComposerJsonDataByClassFilename($classFilename);
-        if (empty($composerJsonData)) {
+        if (!$composerJsonData) {
             return null;
         }
         $packageName = explode('/', $composerJsonData['name']);
