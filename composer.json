@@ -4,7 +4,6 @@
     "description": "ComposerConstrainer module",
     "license": "proprietary",
     "require": {
-        "ondrejmirtes/better-reflection": "^4.3.0",
         "php": ">=7.4",
         "spryker/kernel": "^3.33.0",
         "spryker/laminas": "^1.0.0",

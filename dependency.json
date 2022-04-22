@@ -1,7 +1,6 @@
 {
     "include": {
-        "spryker/transfer": "Required for get*OrFail().",
-        "ondrejmirtes/better-reflection": "Provides reflection wrapper used for code analysis."
+        "spryker/transfer": "Required for get*OrFail()."
     },
     "exclude": {
         "spryker/testify": "Only needed for require-dev."
