@@ -27,7 +27,7 @@ Add the console command `SprykerSdk\Zed\ComposerConstrainer\Communication\Consol
 
 ## Documentation
 
-[Spryker Documentation](https://academy.spryker.com/developing_with_spryker/module_guide/modules.html)
+[Spryker Documentation](https://docs.spryker.com/)
 
 Spryker OS is modular and follows SemVer. Every BC-breaking change of module API (https://documentation.spryker.com/api/definition-api.htm) is considered as a major release. 
 But what happens to non-API? Spryker leverages the ability to change non-API functionality in minor and patch releases. 
