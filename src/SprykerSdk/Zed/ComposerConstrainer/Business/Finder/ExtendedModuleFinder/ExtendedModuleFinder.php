@@ -10,9 +10,9 @@ namespace SprykerSdk\Zed\ComposerConstrainer\Business\Finder\ExtendedModuleFinde
 use Closure;
 use Generated\Shared\Transfer\UsedModuleCollectionTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
-use PHPStan\BetterReflection\BetterReflection;
-use PHPStan\BetterReflection\Reflector\ClassReflector;
-use PHPStan\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
+use Roave\BetterReflection\BetterReflection;
+use Roave\BetterReflection\Reflector\DefaultReflector;
+use Roave\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
 use ReflectionClass;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\ComposerConstrainerConfig;
@@ -119,8 +119,8 @@ class ExtendedModuleFinder implements FinderInterface
     protected function getExtendedClassesInFile(SplFileInfo $splFileInfo): array
     {
         $astLocator = (new BetterReflection())->astLocator();
-        $reflector = new ClassReflector(new SingleFileSourceLocator($splFileInfo->getPathname(), $astLocator));
-        $classes = $reflector->getAllClasses();
+        $reflector = new DefaultReflector(new SingleFileSourceLocator($splFileInfo->getPathname(), $astLocator));
+        $classes = $reflector->reflectAllClasses();
         $extendedClasses = [];
 
         foreach ($classes as $class) {
