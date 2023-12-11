@@ -4,7 +4,7 @@
 [![Minimum PHP Version](http://img.shields.io/badge/php-%3E%3D%207.4-8892BF.svg)](https://php.net/)
 [![PHPStan](https://img.shields.io/badge/PHPStan-enabled-brightgreen.svg?style=flat)](https://github.com/phpstan/phpstan)
 
-Tool to detect extended core modules and to update composer.json constraints from using `^` (caret) to using `~` (tilde) for those extended modules. 
+Tool to detect extended core modules and to update composer.json constraints from using `^` (caret) to using `~` (tilde) for those extended modules.
 
 ### What will be found by this tool
 
@@ -29,20 +29,20 @@ Add the console command `SprykerSdk\Zed\ComposerConstrainer\Communication\Consol
 
 [Spryker Documentation](https://docs.spryker.com/)
 
-Spryker OS is modular and follows SemVer. Every BC-breaking change of module API (https://documentation.spryker.com/api/definition-api.htm) is considered as a major release. 
-But what happens to non-API? Spryker leverages the ability to change non-API functionality in minor and patch releases. 
+Spryker OS is modular and follows SemVer. Every BC-breaking change of module API (https://docs.spryker.com/docs/scos/dev/architecture/module-api/module-api.html) is considered as a major release.
+But what happens to non-API? Spryker leverages the ability to change non-API functionality in minor and patch releases.
 This way Spryker provides new features for different business verticals.
 
 What does it mean for my customized modules?
 
-When you customized Spryker modules (changed module behavior on project level) even minor changes could potentially cause migration efforts. 
-To avoid such cases and keep project updates safe and predictable a project should use `~` (tilde) composer constraint instead of `^` for modules with changed behavior. 
+When you customized Spryker modules (changed module behavior on project level) even minor changes could potentially cause migration efforts.
+To avoid such cases and keep project updates safe and predictable a project should use `~` (tilde) composer constraint instead of `^` for modules with changed behavior.
 And to simplify the process Spryker provides a development command `vendor/bin/console code:constraint:modules`, which will suggest required changes in composer.json.
-It can also auto-adjust your composer.json. 
+It can also auto-adjust your composer.json.
 
 ## Usage
 
-### Dry-run the command 
+### Dry-run the command
 
 ```
 vendor/bin/console code:constraint:modules -d
@@ -61,5 +61,5 @@ This is the recommended hook for your CI system.
 vendor/bin/console code:constraint:modules
 ```
 
-This command will change the project's `composer.json`. 
+This command will change the project's `composer.json`.
 Please dry-run the command before you apply any changes.
