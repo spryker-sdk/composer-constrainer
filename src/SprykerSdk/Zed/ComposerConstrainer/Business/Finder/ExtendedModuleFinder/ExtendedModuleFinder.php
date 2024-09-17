@@ -124,6 +124,10 @@ class ExtendedModuleFinder implements FinderInterface
         $extendedClasses = [];
 
         foreach ($classes as $class) {
+            if ($class->isAnonymous()) {
+                continue;
+            }
+            
             $classNameFragments = explode('\\', $class->getName());
             array_shift($classNameFragments);
             $reflectionClass = new ReflectionClass($class->getName());
