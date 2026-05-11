@@ -99,6 +99,48 @@ class ComposerConstraintConsoleTest extends Unit
     /**
      * @return void
      */
+    public function testExecuteInDryRunWillOutputSuccessCodeWhenModuleExtendedAndConstrainedWithExactZeroMajorVersion(): void
+    {
+        $this->tester->haveConstrainedComposerAndOverriddenClass('spryker/module', '0.1.0');
+
+        $command = new ComposerConstraintConsole();
+        $command->setFacade($this->tester->getFacade());
+        $commandTester = $this->tester->getConsoleTester($command);
+
+        $arguments = [
+            'command' => $command->getName(),
+            '--' . ComposerConstraintConsole::OPTION_DRY_RUN => true,
+        ];
+
+        $commandTester->execute($arguments);
+
+        $this->assertSame(ComposerConstraintConsole::CODE_SUCCESS, $commandTester->getStatusCode());
+    }
+
+    /**
+     * @return void
+     */
+    public function testExecuteInDryRunWillOutputErrorCodeWhenModuleExtendedAndConstrainedWithExactNonZeroMajorVersion(): void
+    {
+        $this->tester->haveConstrainedComposerAndOverriddenClass('spryker/module', '1.0.0');
+
+        $command = new ComposerConstraintConsole();
+        $command->setFacade($this->tester->getFacade());
+        $commandTester = $this->tester->getConsoleTester($command);
+
+        $arguments = [
+            'command' => $command->getName(),
+            '--' . ComposerConstraintConsole::OPTION_DRY_RUN => true,
+        ];
+
+        $commandTester->execute($arguments);
+
+        $this->assertSame(ComposerConstraintConsole::CODE_ERROR, $commandTester->getStatusCode());
+    }
+
+    /**
+     * @return void
+     */
     public function testExecuteInDryRunWillOutputSuccessCodeWhenModuleExtendedAndConstrainedWithTilde(): void
     {
         $this->tester->haveConstrainedComposerAndOverriddenClass('spryker/module', '~1.0.0');

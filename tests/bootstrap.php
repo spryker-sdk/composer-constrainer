@@ -1,7 +1,10 @@
 <?php
 
 if (!defined('APPLICATION_ROOT_DIR')) {
-    define('APPLICATION_ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR);
+    define('APPLICATION_ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR);
+}
+if (!defined('MODULE_UNDER_TEST_ROOT_DIR')) {
+    define('MODULE_UNDER_TEST_ROOT_DIR', dirname(__DIR__) . DIRECTORY_SEPARATOR);
 }
 if (!defined('APPLICATION_STORE')) {
     define('APPLICATION_STORE', 'DE');
