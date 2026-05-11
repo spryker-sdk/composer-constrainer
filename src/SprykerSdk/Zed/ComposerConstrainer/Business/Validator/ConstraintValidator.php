@@ -237,6 +237,11 @@ class ConstraintValidator implements ConstraintValidatorInterface
     ): bool {
         $lockedVersion = $composerLockConstraintTransfer->getVersion();
         $jsonVersion = $composerJsonConstraintTransfer->getVersion();
+
+        if ($lockedVersion === null || $jsonVersion === null) {
+            return false;
+        }
+
         $expectedLockedVersion = sprintf('~%s', $lockedVersion);
 
         if ($expectedLockedVersion === $jsonVersion) {

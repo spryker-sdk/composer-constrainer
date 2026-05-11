@@ -118,8 +118,14 @@ class ExtendedModuleFinder implements FinderInterface
      */
     protected function getExtendedClassesInFile(SplFileInfo $splFileInfo): array
     {
+        $pathname = $splFileInfo->getPathname();
+
+        if ($pathname === '') {
+            return [];
+        }
+
         $astLocator = (new BetterReflection())->astLocator();
-        $reflector = new DefaultReflector(new SingleFileSourceLocator($splFileInfo->getPathname(), $astLocator));
+        $reflector = new DefaultReflector(new SingleFileSourceLocator($pathname, $astLocator));
         $classes = $reflector->reflectAllClasses();
         $extendedClasses = [];
 
