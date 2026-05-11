@@ -14,6 +14,10 @@ use Codeception\Lib\ModuleContainer;
 // so we provide it here to avoid a fatal error when the installed testify version is too old.
 trait ModuleHelperConfigTrait
 {
+    /**
+     * @param \Codeception\Lib\ModuleContainer $moduleContainer
+     * @param array|null $config
+     */
     public function __construct(ModuleContainer $moduleContainer, ?array $config = null)
     {
         $this->setDefaultConfig();
@@ -21,5 +25,8 @@ trait ModuleHelperConfigTrait
         parent::__construct($moduleContainer, $config);
     }
 
+    /**
+     * @return void
+     */
     abstract protected function setDefaultConfig(): void;
 }

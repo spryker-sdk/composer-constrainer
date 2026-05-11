@@ -26,7 +26,7 @@ class SprykerReflectionHelper
     }
 
     /**
-     * @example (SprykerEco, ExampleModuleName) => spryker-eco/example-module-name
+     * @example (\SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\SprykerEco, \SprykerSdk\Zed\ComposerConstrainer\Business\SprykerReflector\ExampleModuleName) => spryker-eco/example-module-name
      *
      * @param string $organisation
      * @param string $moduleName
