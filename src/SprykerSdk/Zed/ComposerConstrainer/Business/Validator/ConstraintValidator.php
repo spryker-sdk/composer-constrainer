@@ -236,8 +236,20 @@ class ConstraintValidator implements ConstraintValidatorInterface
         ComposerConstraintTransfer $composerJsonConstraintTransfer
     ): bool {
         $lockedVersion = $composerLockConstraintTransfer->getVersion();
+        $jsonVersion = $composerJsonConstraintTransfer->getVersion();
+
+        if ($lockedVersion === null || $jsonVersion === null) {
+            return false;
+        }
+
         $expectedLockedVersion = sprintf('~%s', $lockedVersion);
 
-        return $expectedLockedVersion === $composerJsonConstraintTransfer->getVersion();
+        if ($expectedLockedVersion === $jsonVersion) {
+            return true;
+        }
+
+        // For 0.x.y packages, an exact version constraint is a valid minor lock
+        // because ~0.x.y only allows patch updates, and 0.x.y (exact) is equally or more restrictive.
+        return str_starts_with($lockedVersion, '0.') && $lockedVersion === $jsonVersion;
     }
 }

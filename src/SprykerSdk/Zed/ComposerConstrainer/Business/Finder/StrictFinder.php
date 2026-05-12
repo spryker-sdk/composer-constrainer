@@ -76,7 +76,7 @@ class StrictFinder implements FinderInterface
     }
 
     /**
-     * @return \Symfony\Component\Finder\Finder|\Symfony\Component\Finder\SplFileInfo[]
+     * @return \Symfony\Component\Finder\Finder<\Symfony\Component\Finder\SplFileInfo>
      */
     protected function createFinder(): Finder
     {
