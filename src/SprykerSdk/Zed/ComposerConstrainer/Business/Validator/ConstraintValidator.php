@@ -11,9 +11,9 @@ use Generated\Shared\Transfer\ComposerConstraintCollectionTransfer;
 use Generated\Shared\Transfer\ComposerConstraintTransfer;
 use Generated\Shared\Transfer\ConstraintMessageTransfer;
 use Generated\Shared\Transfer\UsedModuleTransfer;
-use Laminas\Filter\FilterChain;
-use Laminas\Filter\StringToLower;
-use Laminas\Filter\Word\CamelCaseToDash;
+use Spryker\Shared\Kernel\Filter\FilterChain;
+use Spryker\Shared\Kernel\Filter\StringToLower;
+use Spryker\Shared\Kernel\Filter\Word\CamelCaseToDash;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerJson\ComposerJsonReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Composer\ComposerLock\ComposerLockReaderInterface;
 use SprykerSdk\Zed\ComposerConstrainer\Business\Finder\FinderInterface;
@@ -36,7 +36,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
     protected $composerLockReader;
 
     /**
-     * @var \Laminas\Filter\FilterChain|null
+     * @var \Spryker\Shared\Kernel\Filter\FilterChain|null
      */
     protected $filterChain;
 
@@ -211,7 +211,7 @@ class ConstraintValidator implements ConstraintValidatorInterface
     }
 
     /**
-     * @return \Laminas\Filter\FilterChain
+     * @return \Spryker\Shared\Kernel\Filter\FilterChain
      */
     protected function getFilterChain(): FilterChain
     {
